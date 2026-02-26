@@ -14,8 +14,6 @@ build/
 .springBeans
 .sts4-cache
 bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
 .idea
@@ -35,3 +33,12 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### application.yml ###
+**/application.yml
+
+### api ###
+**/WEB-INF/views/api/**
+footer.jsp
+KakaoAuthService.java
+MailSender.java
