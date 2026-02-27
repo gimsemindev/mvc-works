@@ -91,7 +91,6 @@ body {
     padding-top: 30px;
     display: flex;
     justify-content: space-between;
-    border-top: 1px solid var(--border-color);
 }
 
 .form-footer .btn {
@@ -265,6 +264,59 @@ body {
     flex-grow: 1;
     min-width: 150px;
     background: transparent;
+}
+
+
+.team-dept {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.dept-dev {
+    background: #e8f0fe;
+    color: #1a56db;
+}
+.dept-dev .status-dot {
+    background: #1a56db;
+}
+
+
+.dept-hr {
+    background: #e6f4ea;
+    color: #1e7e34;
+}
+.dept-hr .status-dot {
+    background: #1e7e34;
+}
+
+
+.dept-design {
+    background: #f3e8fd;
+    color: #7c3aed;
+}
+.dept-design .status-dot {
+    background: #7c3aed;
+}
+
+
+.dept-others {
+    background: #f0f0f0;
+    color: #555;
+}
+.dept-others .status-dot {
+    background: #999;
+}
+
+
+.dept-dropdown li.disabled {
+    opacity: 0.45;
+    cursor: default;
+    pointer-events: none;
 }
 
 /* 3단계 */
