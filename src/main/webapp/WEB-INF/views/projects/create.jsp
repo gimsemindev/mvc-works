@@ -13,8 +13,6 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 
-<script src="${pageContext.request.contextPath}/dist/js/projectEnter"></script>
-<script src="${pageContext.request.contextPath}/dist/js/projectCreate.js"></script>
 
 <style type="text/css">
 .step-content {
@@ -88,6 +86,9 @@
             </div>
         </div>
     </main>
+
+<script src="${pageContext.request.contextPath}/dist/js/projectEnter.js"></script>
+<script src="${pageContext.request.contextPath}/dist/js/projectCreate.js"></script>
 
 </body>
 </html>

@@ -16,75 +16,6 @@ body {
     margin: 0;
 }
 
-#sidebar {
-    width: var(--sidebar-width);
-    height: 100vh;
-    position: fixed;
-    background: #fff;
-    border-right: 1px solid var(--border-color);
-    padding: 24px 0;
-    z-index: 100;
-}
-
-.sidebar-brand {
-    padding: 0 24px 32px;
-    font-weight: 700;
-    font-size: 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.nav-item {
-    padding: 2px 12px;
-}
-
-.nav-link {
-    display: flex;
-    align-items: center;
-    padding: 10px 12px;
-    color: var(--text-gray);
-    text-decoration: none;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: all 0.2s;
-}
-
-.nav-link i {
-    width: 20px;
-    margin-right: 12px;
-    font-size: 1.1rem;
-}
-
-.nav-link:hover, 
-.nav-link.active {
-    background-color: #f2f4f7;
-    color: var(--primary-blue);
-}
-
-.nav-link.active {
-    background-color: #eef2ff;
-}
-
-.sub-menu {
-    list-style: none;
-    padding-left: 44px;
-    margin-top: 4px;
-}
-
-.sub-menu li a {
-    display: block;
-    padding: 8px 0;
-    color: var(--text-gray);
-    text-decoration: none;
-    font-size: 0.85rem;
-}
-
-.sub-menu li a:hover {
-    color: var(--primary-blue);
-}
-
 #main-content {
     margin-left: var(--sidebar-width);
     padding: 24px 40px;
@@ -138,6 +69,14 @@ body {
     overflow: hidden;
     overflow: visible !important;
     position: relative;
+}
+
+.project-title-link {
+    text-decoration: none;      /* 밑줄 제거 */
+    color: var(--text-dark);    /* 기존 텍스트 색상 유지 */
+    font-weight: 600;           /* 약간 두껍게 */
+    transition: color 0.2s ease;
+    display: inline-block;      /* 클릭 영역 확보 */
 }
 
 .table-header {
@@ -208,6 +147,32 @@ body {
 .btn-create:hover {
     background-color: #3e5fcf;
     color: #fff;
+}
+
+.progress-container {
+    width: 100%;            /* 부모 너비 꽉 채우기 */
+    height: 8px;            /* 바 높이 */
+    background-color: #f2f4f7; /* 배경색 (회색) */
+    border-radius: 10px;
+    overflow: hidden;       /* 내부 바가 둥근 모서리를 벗어나지 않게 함 */
+    display: block;         /* flex 내부에서 영역 확보를 위해 block 설정 */
+    position: relative;
+}
+
+.progress-bar {
+    height: 100%;
+    border-radius: 10px;
+    background-color: var(--primary-blue); /* 기본 색상 */
+    transition: width 0.3s ease;           /* 애니메이션 효과 */
+}
+
+.progress-text {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 10px;
+    min-width: 35px;
+    color: var(--text-gray);
+    white-space: nowrap;
 }
 
 .status-badge {

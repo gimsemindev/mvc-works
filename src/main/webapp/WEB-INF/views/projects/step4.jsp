@@ -1,47 +1,6 @@
-<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" isELIgnored="true" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core"%>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
-<style>
-/* 세부 계획 행 - 호버 시 삭제 버튼 살짝 표시 */
-.sub-plan-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 6px;
-    position: relative;
-}
-.sub-plan-item .btn-sub-delete {
-    background: none;
-    border: none;
-    color: transparent;
-    cursor: pointer;
-    padding: 2px 5px;
-    font-size: 0.75rem;
-    border-radius: 3px;
-    flex-shrink: 0;
-    transition: color 0.15s;
-}
-.sub-plan-item:hover .btn-sub-delete {
-    color: #ccc;
-}
-.sub-plan-item .btn-sub-delete:hover {
-    color: #e74c3c !important;
-}
-
-/* 새로 추가되는 단계 제목 input */
-.phase-title-input {
-    border: none;
-    background: transparent;
-    font-weight: 600;
-    font-size: 1rem;
-    outline: none;
-    flex: 1;
-    padding: 2px 4px;
-}
-.phase-title-input:focus {
-    border-bottom-color: #0d6efd;
-}
-</style>
 
 <div class="section-header">
     <div>
@@ -63,7 +22,10 @@
                 <input type="text" class="sub-plan-input" value="고객사 인터뷰 및 요구사항 정의서 작성">
             </div>
         </div>
-        <button class="btn-add-sub"><i class="fas fa-plus me-1"></i> 세부 계획 추가</button>
+        <div class="phase-footer">
+            <button class="btn-add-sub"><i class="fas fa-plus me-1"></i></button>
+            <button class="btn-phase-done" title="완료"><i class="fas fa-check"></i></button>
+        </div>
     </div>
 
     <div class="phase-card">
@@ -72,7 +34,10 @@
             <button class="btn-delete" title="삭제"><i class="fas fa-minus"></i></button>
         </div>
         <div class="sub-plan-list"></div>
-        <button class="btn-add-sub"><i class="fas fa-plus me-1"></i> 세부 계획 추가</button>
+        <div class="phase-footer">
+            <button class="btn-add-sub"><i class="fas fa-plus me-1"></i></button>
+            <button class="btn-phase-done" title="완료"><i class="fas fa-check"></i></button>
+        </div>
     </div>
 
     <div class="phase-card">
@@ -81,7 +46,10 @@
             <button class="btn-delete" title="삭제"><i class="fas fa-minus"></i></button>
         </div>
         <div class="sub-plan-list"></div>
-        <button class="btn-add-sub"><i class="fas fa-plus me-1"></i> 세부 계획 추가</button>
+        <div class="phase-footer">
+            <button class="btn-add-sub"><i class="fas fa-plus me-1"></i></button>
+            <button class="btn-phase-done" title="완료"><i class="fas fa-check"></i></button>
+        </div>
     </div>
 
     <div class="phase-card">
@@ -90,7 +58,10 @@
             <button class="btn-delete" title="삭제"><i class="fas fa-minus"></i></button>
         </div>
         <div class="sub-plan-list"></div>
-        <button class="btn-add-sub"><i class="fas fa-plus me-1"></i> 세부 계획 추가</button>
+        <div class="phase-footer">
+            <button class="btn-add-sub"><i class="fas fa-plus me-1"></i></button>
+            <button class="btn-phase-done" title="완료"><i class="fas fa-check"></i></button>
+        </div>
     </div>
 
     <div class="phase-card">
@@ -99,7 +70,10 @@
             <button class="btn-delete" title="삭제"><i class="fas fa-minus"></i></button>
         </div>
         <div class="sub-plan-list"></div>
-        <button class="btn-add-sub"><i class="fas fa-plus me-1"></i> 세부 계획 추가</button>
+        <div class="phase-footer">
+            <button class="btn-add-sub"><i class="fas fa-plus me-1"></i></button>
+            <button class="btn-phase-done" title="완료"><i class="fas fa-check"></i></button>
+        </div>
     </div>
 
 </div>
@@ -148,25 +122,22 @@
             el.textContent = i + 1;
         });
     }
-    
+
     /* 엔터 키 이벤트 위임 */
     container.addEventListener('keydown', function (e) {
         if (e.key !== 'Enter') return;
         e.preventDefault();
-        e.stopImmediatePropagation(); // ← 추가
+        e.stopImmediatePropagation();
 
-        // 세부 계획 input에서 엔터 → 다음 세부 계획 항목 추가
         if (e.target.classList.contains('sub-plan-input')) {
             const currentItem = e.target.closest('.sub-plan-item');
             const list = currentItem.parentElement;
             const newItem = createSubItem('');
-            // 현재 항목 바로 다음에 삽입
             currentItem.after(newItem);
             newItem.querySelector('input').focus();
             return;
         }
 
-        // 단계 이름 input에서 엔터 → 첫 번째 세부 계획 추가 후 포커스
         if (e.target.classList.contains('phase-title-input')) {
             const card = e.target.closest('.phase-card');
             const list = card.querySelector('.sub-plan-list');
@@ -183,7 +154,8 @@
         // 세부 계획 추가 버튼
         if (e.target.closest('.btn-add-sub')) {
             const btn = e.target.closest('.btn-add-sub');
-            const list = btn.previousElementSibling;
+            const footer = btn.closest('.phase-footer');
+            const list = footer.previousElementSibling;
             const newItem = createSubItem('');
             list.appendChild(newItem);
             newItem.querySelector('input').focus();
@@ -196,6 +168,20 @@
             return;
         }
 
+        // 단계 완료 버튼
+        if (e.target.closest('.btn-phase-done')) {
+            const btn = e.target.closest('.btn-phase-done');
+            const card = btn.closest('.phase-card');
+            const isDone = btn.classList.contains('done');
+            btn.classList.toggle('done');
+            card.classList.toggle('done-card');
+            // 완료 시 input 비활성화 / 취소 시 활성화
+            card.querySelectorAll('.sub-plan-input').forEach(function(input) {
+                input.disabled = !isDone;
+            });
+            return;
+        }
+
         // 단계 카드 삭제 버튼
         if (e.target.closest('.btn-delete')) {
             e.target.closest('.phase-card').remove();
@@ -204,7 +190,7 @@
         }
     });
 
-    /* 단계 추가 버튼 - 새 단계만 제목 input으로 생성 */
+    /* 단계 추가 버튼 */
     document.getElementById('btnAddPhase').addEventListener('click', function () {
         const count = container.querySelectorAll('.phase-card').length + 1;
 
@@ -244,13 +230,24 @@
         const subList = document.createElement('div');
         subList.className = 'sub-plan-list';
 
+        const footer = document.createElement('div');
+        footer.className = 'phase-footer';
+
         const addSubBtn = document.createElement('button');
         addSubBtn.className = 'btn-add-sub';
-        addSubBtn.innerHTML = '<i class="fas fa-plus me-1"></i> 세부 계획 추가';
+        addSubBtn.innerHTML = '<i class="fas fa-plus me-1"></i>';
+
+        const doneBtn = document.createElement('button');
+        doneBtn.className = 'btn-phase-done';
+        doneBtn.title = '완료';
+        doneBtn.innerHTML = '<i class="fas fa-check"></i>';
+
+        footer.appendChild(addSubBtn);
+        footer.appendChild(doneBtn);
 
         card.appendChild(header);
         card.appendChild(subList);
-        card.appendChild(addSubBtn);
+        card.appendChild(footer);
 
         container.appendChild(card);
         titleInput.focus();

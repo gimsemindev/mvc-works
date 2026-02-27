@@ -24,12 +24,15 @@
         <li><a href="${pageContext.request.contextPath}/hrm/performance">직원 성과 관리</a></li>
         <li><a href="${pageContext.request.contextPath}/hrm/records">인사관리 기록</a></li>
     </ul>
-
+    
+    <div class="nav-section">결재관리</div>
+	<a href="${pageContext.request.contextPath}/" class="nav-link active"><i class="fas fa-briefcase"></i> 결재</a>
+	    
     <div class="nav-section">Projects</div>
-    <a href="${pageContext.request.contextPath}/project" class="nav-link active"><i class="fas fa-briefcase"></i> Projects</a>
+    <a href="${pageContext.request.contextPath}/projects" class="nav-link active"><i class="fas fa-briefcase"></i> Projects</a>
     <ul class="sub-menu">
         <li><a href="${pageContext.request.contextPath}/projects/list" class="active">Projects List</a></li>
-        <li><a href="${pageContext.request.contextPath}/projects/list">Projects View</a></li>
+        <li><a href="${pageContext.request.contextPath}/projects/article">Projects View</a></li>
         <li><a href="${pageContext.request.contextPath}/projects/create">Projects Create</a></li>
     </ul>
 

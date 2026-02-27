@@ -91,7 +91,6 @@ body {
     padding-top: 30px;
     display: flex;
     justify-content: space-between;
-    border-top: 1px solid var(--border-color);
 }
 
 .form-footer .btn {
@@ -265,6 +264,216 @@ body {
     flex-grow: 1;
     min-width: 150px;
     background: transparent;
+}
+
+
+.team-dept {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.dept-dev {
+    background: #e8f0fe;
+    color: #1a56db;
+}
+.dept-dev .status-dot {
+    background: #1a56db;
+}
+
+
+.dept-hr {
+    background: #e6f4ea;
+    color: #1e7e34;
+}
+.dept-hr .status-dot {
+    background: #1e7e34;
+}
+
+
+.dept-design {
+    background: #f3e8fd;
+    color: #7c3aed;
+}
+.dept-design .status-dot {
+    background: #7c3aed;
+}
+
+
+.dept-others {
+    background: #f0f0f0;
+    color: #555;
+}
+.dept-others .status-dot {
+    background: #999;
+}
+
+
+.dept-dropdown {
+    display: none;
+    position: absolute;
+    top: 40px;
+    right: 0;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 8px;
+    list-style: none;
+    z-index: 100;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    min-width: 140px;
+}
+
+.dept-dropdown li {
+    padding: 6px 10px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.dept-dropdown li:hover {
+    background: #f9fafb;
+}
+
+.dept-dropdown li.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: grayscale(1);
+}
+
+
+
+/* 동적으로 추가되는 부서 섹션 스타일 */
+.dept-section {
+    background: #fcfcfd;
+    border: 1px solid #eaecf0;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+#btnAddDept {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap !important;
+    width: auto !important;
+    height: 36px;
+    padding: 0 12px !important;
+    line-height: 1;
+}
+
+/* 2. 각 부서별 [삭제] 버튼 개선 */
+.btn-dept-remove {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #fff;
+    border: 1px solid #fda29b !important;
+    color: #d92d20 !important;
+    padding: 4px 10px !important;
+    border-radius: 6px;
+    font-size: 13px !important;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.btn-dept-remove:hover {
+    background-color: #fef3f2;
+    border-color: #f97066 !important;
+}
+
+/* 3. 부서 헤더 레이아웃 조정 */
+.dept-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+/* 멤버 태그 디자인 */
+.member-tag-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.member-tag {
+    background: #fff;
+    border: 1px solid #d0d5dd;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+}
+
+.tag-remove {
+    cursor: pointer;
+    color: #98a2b3;
+}
+
+.tag-remove:hover {
+    color: #667085;
+}
+
+/* 검색 입력창 개선 */
+.member-search-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.member-search-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.member-search-input:focus {
+    border-color: var(--primary-blue);
+}
+
+.member-search-result {
+    position: absolute;
+    top: 105%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 10;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: none;
+}
+
+.member-search-result li {
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.member-search-result li:hover {
+    background-color: #f9fafb;
+    color: var(--primary-blue);
 }
 
 /* 3단계 */
@@ -444,6 +653,7 @@ body {
 
 .btn-delete {
     color: #f04438;
+    margin-right: 28px;
     background: #fef3f2;
     border: none;
     width: 32px;
@@ -487,6 +697,7 @@ body {
 
 .btn-add-sub {
     margin-left: 38px;
+    margin-right: 28px;
     color: var(--primary-blue);
     background: none;
     border: 1px dashed var(--primary-blue);
@@ -499,4 +710,118 @@ body {
 
 .btn-add-sub:hover {
     background: #f0f6ff;
+}
+
+.sub-plan-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    position: relative;
+}
+
+.sub-plan-item .btn-sub-delete {
+    background: none;
+    border: none;
+    color: transparent;
+    cursor: pointer;
+    padding: 2px 5px;
+    font-size: 0.75rem;
+    border-radius: 3px;
+    flex-shrink: 0;
+    transition: color 0.15s;
+}
+
+.sub-plan-item:hover .btn-sub-delete {
+    color: #ccc;
+}
+
+.sub-plan-item .btn-sub-delete:hover {
+    color: #e74c3c !important;
+}
+
+
+.phase-title-input {
+    border: none;
+    background: transparent;
+    font-weight: 600;
+    font-size: 1rem;
+    outline: none;
+    flex: 1;
+    padding: 2px 4px;
+}
+.phase-title-input:focus {
+    border-bottom-color: #0d6efd;
+}
+
+/* 세부 계획 행 */
+.sub-plan-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    position: relative;
+}
+.sub-plan-item .btn-sub-delete {
+    background: none;
+    border: none;
+    color: transparent;
+    cursor: pointer;
+    padding: 2px 5px;
+    font-size: 0.75rem;
+    border-radius: 3px;
+    flex-shrink: 0;
+    transition: color 0.15s;
+}
+.sub-plan-item:hover .btn-sub-delete {
+    color: #ccc;
+}
+.sub-plan-item .btn-sub-delete:hover {
+    color: #e74c3c !important;
+}
+
+/* 새로 추가되는 단계 제목 input */
+.phase-title-input {
+    border: none;
+    background: transparent;
+    font-weight: 600;
+    font-size: 1rem;
+    outline: none;
+    flex: 1;
+    padding: 2px 4px;
+}
+.phase-title-input:focus {
+    border-bottom-color: #0d6efd;
+}
+
+/* 카드 하단 푸터 */
+.phase-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 4px;
+}
+
+/* 완료 버튼 */
+.btn-phase-done {
+    margin-left: 38px;
+    margin-right: 28px;
+    color: var(--primary-blue);
+    background: none;
+    border: 1px dashed var(--primary-blue);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.btn-phase-done:hover {
+    background: #f0f6ff;
+}
+
+.btn-phase-done.done {
+    border-color: #f0f6ff;
+    background: #f0f6ff;
+    color: #fff;
 }

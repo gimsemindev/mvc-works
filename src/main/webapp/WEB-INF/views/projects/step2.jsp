@@ -13,7 +13,7 @@
         <label class="form-label mb-0">팀 멤버 상세 구성</label>
         <div class="position-relative">
             <button type="button" class="btn btn-sm btn-outline-primary" id="btnAddDept">
-                <i class="fas fa-plus me-1"></i> 부서 추가
+                <i class="fas fa-plus"></i>
             </button>
             
             <ul class="dept-dropdown" id="deptDropdown">
@@ -102,7 +102,7 @@
         const removeBtn = document.createElement('button');
         removeBtn.type = 'button';
         removeBtn.className = 'btn-dept-remove';
-        removeBtn.innerHTML = '<i class="fas fa-times"></i> 삭제';
+        removeBtn.innerHTML = '<i class="fas fa-times"></i>';
         removeBtn.addEventListener('click', function () {
             const li = deptDropdown.querySelector('li[data-dept="' + deptName + '"]');
             if (li) li.classList.remove('disabled');
@@ -169,6 +169,19 @@
 
             resultList.style.display = 'block';
         });
+        
+        searchInput.addEventListener('keydown', function (e) {
+            if (e.key !== 'Enter') return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            const firstItem = resultList.querySelector('li');
+            if (firstItem) {
+                const name = firstItem.textContent;
+                addMemberTag(tagContainer, name);
+                searchInput.value = '';
+                resultList.style.display = 'none';
+            }
+        });
 
         /* 검색 결과 외부 클릭 시 닫기 */
         document.addEventListener('click', function (e) {
@@ -187,6 +200,8 @@
         container.appendChild(section);
         searchInput.focus();
     }
+    
+    
 
     /* 멤버 태그 추가 */
     function addMemberTag(tagContainer, name) {

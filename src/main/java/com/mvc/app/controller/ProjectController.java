@@ -22,4 +22,9 @@ public class ProjectController {
 	public String projectcreate() {
 		return "projects/create";
 	}
+	
+	@GetMapping("article")
+	public String projectarticle() {
+		return "projects/article";
+	}
 }

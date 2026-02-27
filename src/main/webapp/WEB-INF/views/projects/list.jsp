@@ -105,63 +105,116 @@
                             <th>매니저</th>
                             <th>시작일</th>
                             <th>종료일</th>
-                            <th>책임자</th>
+                            <th>잔여일</th>
+                            <th>진척도</th>
                             <th>상태</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td><input type="checkbox" class="form-check-input"></td>
-                            <td class="fw-medium">AI Research Initiative</td>
-                            <td><img src="https://i.pravatar.cc/150?u=1" class="avatar"> Alex Miller</td>
+                            <td class="fw-medium">
+                            	<a href="location.href='${pageContext.request.contextPath}/projects/article';">
+                            		AI Research Initiative
+                            	</a>
+                            </td>
+                            <td><span class="member-badge">Sarah P.</span></td>
                             <td>Nov 15, 2023</td>
                             <td>Jan 30, 2024</td>
-                            <td><span class="member-badge">Sarah P.</span></td>
+                            <td>15 / 55 일</td>
+                            <td>
+                            <div class="d-flex align-items-center">
+                                <div class="progress-container flex-grow-1" style="min-width: 100px;">
+                                    <div class="progress-bar" style="width: 85%; background-color: #10b981;"></div>
+                                </div>
+                                <span class="progress-text">85%</span>
+                            </div>
+                        	</td>
                             <td><span class="status-badge badge-inprogress"><span class="status-dot"></span>진행중</span></td>
                         </tr>
                         <tr>
                             <td><input type="checkbox" class="form-check-input"></td>
                             <td class="fw-medium">BI Research Initiative</td>
-                            <td><img src="https://i.pravatar.cc/150?u=1" class="avatar"> Alex Miller</td>
+                            <td><span class="member-badge">Sarah P.</span></td>
                             <td>Nov 15, 2023</td>
                             <td>Jan 30, 2024</td>
-                            <td><span class="member-badge">Sarah P.</span></td>
+                            <td>15 / 55 일</td>
+                            <td>
+                            <div class="d-flex align-items-center">
+                                <div class="progress-container flex-grow-1" style="min-width: 100px;">
+                                    <div class="progress-bar" style="width: 85%; background-color: #10b981;"></div>
+                                </div>
+                                <span class="progress-text">85%</span>
+                            </div>
+                        	</td>
                             <td><span class="status-badge badge-inprogress"><span class="status-dot"></span>진행중</span></td>
                         </tr>
                         <tr>
                             <td><input type="checkbox" class="form-check-input"></td>
                             <td class="fw-medium">Website Redesign</td>
-                            <td><img src="https://i.pravatar.cc/150?u=2" class="avatar"> Lucas White</td>
+                            <td><span class="member-badge">Emily B.</span></td>
                             <td>Oct 28, 2023</td>
                             <td>Dec 20, 2023</td>
-                            <td><span class="member-badge">Emily B.</span></td>
+                            <td>15 / 55 일</td>
+                            <td>
+                            <div class="d-flex align-items-center">
+                                <div class="progress-container flex-grow-1" style="min-width: 100px;">
+                                    <div class="progress-bar" style="width: 85%; background-color: #10b981;"></div>
+                                </div>
+                                <span class="progress-text">85%</span>
+                            </div>
+                        	</td>
                             <td><span class="status-badge badge-pending"><span class="status-dot"></span>승인 대기</span></td>
                         </tr>
                         <tr>
                             <td><input type="checkbox" class="form-check-input"></td>
                             <td class="fw-medium">Cloud Migration Phase 1</td>
-                            <td><img src="https://i.pravatar.cc/150?u=3" class="avatar"> Jessica Davis</td>
+                            <td><span class="member-badge">David R.</span></td>
                             <td>Aug 12, 2023</td>
                             <td>Oct 15, 2023</td>
-                            <td><span class="member-badge">David R.</span></td>
+                            <td>15 / 55 일</td>
+                            <td>
+                            <div class="d-flex align-items-center">
+                                <div class="progress-container flex-grow-1" style="min-width: 100px;">
+                                    <div class="progress-bar" style="width: 85%; background-color: #10b981;"></div>
+                                </div>
+                                <span class="progress-text">85%</span>
+                            </div>
+                        	</td>
                             <td><span class="status-badge badge-finished"><span class="status-dot"></span>종료</span></td>
                         </tr>
                         <tr>
                             <td><input type="checkbox" class="form-check-input"></td>
                             <td class="fw-medium">Data Security Audit</td>
-                            <td><img src="https://i.pravatar.cc/150?u=5" class="avatar"> Michael Thompson</td>
+                            <td><span class="member-badge">Alice V.</span></td>
                             <td>Oct 01, 2023</td>
                             <td>Dec 15, 2023</td>
-                            <td><span class="member-badge">Alice V.</span></td>
+                            <td>15 / 55 일</td>
+                            <td>
+                            <div class="d-flex align-items-center">
+                                <div class="progress-container flex-grow-1" style="min-width: 100px;">
+                                    <div class="progress-bar" style="width: 85%; background-color: #10b981;"></div>
+                                </div>
+                                <span class="progress-text">85%</span>
+                            </div>
+                        	</td>
                             <td><span class="status-badge badge-stop"><span class="status-dot"></span>중단</span></td>
                         </tr>
                         <tr>
                             <td><input type="checkbox" class="form-check-input"></td>
                             <td class="fw-medium">New Customer Portal</td>
-                            <td><img src="https://i.pravatar.cc/150?u=6" class="avatar"> Karen Brown</td>
+                            <td><span class="member-badge">Tom S.</span></td>
                             <td>Jan 02, 2024</td>
                             <td>Mar 30, 2024</td>
-                            <td><span class="member-badge">Tom S.</span></td>
+                            <td>15 / 55 일</td>
+                            <td>
+                            <div class="d-flex align-items-center">
+                                <div class="progress-container flex-grow-1" style="min-width: 100px;">
+                                    <div class="progress-bar" style="width: 85%; background-color: #10b981;"></div>
+                                </div>
+                                <span class="progress-text">85%</span>
+                            </div>
+                        	</td>
                             <td><span class="status-badge badge-delayed"><span class="status-dot"></span>지연</span></td>
                         </tr>
                     </tbody>
