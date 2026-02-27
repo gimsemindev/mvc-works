@@ -5,16 +5,8 @@
 
 <nav class="navbar-custom">
     <div class="navbar-left">
-        <button class="nav-icon-btn"><i class="fas fa-bars"></i></button>
-        <button class="btn btn-sm btn-primary rounded-circle"><i class="fas fa-plus"></i></button>
-        <span class="fw-bold ms-2 navbar-mega-menu">
-            MEGA MENU <i class="fas fa-chevron-down ms-1 fa-xs"></i>
-        </span>
     </div>
     <div class="navbar-right">
-        <button class="nav-icon-btn"><i class="fas fa-search"></i></button>
-        <button class="nav-icon-btn"><i class="fas fa-moon"></i></button>
-
         <%-- 알림 버튼 --%>
         <button class="nav-icon-btn position-relative">
             <i class="far fa-bell"></i>
