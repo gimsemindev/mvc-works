@@ -1,7 +1,30 @@
 @charset "UTF-8";
 
+:root {
+    --sidebar-width: 240px;
+    --primary-blue: #4e73df;
+    --bg-light: #f8f9fc;
+    --border-color: #eaecf0;
+    --text-muted: #667085;
+    --success-green: #10b981;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-light);
+    margin: 0;
+    overflow-x: hidden;
+}
+
+#create-content {
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
 .stepper-wrapper {
-	margin-left: var(--sidebar-width);
+    width: 100%;
     background: #fff;
     border-bottom: 1px solid var(--border-color);
     padding: 0 40px;
@@ -24,8 +47,7 @@
 
 .step-item.active {
     color: var(--primary-blue);
-    font-weight: bold;
-    border-bottom: 2px solid #0d6efd;
+    font-weight: 700;
 }
 
 .step-item.active::after {
@@ -41,20 +63,18 @@
 .step-content {
     display: none;
 }
+.step-content.active {
+    display: block;
+}
 
 .step-content-area {
+	margin-left: 0 !important;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 60px 20px;
 }
-
-.step-content.active {
-    display: block;
-}
-
-
 
 .inner-container {
     width: 100%;
@@ -85,7 +105,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 100px;
+    width: auto !important;
+    min-width: 100px;
     height: 48px;
     border-radius: 10px;
     font-weight: 600;
@@ -106,9 +127,12 @@
 
 .material-symbols-outlined {
     font-family: 'Material Symbols Outlined';
-    font-size: 22px;
+    font-size: 22px !important;
+    line-height: 1 !important;
     display: inline-block;
     vertical-align: middle;
+    width: 20px;
+    height: 20px;
 }
 
 .btn-prev .material-symbols-outlined {
@@ -300,59 +324,146 @@
     background: #999;
 }
 
-
+/* 2단계 부서 섹션 */
 .dept-dropdown {
     display: none;
     position: absolute;
-    top: 40px;
     right: 0;
+    top: calc(100% + 4px);
     background: #fff;
-    border: 1px solid var(--border-color);
+    border: 1px solid #dee2e6;
     border-radius: 8px;
-    padding: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     list-style: none;
-    z-index: 100;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    padding: 6px 0;
+    margin: 0;
     min-width: 140px;
+    z-index: 100;
 }
-
 .dept-dropdown li {
-    padding: 6px 10px;
+    padding: 8px 16px;
     cursor: pointer;
-    border-radius: 6px;
-    transition: background 0.2s;
+    font-size: 0.9rem;
+    transition: background 0.15s;
 }
-
 .dept-dropdown li:hover {
-    background: #f9fafb;
+    background: #f0f4ff;
 }
 
-.dept-dropdown li.disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    filter: grayscale(1);
-}
-
-
-
-/* 동적으로 추가되는 부서 섹션 스타일 */
 .dept-section {
-    background: #fcfcfd;
-    border: 1px solid #eaecf0;
+    border: 1px solid #e0e0e0;
     border-radius: 10px;
-    padding: 16px;
+    padding: 14px 16px;
     margin-bottom: 12px;
+    background: #fafafa;
+}
+.dept-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.dept-section-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #333;
+}
+.btn-dept-remove {
+    background: none;
+    border: 1px solid #eee;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.btn-dept-remove:hover {
+    color: #e74c3c;
+    border-color: #e74c3c;
+    background: #fef0ef;
 }
 
+.member-tag-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+.member-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #e8f0fe;
+    color: #1a56db;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 0.85rem;
+}
+.member-tag .tag-remove {
+    cursor: pointer;
+    color: #888;
+    font-size: 0.75rem;
+}
+.member-tag .tag-remove:hover {
+    color: #e74c3c;
+}
+
+.member-search-wrap {
+    position: relative;
+}
+.member-search-input {
+    width: 100%;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    outline: none;
+    box-sizing: border-box;
+}
+.member-search-input:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 2px rgba(13,110,253,0.1);
+}
+
+.member-search-result {
+    display: none;
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0; right: 0;
+    background: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    z-index: 99;
+    max-height: 180px;
+    overflow-y: auto;
+    list-style: none;
+    padding: 4px 0;
+    margin: 0;
+}
+.member-search-result li {
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 0.88rem;
+}
+.member-search-result li:hover {
+    background: #f0f4ff;
+    color: #0d6efd;
+}
+/* 1. 상단 [부서 추가] 버튼 깨짐 방지 */
 #btnAddDept {
-    display: inline-flex !important;
+    display: inline-flex !important; /* 내부 아이콘과 텍스트를 한 줄로 */
     align-items: center;
     justify-content: center;
-    white-space: nowrap !important;
-    width: auto !important;
-    height: 36px;
-    padding: 0 12px !important;
-    line-height: 1;
+    white-space: nowrap !important; /* 텍스트 줄바꿈 절대 방지 */
+    width: auto !important;         /* 너비를 고정하지 않고 콘텐츠에 맞춤 */
+    min-width: 100px;               /* 최소 너비 확보 */
+    height: 36px;                   /* 적절한 높이 설정 */
+    padding: 0 12px !important;     /* 좌우 여유 공간 */
+    line-height: 1;                 /* 줄 간격 초기화 */
 }
 
 /* 2. 각 부서별 [삭제] 버튼 개선 */
@@ -363,11 +474,11 @@
     background-color: #fff;
     border: 1px solid #fda29b !important;
     color: #d92d20 !important;
-    padding: 4px 10px !important;
+    padding: 4px 10px !important;   /* 패딩 최적화 */
     border-radius: 6px;
-    font-size: 13px !important;
+    font-size: 13px !important;     /* 폰트 크기 고정 */
     font-weight: 500;
-    white-space: nowrap;
+    white-space: nowrap;            /* 삭제 글자 꺾임 방지 */
     cursor: pointer;
     box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
@@ -384,84 +495,6 @@
     align-items: center;
     width: 100%;
     margin-bottom: 15px;
-}
-
-/* 멤버 태그 디자인 */
-.member-tag-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 8px;
-}
-
-.member-tag {
-    background: #fff;
-    border: 1px solid #d0d5dd;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
-}
-
-.tag-remove {
-    cursor: pointer;
-    color: #98a2b3;
-}
-
-.tag-remove:hover {
-    color: #667085;
-}
-
-/* 검색 입력창 개선 */
-.member-search-wrap {
-    position: relative;
-    width: 100%;
-}
-
-.member-search-input {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 0.9rem;
-    outline: none;
-    transition: border-color 0.2s;
-}
-
-.member-search-input:focus {
-    border-color: var(--primary-blue);
-}
-
-.member-search-result {
-    position: absolute;
-    top: 105%;
-    left: 0;
-    right: 0;
-    background: #fff;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    z-index: 10;
-    max-height: 200px;
-    overflow-y: auto;
-    padding: 0;
-    margin: 0;
-    list-style: none;
-    display: none;
-}
-
-.member-search-result li {
-    padding: 10px 14px;
-    cursor: pointer;
-    font-size: 0.9rem;
-}
-
-.member-search-result li:hover {
-    background-color: #f9fafb;
-    color: var(--primary-blue);
 }
 
 /* 3단계 */
@@ -641,7 +674,6 @@
 
 .btn-delete {
     color: #f04438;
-    margin-right: 28px;
     background: #fef3f2;
     border: none;
     width: 32px;
@@ -685,7 +717,6 @@
 
 .btn-add-sub {
     margin-left: 38px;
-    margin-right: 28px;
     color: var(--primary-blue);
     background: none;
     border: 1px dashed var(--primary-blue);
@@ -698,48 +729,6 @@
 
 .btn-add-sub:hover {
     background: #f0f6ff;
-}
-
-.sub-plan-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 6px;
-    position: relative;
-}
-
-.sub-plan-item .btn-sub-delete {
-    background: none;
-    border: none;
-    color: transparent;
-    cursor: pointer;
-    padding: 2px 5px;
-    font-size: 0.75rem;
-    border-radius: 3px;
-    flex-shrink: 0;
-    transition: color 0.15s;
-}
-
-.sub-plan-item:hover .btn-sub-delete {
-    color: #ccc;
-}
-
-.sub-plan-item .btn-sub-delete:hover {
-    color: #e74c3c !important;
-}
-
-
-.phase-title-input {
-    border: none;
-    background: transparent;
-    font-weight: 600;
-    font-size: 1rem;
-    outline: none;
-    flex: 1;
-    padding: 2px 4px;
-}
-.phase-title-input:focus {
-    border-bottom-color: #0d6efd;
 }
 
 /* 세부 계획 행 */
@@ -771,6 +760,7 @@
 /* 새로 추가되는 단계 제목 input */
 .phase-title-input {
     border: none;
+    border-bottom: 1px solid #dee2e6;
     background: transparent;
     font-weight: 600;
     font-size: 1rem;
@@ -792,24 +782,35 @@
 
 /* 완료 버튼 */
 .btn-phase-done {
-    margin-left: 38px;
-    margin-right: 28px;
-    color: var(--primary-blue);
-    background: none;
-    border: 1px dashed var(--primary-blue);
-    border-radius: 8px;
-    padding: 8px 16px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 2px solid #dee2e6;
+    background: #fff;
+    color: #ccc;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 0.85rem;
-    font-weight: 600;
-    transition: 0.2s;
+    transition: all 0.2s;
+    flex-shrink: 0;
 }
-
 .btn-phase-done:hover {
-    background: #f0f6ff;
+    border-color: #10b981;
+    color: #10b981;
+    background: #f0fdf4;
 }
-
 .btn-phase-done.done {
-    border-color: #f0f6ff;
-    background: #f0f6ff;
+    border-color: #10b981;
+    background: #10b981;
+    color: #fff;
+}
+.phase-card.done-card {
+    border-color: #10b981;
+    background: #f0fdf4;
+}
+.phase-card.done-card .phase-number {
+    background: #10b981;
     color: #fff;
 }

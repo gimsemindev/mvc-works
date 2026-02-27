@@ -9,7 +9,6 @@
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp"/>
 
-<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/projectmain.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/projectcreate.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/paginate.css" type="text/css">
 
@@ -50,10 +49,10 @@
 
 				<div class="form-footer">
 				    <button type="button" class="btn btn-prev" id="btnPrev">
-				        <span class="material-symbols-outlined">arrow_back_ios</span>
+				        <
 				    </button>
 				    <button type="button" class="btn btn-next" id="btnNext">
-				        <span class="material-symbols-outlined">arrow_forward_ios</span>
+				        >
 				    </button>
 				    <button type="button" class="btn btn-primary px-4" id="btnComplete" style="display:none;">
 				        완료

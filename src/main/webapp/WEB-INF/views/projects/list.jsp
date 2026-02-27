@@ -9,7 +9,6 @@
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp"/>
 
-<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/projectmain.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/projectlist.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/paginate.css" type="text/css">
 
