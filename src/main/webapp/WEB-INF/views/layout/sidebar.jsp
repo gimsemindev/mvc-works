@@ -25,9 +25,12 @@
         <li><a href="${pageContext.request.contextPath}/hrm/records">인사관리 기록</a></li>
     </ul>
     
-    <div class="nav-section">결재관리</div>
-	<a href="${pageContext.request.contextPath}/" class="nav-link active"><i class="fas fa-briefcase"></i> 결재</a>
-	    
+    <div class="nav-section">Approval</div>
+	<a href="${pageContext.request.contextPath}/approval" class="nav-link active"><i class="fas fa-briefcase"></i>Approval</a>
+	<ul class="sub-menu">
+        <li><a href="${pageContext.request.contextPath}/approval/create">결재 상신</a></li>
+        <li><a href="${pageContext.request.contextPath}/approval/list" class="active">결재 리스트</a></li>
+    </ul>    
     <div class="nav-section">Projects</div>
     <a href="${pageContext.request.contextPath}/projects" class="nav-link active"><i class="fas fa-briefcase"></i> Projects</a>
     <ul class="sub-menu">
