@@ -9,7 +9,7 @@
     <a href="${pageContext.request.contextPath}/" class="nav-link"><i class="fas fa-th-large"></i> Dashboards</a>
     <a href="${pageContext.request.contextPath}/" class="nav-link"><i class="fas fa-file-invoice"></i> Reports</a>
     <a href="${pageContext.request.contextPath}/" class="nav-link"><i class="fas fa-th-large"></i> Applications</a>
-    <a href="${pageContext.request.contextPath}/" class="nav-link"><i class="fas fa-file-signature"></i> Proposal</a>
+    <a href="${pageContext.request.contextPath}/hrm/list" class="nav-link"><i class="fas fa-file-signature"></i> 인사관리</a>
 
     <div class="nav-section">Projects</div>
     <a href="${pageContext.request.contextPath}/project" class="nav-link active"><i class="fas fa-briefcase"></i> Projects</a>
