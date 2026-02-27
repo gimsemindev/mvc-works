@@ -19,10 +19,13 @@
 
 <main id="main-content">
 
-    <!-- 페이지 타이틀 -->
-    <div class="page-title">
+
+    <!-- 페이지 타이틀 + 문서 타이틀 한 줄 -->
+    <div class="page-header">
         <span class="material-symbols-outlined">forward_to_inbox</span>
-        전자결재
+        <span class="page-header-label">전자결재</span>
+        <span class="page-header-divider">›</span>
+        <span class="page-header-doc" id="formDocTitle"></span>
     </div>
 
     <!-- 결재양식 선택 모달 -->

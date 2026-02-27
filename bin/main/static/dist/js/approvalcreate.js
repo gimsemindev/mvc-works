@@ -7,10 +7,11 @@ document.getElementById('todayDate').value = new Date().toLocaleDateString('ko-K
 function selectForm(type) {
     document.getElementById('formSelectModal').classList.add('hidden');
     document.getElementById('approvalForm').classList.add('active');
-    document.getElementById('formDocTitle').textContent = '[' + type + '] 작성';
+    // 상단 헤더에 선택한 양식명 표시
+    document.getElementById('formDocTitle').textContent = type;
 }
 
-// 모달 닫기 (양식 선택 없이 닫으면 리스트로 이동)
+// 모달 닫기
 function closeModal() {
     document.getElementById('formSelectModal').classList.add('hidden');
     location.href = document.querySelector('meta[name="ctx"]').content + '/approval/list';
