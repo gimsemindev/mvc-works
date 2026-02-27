@@ -27,4 +27,14 @@ public class ProjectController {
 	public String projectarticle() {
 		return "projects/article";
 	}
+	
+	@GetMapping("gantt")
+	public String projectgantt() {
+		return "projects/gantt";
+	}
+	
+	@GetMapping("task")
+	public String projecttask() {
+		return "projects/task";
+	}
 }

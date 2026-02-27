@@ -8,37 +8,14 @@
 <title>MVC</title>
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp"/>
+
+<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/projectmain.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/projectcreate.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/paginate.css" type="text/css">
 
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
-
-
-<style type="text/css">
-.step-content {
-    display: none;
-}
-
-.step-content.active {
-    display: block;
-}
-
-.step-item.active {
-    color: #0d6efd;
-    font-weight: bold;
-    border-bottom: 2px solid #0d6efd;
-}
-
-.step-item.active::after {
-    content: '';
-    position: absolute;
-    bottom: -1px; left: 0; right: 0;
-    height: 3px; background: #4e73df;
-} 
-</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=arrow_forward_ios" />
 </head>
 <body>
-
 <jsp:include page="/WEB-INF/views/layout/header.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebar.jsp"/>
 

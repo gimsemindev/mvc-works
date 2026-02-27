@@ -8,6 +8,8 @@
 <title>MVC</title>
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp"/>
+
+<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/projectmain.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/projectlist.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/paginate.css" type="text/css">
 
@@ -17,18 +19,18 @@
 <jsp:include page="/WEB-INF/views/layout/header.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebar.jsp"/>
 
-<main id="main-content">
-        <nav aria-label="breadcrumb">
+	<main id="main-content">
+        <div aria-label="breadcrumb">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item text-muted">Projects</li>
                 <li class="breadcrumb-item text-muted">Home</li>
                 <li class="breadcrumb-item active fw-bold">Projects List</li>
             </ol>
-        </nav>
+        </div>
 
         <div class="row g-4 mb-4">
             <div class="col-md-3">
-                <div class="stat-card shadow-sm">
+                <div class="stat-card">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="stat-icon bg-primary bg-opacity-10 text-primary"><i class="fas fa-list-check"></i></div>
                         <span class="stat-trend bg-success bg-opacity-10 text-success">+12%</span>
@@ -38,7 +40,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="stat-card shadow-sm">
+                <div class="stat-card">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="stat-icon bg-warning bg-opacity-10 text-warning"><i class="fas fa-clock"></i></div>
                         <span class="stat-trend bg-light text-muted">Stable</span>
@@ -48,7 +50,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="stat-card shadow-sm">
+                <div class="stat-card">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="stat-icon bg-success bg-opacity-10 text-success"><i class="fas fa-check-circle"></i></div>
                         <span class="stat-trend bg-success bg-opacity-10 text-success">+5</span>
@@ -92,7 +94,9 @@
 					    </ul>
 					</div>
 					
-					<button class="btn btn-create" >+</button>
+					<button type="button" class="btn btn-create" onclick="location.href='${pageContext.request.contextPath}/projects/create';">
+						+
+					</button>
                 </div>
             </div>
 
@@ -114,9 +118,9 @@
                         <tr>
                             <td><input type="checkbox" class="form-check-input"></td>
                             <td class="fw-medium">
-                            	<a href="location.href='${pageContext.request.contextPath}/projects/article';">
-                            		AI Research Initiative
-                            	</a>
+								<a href="${pageContext.request.contextPath}/projects/article" class="project-title-link">
+								    AI Research Initiative
+								</a>
                             </td>
                             <td><span class="member-badge">Sarah P.</span></td>
                             <td>Nov 15, 2023</td>
@@ -254,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         tableRows.forEach(row => {
             const projectName = row.cells[1].textContent.toLowerCase();
-            const rowStatusClean = row.cells[6].textContent.replace(/\s/g, "").trim();
+            const rowStatusClean = row.cells[7].textContent.replace(/\s/g, "").trim();
             const selectedStatusClean = currentStatus.replace(/\s/g, "").trim();
 
             const matchesSearch = projectName.includes(searchTerm);

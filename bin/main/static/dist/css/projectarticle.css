@@ -1,27 +1,5 @@
 @charset "UTF-8";
 
-:root {
-	--sidebar-width: 240px;
-    --primary-blue: #4e73df;
-    --bg-light: #f8f9fc;
-    --border-color: #eaecf0;
-    --text-dark: #1d2939;
-    --text-gray: #667085;
-}
-
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--bg-light);
-    color: var(--text-dark);
-    margin: 0;
-}
-
-.container-custom {
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
-
 .card-header-project {
     background: #fff;
     border: 1px solid var(--border-color);

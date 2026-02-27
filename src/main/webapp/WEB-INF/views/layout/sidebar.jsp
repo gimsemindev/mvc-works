@@ -35,7 +35,8 @@
     <a href="${pageContext.request.contextPath}/projects" class="nav-link active"><i class="fas fa-briefcase"></i> Projects</a>
     <ul class="sub-menu">
         <li><a href="${pageContext.request.contextPath}/projects/list" class="active">Projects List</a></li>
-        <li><a href="${pageContext.request.contextPath}/projects/article">Projects View</a></li>
+        <li><a href="${pageContext.request.contextPath}/projects/gantt">Projects Gantt</a></li>
+        <li><a href="${pageContext.request.contextPath}/projects/task">Projects Task</a></li>
         <li><a href="${pageContext.request.contextPath}/projects/create">Projects Create</a></li>
     </ul>
 
