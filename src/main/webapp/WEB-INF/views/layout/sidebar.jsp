@@ -19,7 +19,7 @@
         <i class="fas fa-chevron-down toggle-icon" id="hrmArrow"></i>
     </a>
     <ul class="sub-menu" id="hrmSubMenu">
-        <li><a href="${pageContext.request.contextPath}/hrm/list">직원 정보통합 관리</a></li>
+        <li><a href="${pageContext.request.contextPath}/hrm">직원 정보통합 관리</a></li>
         <li><a href="${pageContext.request.contextPath}/hrm/org">직원 조직 관리</a></li>
         <li><a href="${pageContext.request.contextPath}/hrm/performance">직원 성과 관리</a></li>
         <li><a href="${pageContext.request.contextPath}/hrm/records">인사관리 기록</a></li>
