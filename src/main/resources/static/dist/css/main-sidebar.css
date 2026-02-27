@@ -1,0 +1,21 @@
+/* 인사관리 사이드바 토글 스타일 */
+.nav-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.toggle-icon {
+    margin-left: auto;
+    transition: transform 0.3s ease;
+    font-size: 12px;
+}
+
+.toggle-icon.open {
+    transform: rotate(180deg);
+}
+
+#hrmSubMenu {
+    display: none;
+}
