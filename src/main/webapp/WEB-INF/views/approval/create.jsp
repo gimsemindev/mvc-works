@@ -1,6 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,87 +7,264 @@
 <title>MVC</title>
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp"/>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/projectcreate.css" type="text/css">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/paginate.css" type="text/css">
-
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
-
-
-<style type="text/css">
-.step-content {
-    display: none;
-}
-
-.step-content.active {
-    display: block;
-}
-
-.step-item.active {
-    color: #0d6efd;
-    font-weight: bold;
-    border-bottom: 2px solid #0d6efd;
-}
-
-.step-item.active::after {
-    content: '';
-    position: absolute;
-    bottom: -1px; left: 0; right: 0;
-    height: 3px; background: #4e73df;
-} 
-</style>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/projectlist.css" type="text/css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/approvalcreate.css" type="text/css">
+<meta name="ctx" content="${pageContext.request.contextPath}">
 </head>
 <body>
 
 <jsp:include page="/WEB-INF/views/layout/header.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebar.jsp"/>
 
-    <main id="content">
-        <div class="full-width-stepper shadow-sm">
-            <div class="stepper-nav">
-                <div class="step-item active" data-step="1">Project 타입</div>
-                <div class="step-item" data-step="2">Project 설정</div>
-                <div class="step-item" data-step="3">Project 팀 구성</div>
-                <div class="step-item" data-step="4">Project 단계 설정</div>
+<main id="main-content">
+
+    <!-- 페이지 타이틀 -->
+    <div class="page-title">
+        <span class="material-symbols-outlined">forward_to_inbox</span>
+        전자결재
+    </div>
+
+    <!-- 결재양식 선택 모달 -->
+    <div class="modal-overlay" id="formSelectModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-breadcrumb">전자 결재 &gt; <span>등록</span></div>
+                <div class="modal-header-btns">
+                    <button title="전체화면"><span class="material-symbols-outlined" style="font-size:18px">open_in_full</span></button>
+                    <button title="닫기" onclick="closeModal()"><span class="material-symbols-outlined" style="font-size:18px">close</span></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="modal-section-title">
+                    <span class="material-symbols-outlined">description</span>
+                    결재양식 선택
+                </div>
+                <div class="form-type-list">
+                    <div class="form-type-item" onclick="selectForm('휴가신청서')">
+                        <span class="material-symbols-outlined">event_available</span>
+                        <div class="form-type-item-content">
+                            <div class="form-type-item-title">휴가신청서</div>
+                            <div class="form-type-item-desc">• 연차, 예비군, 병가, 무급 등 각종 휴가 사용 시 제출</div>
+                        </div>
+                    </div>
+                    <div class="form-type-item" onclick="selectForm('출장신청서')">
+                        <span class="material-symbols-outlined">flight_takeoff</span>
+                        <div class="form-type-item-content">
+                            <div class="form-type-item-title">출장신청서</div>
+                            <div class="form-type-item-desc">• 업무상 출장이 필요한 경우 사전 승인 및 기록을 위해 제출</div>
+                        </div>
+                    </div>
+                    <div class="form-type-item" onclick="selectForm('지출결의서')">
+                        <span class="material-symbols-outlined">receipt_long</span>
+                        <div class="form-type-item-content">
+                            <div class="form-type-item-title">지출결의서</div>
+                            <div class="form-type-item-desc">• 사무용품, 식대비 등 비용 지출이 필요한 경우 승인 요청</div>
+                        </div>
+                    </div>
+                    <div class="form-type-item" onclick="selectForm('비용청구서')">
+                        <span class="material-symbols-outlined">payments</span>
+                        <div class="form-type-item-content">
+                            <div class="form-type-item-title">비용청구서</div>
+                            <div class="form-type-item-desc">• 업무상 개인 비용을 지출한 경우 회사에 환급 요청</div>
+                        </div>
+                    </div>
+                    <div class="form-type-item" onclick="selectForm('일반신청서')">
+                        <span class="material-symbols-outlined">article</span>
+                        <div class="form-type-item-content">
+                            <div class="form-type-item-title">일반신청서</div>
+                            <div class="form-type-item-desc">• 기타 요청 사항을 신청할 때 사용하는 공용 신청서</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-close-modal" onclick="closeModal()">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 결재 작성 폼 -->
+    <div class="approval-form-wrap" id="approvalForm">
+
+        <div class="form-doc-title" id="formDocTitle"></div>
+
+        <!-- 기본 정보 -->
+        <div class="form-section">
+            <div class="form-section-header">
+                <div class="form-section-title">
+                    <span class="material-symbols-outlined">info</span>
+                    기본 정보
+                </div>
+            </div>
+            <div class="form-section-body">
+                <div class="info-grid">
+                    <div class="form-field">
+                        <label>문서번호</label>
+                        <input type="text" value="자동으로 생성됩니다" readonly>
+                    </div>
+                    <div class="form-field">
+                        <label>작성일</label>
+                        <input type="text" id="todayDate" readonly>
+                    </div>
+                    <div class="form-field">
+                        <label>작성자</label>
+                        <input type="text" value="경영지원팀 | 신준안 대표" readonly>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="step-content-area">
-            <div class="inner-container">
-
-                <div class="step-content active " id="step-panel-1">
-                    <jsp:include page="/WEB-INF/views/projects/step1.jsp"/>
+        <!-- 결재선 + 참조자 -->
+        <div class="form-section">
+            <div class="form-section-header">
+                <div class="form-section-title">
+                    <span class="material-symbols-outlined">group</span>
+                    결재선 정보
                 </div>
-
-                <div class="step-content" id="step-panel-2">
-                    <jsp:include page="/WEB-INF/views/projects/step2.jsp"/>
+                <div class="badge-group">
+                    <button class="badge-btn orange">★ 작동</button>
+                    <button class="badge-btn green">● 설정</button>
                 </div>
-
-                <div class="step-content" id="step-panel-3">
-                    <jsp:include page="/WEB-INF/views/projects/step3.jsp"/>
+            </div>
+            <div class="form-section-body">
+                <div class="approver-layout">
+                    <div>
+                        <div class="approver-grid">
+                            <div class="form-field">
+                                <label>결재자 1</label>
+                                <select><option value="">선택</option></select>
+                            </div>
+                            <div class="form-field">
+                                <label>결재자 2</label>
+                                <select><option value="">선택</option></select>
+                            </div>
+                            <div class="form-field">
+                                <label>결재자 3</label>
+                                <select><option value="">선택</option></select>
+                            </div>
+                            <div class="form-field">
+                                <label>결재자 4</label>
+                                <select><option value="">선택</option></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="approver-ref">
+                        <div class="form-section-title" style="margin-bottom:10px;">
+                            <span class="material-symbols-outlined">person_add</span>
+                            참조자 정보
+                        </div>
+                        <div class="form-field">
+                            <label>참조 목록</label>
+                            <select><option value="">선택</option></select>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="step-content" id="step-panel-4">
-                    <jsp:include page="/WEB-INF/views/projects/step4.jsp"/>
-                </div>
-
-				<div class="form-footer">
-				    <button type="button" class="btn btn-prev" id="btnPrev">
-				        <span class="material-symbols-outlined">arrow_back_ios</span>
-				    </button>
-				    <button type="button" class="btn btn-next" id="btnNext">
-				        <span class="material-symbols-outlined">arrow_forward_ios</span>
-				    </button>
-				    <button type="button" class="btn btn-primary px-4" id="btnComplete" style="display:none;">
-				        완료
-				    </button>
-				</div>
-
             </div>
         </div>
-    </main>
 
-<script src="${pageContext.request.contextPath}/dist/js/projectEnter.js"></script>
-<script src="${pageContext.request.contextPath}/dist/js/projectCreate.js"></script>
+        <!-- 세부 정보 -->
+        <div class="form-section" id="detailSection">
+            <div class="form-section-header">
+                <div class="form-section-title">
+                    <span class="material-symbols-outlined">edit_note</span>
+                    세부 정보
+                </div>
+            </div>
+            <div class="form-section-body">
+                <div class="detail-grid">
+                    <div class="form-field">
+                        <label>휴가 종류</label>
+                        <select>
+                            <option value="">선택</option>
+                            <option>연차</option>
+                            <option>반차(오전)</option>
+                            <option>반차(오후)</option>
+                            <option>병가</option>
+                            <option>예비군</option>
+                            <option>무급</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label>휴가 시작일</label>
+                        <div class="detail-grid-input">
+                            <input type="date">
+                            <select><option>종일</option><option>오전</option><option>오후</option></select>
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label>휴가 종료일</label>
+                        <div class="detail-grid-input">
+                            <input type="date">
+                            <select><option>종일</option><option>오전</option><option>오후</option></select>
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label>총 휴가일 수</label>
+                        <div class="detail-grid-input">
+                            <input type="number" placeholder="0">
+                            <span style="font-size:13px;color:#667085;white-space:nowrap;">일</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-field">
+                    <label>상세 설명</label>
+                    <textarea rows="4" placeholder="상세 내용을 입력해주세요."></textarea>
+                </div>
+                <div class="attach-row">
+                    <div class="form-field">
+                        <label>관련 첨부 <span style="font-size:10px;color:#9aa0b4;">ⓘ</span></label>
+                        <div class="attach-input-wrap">
+                            <button class="btn-file-select" onclick="document.getElementById('fileInput').click()">파일 선택</button>
+                            <span class="file-name-display">선택된 파일 없음</span>
+                            <input type="file" id="fileInput" style="display:none" onchange="updateFileName(this)">
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label>첨부된 파일</label>
+                        <div class="attach-preview">첨부된 파일이 없습니다.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <!-- 참고사항 -->
+        <div class="form-section">
+            <div class="form-section-header">
+                <div class="form-section-title">
+                    <span class="material-symbols-outlined">menu_book</span>
+                    참고사항
+                </div>
+            </div>
+            <div class="form-section-body">
+                <ul class="reference-list">
+                    <li><strong>[예비군 / 민방위 신청시]</strong> 동서서 스캔하여 파일 첨부</li>
+                    <li><strong>[경조휴가 신청시]</strong> 각종 증빙서류 스캔하여 파일 첨부 (예: 청첩장, 등본 등)</li>
+                    <li>기타 필요한 내용은 상세 설명란에 기입</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 하단 버튼 -->
+        <div class="form-footer">
+            <button class="btn-save-temp">
+                <span class="material-symbols-outlined" style="font-size:16px">save</span>
+                임시저장
+            </button>
+            <button class="btn-submit">
+                <span class="material-symbols-outlined" style="font-size:16px">send</span>
+                결재전송
+            </button>
+            <button class="btn-cancel" onclick="location.href='${pageContext.request.contextPath}/approval/list'">
+                <span class="material-symbols-outlined" style="font-size:16px">close</span>
+                목록
+            </button>
+        </div>
+
+    </div>
+
+</main>
+
+<script src="${pageContext.request.contextPath}/dist/js/approvalCreate.js"></script>
 </body>
 </html>

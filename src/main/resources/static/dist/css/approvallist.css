@@ -1,11 +1,17 @@
 @charset "UTF-8";
 
 /* ───────────────────────────────
-   전자결재 리스트 전용 스타일
+   레이아웃 - 사이드바 오른쪽 영역
 ─────────────────────────────── */
-
-/* projectlist.css의 #main-content 설정을 그대로 상속 */
-/* margin-left, padding 등은 projectlist.css 에서 처리됨 */
+#main-content {
+    margin-left: 240px !important;
+    padding: 24px 32px !important;
+    box-sizing: border-box;
+    min-height: 100vh;
+    background: #f8f9fc;
+    display: flex;
+    flex-direction: column;
+}
 
 /* ───────────────────────────────
    상단 액션 바
@@ -122,6 +128,7 @@
     display: flex;
     gap: 20px;
     align-items: flex-start;
+    flex: 1;
 }
 
 /* ───────────────────────────────
