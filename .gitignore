@@ -13,3 +13,11 @@ build/
 footer.jsp
 KakaoAuthService.java
 MailSender.java
+
+### Eclipse/STS IDE 설정 파일 (개인 IDE 환경이므로 공유 불필요) ###
+.classpath
+.project
+.settings/
+
+### Eclipse 컴파일 출력 디렉토리 (build/와 같은 역할) ###
+bin/
