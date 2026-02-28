@@ -28,8 +28,9 @@
     <div class="nav-section">Approval</div>
 	<a href="${pageContext.request.contextPath}/approval" class="nav-link active"><i class="fas fa-briefcase"></i>Approval</a>
 	<ul class="sub-menu">
+        <li><a href="${pageContext.request.contextPath}/approval/manage/doctype">문서유형 관리</a></li>
         <li><a href="${pageContext.request.contextPath}/approval/create">결재 상신</a></li>
-        <li><a href="${pageContext.request.contextPath}/approval/list" class="active">결재 리스트</a></li>
+        <li><a href="${pageContext.request.contextPath}/approval/list">결재 리스트</a></li>
     </ul>    
     <div class="nav-section">Projects</div>
     <a href="${pageContext.request.contextPath}/projects" class="nav-link active"><i class="fas fa-briefcase"></i> Projects</a>

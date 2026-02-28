@@ -22,5 +22,10 @@ public class ApprovalController {
     public String approvalCreate() {
         return "approval/create";
     }
+    
+    @GetMapping("manage/doctype")
+    public String docTypeManage() {
+        return "approval/doctype";
+    }
 
 }

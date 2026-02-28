@@ -43,42 +43,8 @@
                     <span class="material-symbols-outlined">description</span>
                     결재양식 선택
                 </div>
-                <div class="form-type-list">
-                    <div class="form-type-item" onclick="selectForm('휴가신청서')">
-                        <span class="material-symbols-outlined">event_available</span>
-                        <div class="form-type-item-content">
-                            <div class="form-type-item-title">휴가신청서</div>
-                            <div class="form-type-item-desc">• 연차, 예비군, 병가, 무급 등 각종 휴가 사용 시 제출</div>
-                        </div>
-                    </div>
-                    <div class="form-type-item" onclick="selectForm('출장신청서')">
-                        <span class="material-symbols-outlined">flight_takeoff</span>
-                        <div class="form-type-item-content">
-                            <div class="form-type-item-title">출장신청서</div>
-                            <div class="form-type-item-desc">• 업무상 출장이 필요한 경우 사전 승인 및 기록을 위해 제출</div>
-                        </div>
-                    </div>
-                    <div class="form-type-item" onclick="selectForm('지출결의서')">
-                        <span class="material-symbols-outlined">receipt_long</span>
-                        <div class="form-type-item-content">
-                            <div class="form-type-item-title">지출결의서</div>
-                            <div class="form-type-item-desc">• 사무용품, 식대비 등 비용 지출이 필요한 경우 승인 요청</div>
-                        </div>
-                    </div>
-                    <div class="form-type-item" onclick="selectForm('비용청구서')">
-                        <span class="material-symbols-outlined">payments</span>
-                        <div class="form-type-item-content">
-                            <div class="form-type-item-title">비용청구서</div>
-                            <div class="form-type-item-desc">• 업무상 개인 비용을 지출한 경우 회사에 환급 요청</div>
-                        </div>
-                    </div>
-                    <div class="form-type-item" onclick="selectForm('일반신청서')">
-                        <span class="material-symbols-outlined">article</span>
-                        <div class="form-type-item-content">
-                            <div class="form-type-item-title">일반신청서</div>
-                            <div class="form-type-item-desc">• 기타 요청 사항을 신청할 때 사용하는 공용 신청서</div>
-                        </div>
-                    </div>
+                <div class="form-type-list" id="formTypeList">
+                    <!-- DB에서 동적으로 로딩 -->
                 </div>
             </div>
             <div class="modal-footer">
@@ -268,6 +234,63 @@
 
 </main>
 
-<script src="${pageContext.request.contextPath}/dist/js/approvalCreate.js"></script>
+<script>
+const ctx = document.querySelector('meta[name="ctx"]').content;
+
+// 오늘 날짜 표시
+document.getElementById('todayDate').value = new Date().toLocaleDateString('ko-KR', {
+    year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short'
+});
+
+// 문서유형 목록 로딩 (DB 연동)
+(async function() {
+    try {
+        const res = await fetch(ctx + '/api/approval/doctype', {
+            headers: { 'AJAX': 'true' }
+        });
+        const data = await res.json();
+
+        const activeList = data.list.filter(item => item.useYn === 'Y');
+        const container = document.getElementById('formTypeList');
+
+        if (activeList.length === 0) {
+            container.innerHTML = '<div style="text-align:center; color:#9aa0b4; padding:40px;">등록된 문서유형이 없습니다.</div>';
+            return;
+        }
+
+        container.innerHTML = activeList.map(item =>
+            '<div class="form-type-item" onclick="selectForm(' + item.docTypeId + ', \'' + item.typeName + '\')">' +
+                '<span class="material-symbols-outlined">description</span>' +
+                '<div class="form-type-item-content">' +
+                    '<div class="form-type-item-title">' + item.typeName + '</div>' +
+                    '<div class="form-type-item-desc">' + (item.description ? '• ' + item.description : '') + '</div>' +
+                '</div>' +
+            '</div>'
+        ).join('');
+
+    } catch (e) {
+        console.error('문서유형 로딩 실패:', e);
+    }
+})();
+
+let selectedDocTypeId = null;
+
+function selectForm(docTypeId, typeName) {
+    selectedDocTypeId = docTypeId;
+    document.getElementById('formSelectModal').classList.add('hidden');
+    document.getElementById('approvalForm').classList.add('active');
+    document.getElementById('formDocTitle').textContent = typeName;
+}
+
+function closeModal() {
+    document.getElementById('formSelectModal').classList.add('hidden');
+    location.href = ctx + '/approval/list';
+}
+
+function updateFileName(input) {
+    const name = input.files[0] ? input.files[0].name : '선택된 파일 없음';
+    input.closest('.attach-input-wrap').querySelector('.file-name-display').textContent = name;
+}
+</script>
 </body>
 </html>
