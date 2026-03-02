@@ -5,43 +5,55 @@ import { getPagination } from 'paginate';
 export const useHrmStore = defineStore('hrm', {
 
     // ──────────────────────────────────────────────
-    // State (boardStore 패턴 + 직원 인라인 편집 전용 상태)
+    // State
     // ──────────────────────────────────────────────
     state: () => ({
-        list: [],           // 화면에 표시되는 직원 행 목록 (UI 메타 포함)
+        list: [],
         sessionName: '',
 
-        // 검색 파라미터 (boardStore.searchParams 패턴 동일)
         searchParams: {
-            name:    '',
-            empNo:   '',
-            project: '',
-            status:  '',
-            role:    '',
-            pmoY:    false,
-            pmoN:    false,
-            page:    1
+            name:          '',
+            empNo:         '',      // empId 검색용 (LIKE)
+            project:       '',
+            empStatusCode: '',      // E=재직 / L=휴직 / R=퇴직
+            levelCode:     '',      // 권한레벨 숫자
+            pmoY:          false,   // isPmo = 'Y' 검색
+            pmoN:          false,   // isPmo = 'N' 검색
+            page:          1
         },
 
         pageInfo: { totalCount: 0, totalPage: 1, pageSize: 10 },
         pagination: null,
         loading: false,
 
-        // 정렬 상태
         sortCol: '',
-        sortDir: 'asc',   // 'asc' | 'desc'
+        sortDir: 'asc',
 
-        // ── 인라인 편집용 셀렉트 옵션 정의 ──
-        deptOptions: ['개발팀', '경영기획팀', '경영지원팀', '영업팀', '인사팀', '재무팀'],
-        rankOptions: ['사원', '대리', '과장', '차장', '부장', '이사', '상무', '전무', '대표'],
-        roleOptions: ['MASTER', 'EXECUTIVE', 'COORDINATOR', 'PARTICIPANT', 'WATCHER'],
+        // 인라인 편집용 셀렉트 옵션
+        // ※ deptCode / gradeCode 는 코드 테이블 연동 전까지 임시 고정값 사용
+        deptOptions:   
+			['DEV', 'HR', 'SALES', 'FIN', 'PLAN', 'MANAGE'],
+        gradeOptions:  ['G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08', 'G09'],
+        levelOptions:  [
+            { value: 1,  label: '1 (WATCHER)' },
+            { value: 10, label: '10 (PARTICIPANT)' },
+            { value: 20, label: '20 (COORDINATOR)' },
+            { value: 30, label: '30 (EXECUTIVE)' },
+            { value: 51, label: '51 (ADMIN)' },
+            { value: 99, label: '99 (MASTER)' },
+        ],
+        statusOptions: [
+            { value: 'E', label: '재직' },
+            { value: 'L', label: '휴직' },
+            { value: 'R', label: '퇴직' },
+        ],
     }),
 
     // ──────────────────────────────────────────────
     // Getters
     // ──────────────────────────────────────────────
     getters: {
-        isAllChecked: (state) => state.list.length > 0 && state.list.every(e => e._checked),
+        isAllChecked:    (state) => state.list.length > 0 && state.list.every(e => e._checked),
         isIndeterminate: (state) => state.list.some(e => e._checked) && !state.list.every(e => e._checked),
     },
 
@@ -50,7 +62,9 @@ export const useHrmStore = defineStore('hrm', {
     // ──────────────────────────────────────────────
     actions: {
 
-        // ── 목록 조회 (boardStore.fetchList 패턴 동일) ────
+        // ════════════════════════════════════════════
+        // [1] 목록 조회 (GET /api/hrm)
+        // ════════════════════════════════════════════
         async fetchList(page = this.searchParams.page) {
             this.loading = true;
             this.searchParams.page = page;
@@ -65,7 +79,6 @@ export const useHrmStore = defineStore('hrm', {
                     }
                 });
 
-                // 서버 응답 데이터에 UI 메타 필드 추가
                 this.list = (res.data.list || []).map(emp => this._wrapRow(emp));
 
                 this.pageInfo.totalCount = res.data.totalCount;
@@ -76,6 +89,8 @@ export const useHrmStore = defineStore('hrm', {
                     this.pageInfo.totalPage,
                     10
                 );
+                // getPagination 반환: prevBlockPage/nextBlockPage 는 이동 불가 시 null
+                // showPrev/showNext 는 boolean — jsp에서 disabled 판단에 사용
             } catch (error) {
                 console.error('직원 목록 조회 오류:', error);
                 alert('목록을 불러오는 중 오류가 발생했습니다.');
@@ -84,61 +99,63 @@ export const useHrmStore = defineStore('hrm', {
             }
         },
 
-        // 서버 데이터에 UI 전용 메타 필드 부착
-        _wrapRow(emp) {
-            return {
-                ...emp,
-                _checked: false,   // 체크박스
-                _editing: false,   // 더블클릭 편집 모드
-                _dirty:   false,   // 변경 대기 마킹
-                _isNew:   false,   // 신규 추가 행 여부
-            };
+        // ════════════════════════════════════════════
+        // [2] 검색
+        // ════════════════════════════════════════════
+        search() {
+            this.fetchList(1);
         },
 
-        // ── 검색 초기화 (boardStore.resetSearch 패턴 동일) ──
+        // 검색 초기화 — 모든 작업 취소 후 전체 조회
         resetSearch() {
             this.searchParams = {
-                name:'', empNo:'', project:'',
-                status:'', role:'', pmoY:false, pmoN:false, page:1
+                name: '', empNo: '', project: '',
+                empStatusCode: '', levelCode: '',
+                pmoY: false, pmoN: false, page: 1
             };
             this.sortCol = '';
             this.sortDir = 'asc';
             this.fetchList(1);
         },
 
-        // ── 체크박스 ────────────────────────────────
-        toggleAll(checked) {
-            this.list.forEach(emp => { emp._checked = checked; });
-        },
-        toggleRow(emp, checked) {
-            emp._checked = checked;
+        // PMO 필터 : radio 방식 (Y / N / 전체)
+        setPmoFilter(value) {
+            this.searchParams.pmoY = (value === 'Y');
+            this.searchParams.pmoN = (value === 'N');
         },
 
-        // ── 더블클릭 인라인 편집 ─────────────────────
-        activateRowEdit(emp) {
-            // 기존 편집 행 닫기
-            this.list.forEach(e => {
-                if (e !== emp && e._editing) e._editing = false;
-            });
-            emp._editing = true;
+        // ════════════════════════════════════════════
+        // [3] 행 추가 — 실제 컬럼명 반영
+        // ════════════════════════════════════════════
+        addRow() {
+            this.deactivateAll();
+            const newEmp = {
+                _tempId:       'new_' + Date.now(),
+                empId:         '',      // VARCHAR2(11) — 직접 입력
+                name:          '',
+                password:      '',      // 신규 등록 시 필수
+                deptCode:      '',
+                gradeCode:     '',
+                levelCode:     1,
+                empStatusCode: 'E',     // 기본: 재직
+                enabled:       1,
+                hireDate:      '',
+                projectNames:  '',
+                profilePhoto:  '',
+                _checked:      true,
+                _editing:      true,
+                _dirty:        false,
+                _isNew:        true,
+            };
+            this.list.push(newEmp);
         },
 
-        // 편집 모드 해제 (외부 클릭 등)
-        deactivateAll() {
-            this.list.forEach(e => { e._editing = false; });
-        },
-
-        // dirty 마킹 (select 변경 시 호출)
-        markDirty(emp) {
-            emp._dirty = true;
-        },
-
-        // ── 저장 (벌크 PUT) ─────────────────────────
+        // ════════════════════════════════════════════
+        // [4] 저장 — 신규(POST) + 수정된 기존 행(PUT bulk)
+        // ════════════════════════════════════════════
         async saveRows() {
-            // 편집 중인 행 먼저 닫기
             this.deactivateAll();
 
-            // 신규 행 + dirty 행 수집
             const newRows   = this.list.filter(e => e._isNew);
             const dirtyRows = this.list.filter(e => e._dirty && !e._isNew);
 
@@ -148,73 +165,77 @@ export const useHrmStore = defineStore('hrm', {
             }
 
             try {
-                // 신규 등록 (POST)
+                // 신규 등록 (POST /api/hrm)
                 for (const emp of newRows) {
-                    if (!emp.name || !emp.empNo) {
-                        alert('이름과 사원번호는 필수입니다.');
+                    if (!emp.empId?.trim()) {
+                        alert('사원번호는 필수입니다.');
                         return;
                     }
-                    await http.post('/hrm', this._toPayload(emp));
+                    if (!emp.name?.trim()) {
+                        alert('이름은 필수입니다.');
+                        return;
+                    }
+                    if (!emp.password?.trim()) {
+                        alert('비밀번호는 필수입니다.');
+                        return;
+                    }
+
+                    try {
+                        await http.post('/hrm', this._toPayload(emp));
+                    } catch (err) {
+                        if (err?.response?.status === 409) {
+                            alert(`사원번호 중복: ${emp.empId}`);
+                            return;
+                        }
+                        throw err;
+                    }
                 }
 
-                // 기존 수정 (벌크 PUT)
+                // 벌크 수정 (PUT /api/hrm/bulk)
                 if (dirtyRows.length > 0) {
-                    const payload = dirtyRows.map(e => this._toPayload(e));
-                    await http.put('/hrm/bulk', payload);
+                    await http.put('/hrm/bulk', dirtyRows.map(e => this._toPayload(e)));
                 }
 
                 alert('저장되었습니다.');
                 this.fetchList();
+
             } catch (error) {
                 console.error('저장 오류:', error);
-                alert('저장 중 오류가 발생했습니다.');
+                alert(error?.response?.data || '저장 중 오류가 발생했습니다.');
             }
         },
 
-        // 서버 전송용 페이로드 변환 (UI 메타 필드 제거)
-        _toPayload(emp) {
-            const { _checked, _editing, _dirty, _isNew, _tempId, ...payload } = emp;
-            return payload;
+        // ════════════════════════════════════════════
+        // [5] 더블클릭 행 편집 활성화
+        //   - 사원번호(empId)는 _isNew=true 일 때만 수정 가능
+        // ════════════════════════════════════════════
+        activateRowEdit(emp) {
+            this.list.forEach(e => {
+                if (e !== emp && e._editing && !e._isNew) e._editing = false;
+            });
+            emp._editing = true;
         },
 
-        // ── 취소 ─────────────────────────────────────
-        cancelEdit() {
-            const hasDirty = this.list.some(e => e._dirty || e._isNew);
-            if (!hasDirty) { alert('취소할 수정 내용이 없습니다.'); return; }
-            if (!confirm('수정 중인 내용을 모두 취소하시겠습니까?')) return;
-            this.fetchList(); // 서버에서 원본 재조회
+        // ════════════════════════════════════════════
+        // [6] 수정 버튼 — 체크된 기존 행 편집 모드
+        // ════════════════════════════════════════════
+        editSelected() {
+            const checked = this.list.filter(e => e._checked && !e._isNew);
+            if (checked.length === 0) {
+                alert('수정할 항목을 선택해 주세요.');
+                return;
+            }
+            checked.forEach(emp => { emp._editing = true; });
         },
 
-        // ── 행 추가 ───────────────────────────────────
-        addRow() {
-            this.deactivateAll();
-            const newEmp = {
-                _tempId:  'new_' + Date.now(),
-                empId:    null,
-                name:     '',
-                empNo:    '',
-                projectNames: '',
-                avatar:   '',
-                dept:     '',
-                rank:     '',
-                role:     'PARTICIPANT',
-                pmo:      'N',
-                status:   'EMPLOYED',
-                _checked: true,
-                _editing: true,
-                _dirty:   false,
-                _isNew:   true,
-            };
-            this.list.push(newEmp);
-        },
-
-        // ── 선택 삭제 ─────────────────────────────────
+        // ════════════════════════════════════════════
+        // [7] 삭제 — empId 는 String
+        // ════════════════════════════════════════════
         async deleteSelected() {
             const checked = this.list.filter(e => e._checked);
             if (checked.length === 0) { alert('삭제할 항목을 선택해 주세요.'); return; }
             if (!confirm(checked.length + '건을 삭제하시겠습니까?')) return;
 
-            // 신규 행은 서버 요청 없이 바로 제거
             const newRows    = checked.filter(e => e._isNew);
             const serverRows = checked.filter(e => !e._isNew);
 
@@ -225,43 +246,38 @@ export const useHrmStore = defineStore('hrm', {
 
             if (serverRows.length > 0) {
                 try {
-                    const ids = serverRows.map(e => e.empId);
+                    const ids = serverRows.map(e => e.empId);   // String[]
                     await http.delete('/hrm', { data: { ids } });
                     this.fetchList();
                 } catch (error) {
                     console.error('삭제 오류:', error);
-                    alert('삭제 중 오류가 발생했습니다.');
+                    alert(error?.response?.data || '삭제 중 오류가 발생했습니다.');
                 }
             }
         },
 
-        // ── 정렬 ─────────────────────────────────────
-        sortBy(col) {
-            if (this.sortCol === col) {
-                this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
-            } else {
-                this.sortCol = col;
-                this.sortDir = 'asc';
-            }
-            this.fetchList(1);
+        // ════════════════════════════════════════════
+        // [8] 취소 — 모든 변경 취소 후 전체 조회
+        // ════════════════════════════════════════════
+        cancelEdit() {
+            const hasChanges = this.list.some(e => e._dirty || e._isNew || e._editing);
+            if (!hasChanges) { alert('취소할 내용이 없습니다.'); return; }
+            if (!confirm('모든 변경 내용을 취소하고 새로 조회하시겠습니까?')) return;
+            this.fetchList();
         },
 
-        getSortClass(col) {
-            if (this.sortCol !== col) return '';
-            return this.sortDir === 'asc' ? 'asc' : 'desc';
-        },
-
-        // ── 재직상태 라벨 변환 ────────────────────────
-        statusLabel(status) {
-            return { EMPLOYED: '재직', LEAVE: '휴직', RESIGNED: '퇴직' }[status] || status;
-        },
-
-        // ── 엑셀 다운로드 ─────────────────────────────
+        // ════════════════════════════════════════════
+        // [9] 엑셀 다운로드
+        // ════════════════════════════════════════════
         excelDownload() {
-            location.href = '/api/hrm/excel/download?' + new URLSearchParams(this.searchParams);
+            const { name, empNo, project, empStatusCode, levelCode, pmoY, pmoN } = this.searchParams;
+            const qs = new URLSearchParams({ name, empNo, project, empStatusCode, levelCode, pmoY, pmoN });
+            location.href = '/api/hrm/excel/download?' + qs;
         },
 
-        // ── 엑셀 업로드 트리거 (input[type=file] ref 대신 store에서 처리) ─
+        // ════════════════════════════════════════════
+        // [10] 엑셀 업로드
+        // ════════════════════════════════════════════
         triggerExcelUpload() {
             document.querySelector('input[type="file"][accept=".xlsx,.xls"]')?.click();
         },
@@ -274,17 +290,75 @@ export const useHrmStore = defineStore('hrm', {
             formData.append('file', file);
 
             try {
-                await http.post('/hrm/excel/upload', formData, {
+                const res = await http.post('/hrm/excel/upload', formData, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
-                alert('엑셀 업로드가 완료되었습니다.');
+                const cnt = res.data?.insertedCount ?? '';
+                alert(`엑셀 업로드 완료${cnt !== '' ? ' (' + cnt + '건 등록)' : ''}`);
                 this.fetchList(1);
             } catch (error) {
                 console.error('엑셀 업로드 오류:', error);
-                alert('엑셀 업로드 중 오류가 발생했습니다.');
+                alert(error?.response?.data || '엑셀 업로드 중 오류가 발생했습니다.');
             } finally {
                 event.target.value = '';
             }
+        },
+
+        // ════════════════════════════════════════════
+        // 체크박스
+        // ════════════════════════════════════════════
+        toggleAll(checked) { this.list.forEach(emp => { emp._checked = checked; }); },
+        toggleRow(emp, checked) { emp._checked = checked; },
+
+        // ════════════════════════════════════════════
+        // 인라인 편집 헬퍼
+        // ════════════════════════════════════════════
+        deactivateAll() { this.list.forEach(e => { e._editing = false; }); },
+        markDirty(emp)  { emp._dirty = true; },
+
+        // ════════════════════════════════════════════
+        // 정렬
+        // ════════════════════════════════════════════
+        sortBy(col) {
+            if (this.sortCol === col) {
+                this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortCol = col;
+                this.sortDir = 'asc';
+            }
+            this.fetchList(1);
+        },
+        getSortClass(col) {
+            if (this.sortCol !== col) return '';
+            return this.sortDir === 'asc' ? 'asc' : 'desc';
+        },
+
+        // ════════════════════════════════════════════
+        // 순번 계산 (신규 행 제외)
+        // ════════════════════════════════════════════
+        getRowNo(index) {
+            const newRowsBefore = this.list.slice(0, index).filter(e => e._isNew).length;
+            const realIndex     = index - newRowsBefore;
+            const offset        = (this.searchParams.page - 1) * this.pageInfo.pageSize;
+            return this.pageInfo.totalCount - offset - realIndex;
+        },
+
+        // ════════════════════════════════════════════
+        // 재직상태 라벨 (empStatusCode → 한글)
+        // ════════════════════════════════════════════
+        statusLabel(code) {
+            return { E: '재직', L: '휴직', R: '퇴직' }[code] || code;
+        },
+
+        // ════════════════════════════════════════════
+        // 내부 헬퍼
+        // ════════════════════════════════════════════
+        _wrapRow(emp) {
+            return { ...emp, _checked: false, _editing: false, _dirty: false, _isNew: false };
+        },
+        _toPayload(emp) {
+            const { _checked, _editing, _dirty, _isNew, _tempId, ...payload } = emp;
+            return payload;
         },
     }
 });

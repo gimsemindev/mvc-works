@@ -26,7 +26,6 @@
     <div id="vue-app">
         <jsp:include page="/WEB-INF/views/hrm/employeeList.jsp"/>
     </div>
-
 </div>
 
 <jsp:include page="/WEB-INF/views/vue/vue_cdn.jsp"/>
@@ -63,6 +62,7 @@
 	app.use(pinia);
 	app.mount('#vue-app');
 </script>
+
 <script src="${pageContext.request.contextPath}/dist/js/employee-table.js"></script>
 <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
 

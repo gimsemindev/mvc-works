@@ -52,8 +52,20 @@ dependencies {
 	implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl'
 	
 	implementation 'org.springframework.security:spring-security-taglibs'	
+	
+	// Apache POI
+		implementation 'org.apache.poi:poi-ooxml:5.2.5'
+		implementation 'org.apache.commons:commons-compress:1.26.1'
 }
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+// Java 21 + Apache POI 모듈 접근 허용
+bootRun {
+    jvmArgs = [
+        '--add-opens=java.base/java.lang=ALL-UNNAMED',
+        '--add-opens=java.base/java.util=ALL-UNNAMED'
+    ]
 }

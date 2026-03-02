@@ -4,13 +4,26 @@
    ==================================================== */
 
 /* ---- 레이아웃 ---- */
+/*
+ * approvalcreate.css 패턴 적용:
+ * margin-left 고정 + !important + box-sizing 조합으로
+ * 브라우저 창 크기가 바뀌어도 사이드바에 묻히지 않고 안정적으로 유지
+ */
 .emp-wrapper { display: flex; min-height: 100vh; }
 .emp-content {
-    margin-left: 260px; flex: 1; display: flex;
+    margin-left: 130px; flex: 1; display: flex;
     flex-direction: column; background: #f4f7fe; min-height: 100vh;
 }
 .emp-content .navbar-custom { margin-left: 0; }
-.emp-main { padding: 28px 28px 40px; flex: 1; }
+.emp-main {
+    margin-left: 0 !important;
+    padding: 24px 28px 40px !important;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 100vh;
+    background: #f4f7fe;
+    flex: 1;
+}
 
 /* ---- 페이지 타이틀 ---- */
 .emp-page-title { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
@@ -65,6 +78,8 @@
 .emp-btn-add:hover    { background:#12a955; }
 .emp-btn-save         { background:#f5a623; color:#fff; border-color:#f5a623; }
 .emp-btn-save:hover   { background:#d9911a; }
+.emp-btn-edit         { background:#7c3aed; color:#fff; border-color:#7c3aed; }
+.emp-btn-edit:hover   { background:#6d28d9; border-color:#6d28d9; }
 .emp-btn-delete       { background:#ea4252; color:#fff; border-color:#ea4252; }
 .emp-btn-delete:hover { background:#cc2f3e; }
 .emp-btn-cancel       { background:#fff; color:#64748b; border-color:#d1d9e0; }

@@ -21,44 +21,97 @@ let currentEditingRow = null; // 현재 편집 중인 <tr> 참조
    셀렉트 옵션 정의
 -------------------------------------------------------------- */
 const SELECT_OPTIONS = {
+    // ── DEPT: commoncode codeGroup='DEPT', value=code, label=codeName ──
     dept: [
-        { value: '',         label: '(없음)' },
-        { value: '개발팀',    label: '개발팀' },
-        { value: '경영기획팀', label: '경영기획팀' },
-        { value: '경영지원팀', label: '경영지원팀' },
-        { value: '영업팀',    label: '영업팀' },
-        { value: '인사팀',    label: '인사팀' },
-        { value: '재무팀',    label: '재무팀' },
+        { value: '',       label: '(없음)' },
+        // 1단: 본부
+        { value: 'D00100', label: '경영지원본부' },
+        { value: 'D00200', label: '영업본부' },
+        { value: 'D00300', label: '기술본부' },
+        { value: 'D00400', label: '전략본부' },
+        { value: 'D00500', label: '생산본부' },
+        // 2단: 부
+        { value: 'D00110', label: '경영지원부' },
+        { value: 'D00120', label: '인사부' },
+        { value: 'D00130', label: '재무부' },
+        { value: 'D00210', label: '국내영업부' },
+        { value: 'D00220', label: '해외사업부' },
+        { value: 'D00230', label: '마케팅부' },
+        { value: 'D00310', label: '개발부' },
+        { value: 'D00320', label: 'IT인프라부' },
+        { value: 'D00330', label: '연구개발부' },
+        { value: 'D00410', label: '전략기획부' },
+        { value: 'D00420', label: '구매물류부' },
+        { value: 'D00510', label: '생산부' },
+        { value: 'D00520', label: '품질부' },
+        // 3단: 팀
+        { value: 'D00111', label: '총무팀' },
+        { value: 'D00112', label: '법무팀' },
+        { value: 'D00113', label: '감사팀' },
+        { value: 'D00121', label: '인사팀' },
+        { value: 'D00122', label: '교육팀' },
+        { value: 'D00131', label: '재무팀' },
+        { value: 'D00132', label: '회계팀' },
+        { value: 'D00211', label: '영업1팀' },
+        { value: 'D00212', label: '영업2팀' },
+        { value: 'D00213', label: '고객지원팀' },
+        { value: 'D00221', label: '해외영업팀' },
+        { value: 'D00222', label: '수출팀' },
+        { value: 'D00231', label: '마케팅팀' },
+        { value: 'D00232', label: '홍보팀' },
+        { value: 'D00311', label: '개발1팀' },
+        { value: 'D00312', label: '개발2팀' },
+        { value: 'D00321', label: 'IT운영팀' },
+        { value: 'D00322', label: '정보보안팀' },
+        { value: 'D00331', label: '연구팀' },
+        { value: 'D00332', label: '기술지원팀' },
+        { value: 'D00411', label: '기획팀' },
+        { value: 'D00412', label: '전략팀' },
+        { value: 'D00421', label: '구매팀' },
+        { value: 'D00422', label: '물류팀' },
+        { value: 'D00511', label: '생산1팀' },
+        { value: 'D00512', label: '생산2팀' },
+        { value: 'D00521', label: '품질관리팀' },
+        { value: 'D00522', label: '품질보증팀' },
     ],
+    // ── RANK: commoncode codeGroup='RANK', value=code, label=codeName ──
     rank: [
-        { value: '',    label: '(없음)' },
-        { value: '사원', label: '사원' },
-        { value: '대리', label: '대리' },
-        { value: '과장', label: '과장' },
-        { value: '차장', label: '차장' },
-        { value: '부장', label: '부장' },
-        { value: '이사', label: '이사' },
-        { value: '상무', label: '상무' },
-        { value: '전무', label: '전무' },
-        { value: '대표', label: '대표' },
-    ],
-    role: [
-        { value: 'MASTER',       label: 'MASTER' },
-        { value: 'EXECUTIVE',    label: 'EXECUTIVE' },
-        { value: 'COORDINATOR',  label: 'COORDINATOR' },
-        { value: 'PARTICIPANT',  label: 'PARTICIPANT' },
-        { value: 'WATCHER',      label: 'WATCHER' },
+        { value: '',       label: '(없음)' },
+        { value: 'RANK01', label: '사원' },
+        { value: 'RANK02', label: '주임' },
+        { value: 'RANK03', label: '대리' },
+        { value: 'RANK04', label: '과장' },
+        { value: 'RANK05', label: '차장' },
+        { value: 'RANK06', label: '부장' },
+        { value: 'RANK07', label: '이사' },
+        { value: 'RANK08', label: '상무' },
+        { value: 'RANK09', label: '전무' },
+        { value: 'RANK10', label: '부사장' },
+        { value: 'RANK11', label: '사장' },
     ],
     pmo: [
         { value: 'Y', label: 'Y' },
         { value: 'N', label: 'N' },
     ],
+    // ── STATUS: empStatusCode (CHAR(1)) ──
     status: [
-        { value: 'EMPLOYED', label: '재직' },
-        { value: 'LEAVE',    label: '휴직' },
-        { value: 'RESIGNED', label: '퇴직' },
+        { value: 'E', label: '재직' },
+        { value: 'L', label: '휴직' },
+        { value: 'R', label: '퇴직' },
     ]
 };
+
+/* --------------------------------------------------------------
+   코드 → 이름 변환 헬퍼
+   SELECT_OPTIONS를 역방향 조회하여 code → label 반환
+   조회 화면에서 deptCode, gradeCode를 codeName으로 표시할 때 사용
+-------------------------------------------------------------- */
+function getCodeName(field, code) {
+    if (!code) return '-';
+    const opts = SELECT_OPTIONS[field] || [];
+    const found = opts.find(o => o.value === code);
+    return found ? found.label : code;  // 못 찾으면 코드값 그대로 표시
+}
 
 /* --------------------------------------------------------------
    행의 현재 값 읽기
@@ -87,7 +140,7 @@ function activateRowEdit(tr) {
     currentEditingRow = tr;
     tr.classList.add('editing');
 
-    const editFields = ['dept', 'rank', 'role', 'pmo', 'status'];
+    const editFields = ['dept', 'rank', 'pmo', 'status'];
     editFields.forEach(field => {
         const td = tr.querySelector('td[data-field="' + field + '"]');
         if (!td) return;
@@ -115,7 +168,7 @@ function closeRowEdit(tr, save) {
     tr.classList.remove('editing');
     const id = tr.dataset.id;
 
-    const editFields = ['dept', 'rank', 'role', 'pmo', 'status'];
+    const editFields = ['dept', 'rank', 'pmo', 'status'];
     editFields.forEach(field => {
         const td = tr.querySelector('td[data-field="' + field + '"]');
         if (!td) return;
@@ -145,8 +198,9 @@ function closeRowEdit(tr, save) {
 function renderCell(field, value) {
     switch (field) {
         case 'dept':
+            return getCodeName('dept', value);
         case 'rank':
-            return value || '-';
+            return getCodeName('rank', value);
 
         case 'role': {
             const cls = 'emp-role-' + value.toLowerCase();
@@ -158,11 +212,11 @@ function renderCell(field, value) {
 
         case 'status': {
             const statusMap = {
-                EMPLOYED: ['emp-status-employed', '재직'],
-                LEAVE:    ['emp-status-leave',    '휴직'],
-                RESIGNED: ['emp-status-resigned', '퇴직'],
+                E: ['emp-status-employed', '재직'],
+                L: ['emp-status-leave',    '휴직'],
+                R: ['emp-status-resigned', '퇴직'],
             };
-            const info = statusMap[value] || ['emp-status-employed', '재직'];
+            const info = statusMap[value] || ['emp-status-unknown', value || '-'];
             return '<span class="emp-status-badge ' + info[0] + '"><span class="emp-dot"></span>' + info[1] + '</span>';
         }
         default:
@@ -300,7 +354,7 @@ function addRow() {
     tr.dataset.rank   = '';
     tr.dataset.role   = 'PARTICIPANT';
     tr.dataset.pmo    = 'N';
-    tr.dataset.status = 'EMPLOYED';
+    tr.dataset.status = 'E';
     tr.classList.add('selected');
 
     tr.innerHTML =
@@ -320,13 +374,19 @@ function addRow() {
         '<td class="emp-readonly" style="color:#94a3b8;font-size:0.8rem;">자동 연동</td>' +
         '<td class="emp-editable" data-field="dept">'   + renderCell('dept',   '')            + '</td>' +
         '<td class="emp-editable" data-field="rank">'   + renderCell('rank',   '')            + '</td>' +
-        '<td class="emp-editable" data-field="role">'   + renderCell('role',   'PARTICIPANT') + '</td>' +
         '<td class="emp-editable" data-field="pmo">'    + renderCell('pmo',    'N')           + '</td>' +
-        '<td class="emp-editable" data-field="status">' + renderCell('status', 'EMPLOYED')    + '</td>' +
+        '<td class="emp-editable" data-field="status">' + renderCell('status', 'E')    + '</td>' +
         '<td class="col-del"><button class="emp-btn-row-del" onclick="deleteRow(this)" title="행 삭제"><i class="bi bi-x"></i></button></td>';
 
     tbody.appendChild(tr);
     activateRowEdit(tr);
+
+    // 사원번호 input에 자동 focus
+    // setTimeout 0: mousedown 이벤트 처리 이후 마이크로태스크로 실행되어 focus 유실 방지
+    setTimeout(() => {
+        const empNoInput = tr.querySelectorAll('td.emp-readonly input[type="text"]')[1];
+        if (empNoInput) empNoInput.focus();
+    }, 0);
 
     document.getElementById('chkAll').indeterminate = true;
 }
@@ -456,10 +516,20 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    /* ── mousedown: 편집 행 외부 클릭 시 닫기 ── */
+    /* ── mousedown: 편집 행 외부 클릭 시 닫기 ──
+       신규 행(_isNew)은 input 포커스 도중 외부 클릭 감지를 무시
+       단, 저장/취소/삭제 버튼 클릭은 정상 동작 허용
+    ── */
     document.addEventListener('mousedown', function (e) {
         if (!currentEditingRow) return;
         if (currentEditingRow.contains(e.target)) return;
+        // 신규 행 편집 중 — 버튼 영역이 아닌 곳 클릭은 무시 (input focus 유지)
+        const isNew = currentEditingRow.dataset.id && currentEditingRow.dataset.id.startsWith('new_');
+        if (isNew) {
+            // 툴바 버튼(저장·삭제·취소 등) 클릭은 닫기 허용
+            const isToolbarBtn = e.target.closest('.emp-toolbar, .emp-btn');
+            if (!isToolbarBtn) return;
+        }
         closeRowEdit(currentEditingRow, true);
     });
 });

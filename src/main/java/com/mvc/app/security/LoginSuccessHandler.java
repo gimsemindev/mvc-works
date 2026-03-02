@@ -15,11 +15,13 @@ import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
 
 import com.mvc.app.domain.dto.EmployeeDto;
+import com.mvc.app.domain.dto.SessionInfo;
 import com.mvc.app.service.EmployeeService;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 /*
 - RequestCache
@@ -42,12 +44,25 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler{
 		// System.out.println(authentication.getName()); // 로그인 아이디
 		
 		try {
+			EmployeeDto dto = memberService.findByEmpId(authentication.getName());
+			
 			// 로그인 날짜 변경
 			memberService.updateLastLogin(authentication.getName());
 			
-			// 패스워드 변경이 90일이 지난 경우 패스워드 변경 폼으로 이동
-			EmployeeDto dto = memberService.findByEmpId(authentication.getName());
+			//SessionInfo에 세션관련 값 builder
+			SessionInfo sessionInfo = SessionInfo.builder()
+			        .empId(dto.getEmpId())
+			        .name(dto.getName())
+			        .email(dto.getEmail())
+			        .userLevel(dto.getLevelCode() > 0 ? dto.getLevelCode() : 1)
+			        .avatar(dto.getProfilePhoto())
+			        .build();
+
+			//session member로 가져오기 위한 set
+			HttpSession session = request.getSession();
+			session.setAttribute("member", sessionInfo);
 			
+			// 패스워드 변경이 90일이 지난 경우 패스워드 변경 폼으로 이동
 			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 			LocalDateTime curDate = LocalDateTime.now();
 			LocalDateTime targetDate = LocalDateTime.parse(dto.getUpdateDate(), dtf);
