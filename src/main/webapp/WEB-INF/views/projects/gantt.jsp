@@ -97,8 +97,7 @@
 
                 </tbody>
             </table>
-        </div>
-								    <div class="pagination-area">
+		<div class="pagination-area">
         <div>Showing 1 to 4 of 24 entries</div>
         <div class="pagination">
             <div class="page-item"><i class="fas fa-step-backward fa-xs"></i></div>
@@ -109,7 +108,10 @@
             <div class="page-item"><i class="fas fa-chevron-right fa-xs"></i></div>
             <div class="page-item"><i class="fas fa-step-forward fa-xs"></i></div>
         </div>
-    </div>
+    </div>        
+            
+        </div>
+
     </main>
 
 

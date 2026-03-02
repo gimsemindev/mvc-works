@@ -62,13 +62,19 @@
 
         <div class="card-progress">
             <div class="progress-header">
-                <div class="progress-label">Projects in Progress <i class="fas fa-link ms-1 fa-xs"></i></div>
+                <div class="progress-label">Projects in Progress 
+                	
+                </div>
                 <div class="progress-stats text-muted">16/25 Tasks Completed <span class="text-dark">(78%)</span></div>
             </div>
-            <div class="progress">
-                <div class="progress-bar" role="progressbar" style="width: 78%;" aria-valuenow="78" aria-valuemin="0" aria-valuemax="100"></div>
-            </div>
-        </div>
+		    <div class="progress" style="cursor: pointer;" onclick="location.href='${pageContext.request.contextPath}/projects/ganttarticle'">
+		        <div class="progress-bar" role="progressbar" 
+		             style="width: 78%;" 
+		             aria-valuenow="78" aria-valuemin="0" aria-valuemax="100">
+		            78%
+		        </div>
+		    </div>
+		</div>
 
         <div class="bottom-grid">
             <div class="card-details">
