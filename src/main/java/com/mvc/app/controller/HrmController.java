@@ -53,11 +53,12 @@ public class HrmController {
             @RequestParam(name = "pmoY",           defaultValue = "false") boolean pmoY,
             @RequestParam(name = "pmoN",           defaultValue = "false") boolean pmoN,
             @RequestParam(name = "sortCol",        defaultValue = "")      String sortCol,
-            @RequestParam(name = "sortDir",        defaultValue = "asc")   String sortDir) {
+            @RequestParam(name = "sortDir",        defaultValue = "asc")   String sortDir,
+            @RequestParam(name = "authorityCode",  defaultValue = "")	   String authorityCode) {
 
         try {
             Map<String, Object> params = buildSearchParams(
-                name, empNo, project, empStatusCode, levelCode, pmoY, pmoN, sortCol, sortDir
+                name, empNo, project, empStatusCode, levelCode, pmoY, pmoN, sortCol, sortDir, authorityCode
             );
 
             int totalCount = hrmService.dataCount(params);
@@ -170,11 +171,12 @@ public class HrmController {
             @RequestParam(name = "empStatusCode", defaultValue = "") String empStatusCode,
             @RequestParam(name = "levelCode",     defaultValue = "") String levelCode,
             @RequestParam(name = "pmoY",          defaultValue = "false") boolean pmoY,
-            @RequestParam(name = "pmoN",          defaultValue = "false") boolean pmoN) {
+            @RequestParam(name = "pmoN",          defaultValue = "false") boolean pmoN,
+            @RequestParam(name = "authorityCode", defaultValue = "") String authorityCode) {
 
         try {
             Map<String, Object> params = buildSearchParams(
-                name, empNo, project, empStatusCode, levelCode, pmoY, pmoN, "", "asc"
+                name, empNo, project, empStatusCode, levelCode, pmoY, pmoN, "", "asc", authorityCode
             );
 
             Resource resource = hrmService.exportExcel(params);
@@ -220,13 +222,48 @@ public class HrmController {
     }
 
     // ──────────────────────────────────────────────
+    // [7] 다음 사원번호 자동채번 (GET /api/hrm/next-emp-id)
+    //   EMPLOYEE1 테이블의 MAX(empId) + 1 을 11자리 zero-padding 으로 반환
+    //   ex) 현재 최댓값 "00000000005" → "00000000006"
+    // ──────────────────────────────────────────────
+    @GetMapping("/next-emp-id")
+    public ResponseEntity<?> getNextEmpId() {
+        try {
+            String maxId = hrmService.getNextEmpId();
+            return ResponseEntity.ok(Map.of("nextEmpId", maxId));
+        } catch (Exception e) {
+            log.error("다음 사원번호 조회 오류", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    // ──────────────────────────────────────────────
+    // [8] 공통코드 일괄 조회 (GET /api/hrm/codes)
+    //   화면 초기 로딩 시 부서·직급·재직상태 옵션 조회
+    // ──────────────────────────────────────────────
+    @GetMapping("/codes")
+    public ResponseEntity<?> getCodes() {
+        try {
+            return ResponseEntity.ok(Map.of(
+                "dept",      hrmService.getCommonCodes("DEPT"),
+                "rank",      hrmService.getCommonCodes("RANK"),
+                "empStatus", hrmService.getCommonCodes("EMPSTATUS"),
+                "authority", hrmService.getCommonCodes("AUTHORITY")
+            ));
+        } catch (Exception e) {
+            log.error("공통코드 조회 오류", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+    // ──────────────────────────────────────────────
     // 내부 헬퍼 — 검색 파라미터 Map 구성
     // ──────────────────────────────────────────────
     private Map<String, Object> buildSearchParams(
             String name, String empNo, String project,
             String empStatusCode, String levelCode,
             boolean pmoY, boolean pmoN,
-            String sortCol, String sortDir) {
+            String sortCol, String sortDir,
+            String authorityCode) {
 
         Map<String, Object> map = new HashMap<>();
         map.put("name",          name);
@@ -235,6 +272,7 @@ public class HrmController {
         map.put("empStatusCode", empStatusCode);
         map.put("pmoY",          pmoY);
         map.put("pmoN",          pmoN);
+        map.put("authorityCode", (authorityCode != null && !authorityCode.isBlank()) ? authorityCode : null);
         if (levelCode != null && !levelCode.isBlank()) {
             try { map.put("levelCode", Integer.parseInt(levelCode)); }
             catch (NumberFormatException e) { map.put("levelCode", null); }

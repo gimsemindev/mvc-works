@@ -17,6 +17,7 @@ export const useHrmStore = defineStore('hrm', {
             project:       '',
             empStatusCode: '',      // E=재직 / L=휴직 / R=퇴직
             levelCode:     '',      // 권한레벨 숫자
+			authorityCode: '',      // 권한 공통코드 검색용
             pmoY:          false,   // isPmo = 'Y' 검색
             pmoN:          false,   // isPmo = 'N' 검색
             page:          1
@@ -29,24 +30,11 @@ export const useHrmStore = defineStore('hrm', {
         sortCol: '',
         sortDir: 'asc',
 
-        // 인라인 편집용 셀렉트 옵션
-        // ※ deptCode / gradeCode 는 코드 테이블 연동 전까지 임시 고정값 사용
-        deptOptions:   
-			['DEV', 'HR', 'SALES', 'FIN', 'PLAN', 'MANAGE'],
-        gradeOptions:  ['G01', 'G02', 'G03', 'G04', 'G05', 'G06', 'G07', 'G08', 'G09'],
-        levelOptions:  [
-            { value: 1,  label: '1 (WATCHER)' },
-            { value: 10, label: '10 (PARTICIPANT)' },
-            { value: 20, label: '20 (COORDINATOR)' },
-            { value: 30, label: '30 (EXECUTIVE)' },
-            { value: 51, label: '51 (ADMIN)' },
-            { value: 99, label: '99 (MASTER)' },
-        ],
-        statusOptions: [
-            { value: 'E', label: '재직' },
-            { value: 'L', label: '휴직' },
-            { value: 'R', label: '퇴직' },
-        ],
+        // 인라인 편집용 셀렉트 옵션 (화면 초기 로딩 시 GET /api/hrm/codes 로 채워짐)
+        deptOptions:   [],   // { code, codeName } — codeGroup='DEPT'
+        gradeOptions:  [],   // { code, codeName } — codeGroup='RANK'
+        statusOptions: [],   // { code, codeName } — codeGroup='EMPSTATUS'
+		authorityOptions: [],
     }),
 
     // ──────────────────────────────────────────────
@@ -63,7 +51,24 @@ export const useHrmStore = defineStore('hrm', {
     actions: {
 
         // ════════════════════════════════════════════
-        // [1] 목록 조회 (GET /api/hrm)
+        // [1] 공통코드 로드 (GET /api/hrm/codes)
+        //   화면 초기 진입 시 1회 호출 — 부서·직급·재직상태 옵션 세팅
+        // ════════════════════════════════════════════
+        async loadCodes() {
+            try {
+                const res = await http.get('/hrm/codes');
+                // 서버 응답: { dept: [{code, codeName}], rank: [...], empStatus: [...] }
+                this.deptOptions   = res.data.dept      || [];
+                this.gradeOptions  = res.data.rank      || [];
+                this.statusOptions = res.data.empStatus || [];
+				this.authorityOptions = res.data.authority || [];
+            } catch (error) {
+                console.error('공통코드 조회 오류:', error);
+            }
+        },
+
+        // ════════════════════════════════════════════
+        // [2] 목록 조회 (GET /api/hrm)
         // ════════════════════════════════════════════
         async fetchList(page = this.searchParams.page) {
             this.loading = true;
@@ -106,18 +111,6 @@ export const useHrmStore = defineStore('hrm', {
             this.fetchList(1);
         },
 
-        // 검색 초기화 — 모든 작업 취소 후 전체 조회
-        resetSearch() {
-            this.searchParams = {
-                name: '', empNo: '', project: '',
-                empStatusCode: '', levelCode: '',
-                pmoY: false, pmoN: false, page: 1
-            };
-            this.sortCol = '';
-            this.sortDir = 'asc';
-            this.fetchList(1);
-        },
-
         // PMO 필터 : radio 방식 (Y / N / 전체)
         setPmoFilter(value) {
             this.searchParams.pmoY = (value === 'Y');
@@ -125,29 +118,39 @@ export const useHrmStore = defineStore('hrm', {
         },
 
         // ════════════════════════════════════════════
-        // [3] 행 추가 — 실제 컬럼명 반영
+        // [3] 행 추가 — 사원번호 자동채번 (GET /api/hrm/next-emp-id)
+        //   empId 는 서버에서 MAX+1 을 받아 자동 할당 (readonly)
         // ════════════════════════════════════════════
-        addRow() {
-            this.deactivateAll();
-            const newEmp = {
-                _tempId:       'new_' + Date.now(),
-                empId:         '',      // VARCHAR2(11) — 직접 입력
-                name:          '',
-                password:      '',      // 신규 등록 시 필수
-                deptCode:      '',
-                gradeCode:     '',
-                levelCode:     1,
-                empStatusCode: 'E',     // 기본: 재직
-                enabled:       1,
-                hireDate:      '',
-                projectNames:  '',
-                profilePhoto:  '',
-                _checked:      true,
-                _editing:      true,
-                _dirty:        false,
-                _isNew:        true,
-            };
-            this.list.push(newEmp);
+        async addRow() {
+            try {
+                // 자동채번 API 호출
+                const res = await http.get('/hrm/next-emp-id');
+                const nextEmpId = res.data?.nextEmpId || '';
+
+                const newEmp = {
+                    _tempId:       'new_' + Date.now(),
+                    empId:         nextEmpId,   // 자동채번된 사원번호 (readonly)
+                    name:          '',
+                    password:      '',           // 신규 등록 시 필수
+                    deptCode:      '',
+                    gradeCode:     '',
+                    authorityCode: '',
+                    levelCode:     1,
+                    empStatusCode: '',           // (없음) 상태로 시작
+                    enabled:       1,
+                    hireDate:      '',
+                    projectNames:  '',
+                    profilePhoto:  '',
+                    _checked:      true,
+                    _editing:      true,
+                    _dirty:        false,
+                    _isNew:        true,
+                };
+                this.list.push(newEmp);
+            } catch (error) {
+                console.error('사원번호 채번 오류:', error);
+                alert('사원번호 자동 채번 중 오류가 발생했습니다.');
+            }
         },
 
         // ════════════════════════════════════════════
@@ -217,18 +220,6 @@ export const useHrmStore = defineStore('hrm', {
         },
 
         // ════════════════════════════════════════════
-        // [6] 수정 버튼 — 체크된 기존 행 편집 모드
-        // ════════════════════════════════════════════
-        editSelected() {
-            const checked = this.list.filter(e => e._checked && !e._isNew);
-            if (checked.length === 0) {
-                alert('수정할 항목을 선택해 주세요.');
-                return;
-            }
-            checked.forEach(emp => { emp._editing = true; });
-        },
-
-        // ════════════════════════════════════════════
         // [7] 삭제 — empId 는 String
         // ════════════════════════════════════════════
         async deleteSelected() {
@@ -270,8 +261,8 @@ export const useHrmStore = defineStore('hrm', {
         // [9] 엑셀 다운로드
         // ════════════════════════════════════════════
         excelDownload() {
-            const { name, empNo, project, empStatusCode, levelCode, pmoY, pmoN } = this.searchParams;
-            const qs = new URLSearchParams({ name, empNo, project, empStatusCode, levelCode, pmoY, pmoN });
+            const { name, empNo, project, empStatusCode, levelCode, authorityCode, pmoY, pmoN } = this.searchParams;
+            const qs = new URLSearchParams({ name, empNo, project, empStatusCode, levelCode, authorityCode, pmoY, pmoN });
             location.href = '/api/hrm/excel/download?' + qs;
         },
 
@@ -345,9 +336,12 @@ export const useHrmStore = defineStore('hrm', {
 
         // ════════════════════════════════════════════
         // 재직상태 라벨 (empStatusCode → 한글)
+        //   statusOptions가 로드된 후에는 DB 코드명 사용
         // ════════════════════════════════════════════
         statusLabel(code) {
-            return { E: '재직', L: '휴직', R: '퇴직' }[code] || code;
+            const found = this.statusOptions.find(s => s.code === code);
+            if (found) return found.codeName;
+            return { ES01: '재직', ES02: '휴직', ES03: '퇴직', ES04: '계약만료' }[code] || code;
         },
 
         // ════════════════════════════════════════════

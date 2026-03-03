@@ -4,19 +4,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * HrmDto
- *
- * employee1 (인증정보) + employee2 (인적정보) JOIN 결과를 담는 DTO
- *
- * [employee1]
- *   empId, password, levelCode, enabled, regDate, updateDate,
- *   lastLoginDate, loginFailureCount, empStatusCode
- *
- * [employee2]
- *   empId(FK), name, birth, profilePhoto, tel, zip, addr1, addr2,
- *   email, ipAddr, hireDate, deptCode, gradeCode, regEmpId, regDate
- */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -50,6 +37,11 @@ public class HrmDto {
     private String gradeName;           // 직급명 (ex: 대리)    — 조회 전용
     private String regEmpId;            // 등록자 사원번호
     private String e2RegDate;           // employee2 등록일
+    
+    //employeeAuthority (권한)
+    private String authority;
+    private String authorityCode;
+    private String authorityName;
 
     // ── JOIN 추가 컬럼 ─────────────────────────────────────────
     private String projectNames;        // 참여 프로젝트명 (서브쿼리 결과)

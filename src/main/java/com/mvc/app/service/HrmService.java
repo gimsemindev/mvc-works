@@ -16,6 +16,12 @@ public interface HrmService {
     boolean isDuplicateEmpId(String empId);
 
     /**
+     * 다음 사원번호 자동채번
+     *  EMPLOYEE1.empId MAX 값 + 1 을 11자리 zero-padding 문자열로 반환
+     */
+    String getNextEmpId();
+
+    /**
      * 직원 신규 등록
      *  1. 사원번호 중복 체크
      *  2. 비밀번호 BCrypt 암호화
@@ -44,4 +50,7 @@ public interface HrmService {
 
     /** 엑셀 업로드 → DB 일괄 등록, 등록된 건수 반환 */
     int importExcel(MultipartFile file) throws Exception;
+
+    /** 공통코드 조회 (codeGroup 기준, value=code / label=codeName) */
+    List<Map<String, String>> getCommonCodes(String codeGroup);
 }

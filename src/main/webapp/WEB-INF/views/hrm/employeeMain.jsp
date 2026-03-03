@@ -52,7 +52,10 @@
 			// 세션 정보 주입 (main.jsp 패턴과 동일)
 			store.sessionName = '${sessionScope.member.name}';
 
-			onMounted(() => store.fetchList());
+			onMounted(() => {
+				store.loadCodes();   // 부서·직급·재직상태 공통코드 조회
+				store.fetchList();
+			});
 
 			return { store };
 		}
@@ -63,7 +66,6 @@
 	app.mount('#vue-app');
 </script>
 
-<script src="${pageContext.request.contextPath}/dist/js/employee-table.js"></script>
 <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
 
 </body>

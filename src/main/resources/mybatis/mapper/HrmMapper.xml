@@ -26,9 +26,10 @@
     └──────────────────────────────────────────────────────┘
 
     empStatusCode (CHAR(1))
-      E = 재직(EMPLOYED)
-      L = 휴직(LEAVE)
-      R = 퇴직(RESIGNED)
+      ES01 = 재직(EMPLOYED)
+      ES02 = 휴직(LEAVE)
+      ES03 = 퇴직(RESIGNED)
+      ES04 = 계약만료(RESIGNED)
 
     isPmo (CHAR(1))
       Y = PMO 여부 Y
@@ -70,6 +71,8 @@
         <result property="e2RegDate"          column="e2RegDate"/>
         <!-- 추가 -->
         <result property="projectNames"       column="projectNames"/>
+        <result property="authorityCode" column="authorityCode"/>
+    	<result property="authorityName" column="authorityName"/>
     </resultMap>
 
     <!-- ════════════════════════════════════════
@@ -92,6 +95,14 @@
             </if>
             <if test="levelCode != null">
                 AND e1.levelCode = #{levelCode}
+            </if>
+            <!-- 권한코드 검색 : employeeAuthority JOIN -->
+            <if test="authorityCode != null and authorityCode != ''">
+                AND EXISTS (
+                    SELECT 1 FROM employeeAuthority ea
+                    WHERE  ea.empId    = e1.empId
+                    AND    ea.authority = #{authorityCode}
+                )
             </if>
             <!-- 프로젝트명 검색 : empProject → project JOIN -->
             <if test="project != null and project != ''">
@@ -146,6 +157,7 @@
         e2.addr2,
         e2.email,
         e2.ipAddr,
+        ea.authority AS authorityCode,
         TO_CHAR(e2.hireDate, 'YYYY-MM-DD') AS hireDate,
         e2.deptCode,
         e2.gradeCode,
@@ -154,6 +166,8 @@
          WHERE cc.codeGroup = 'DEPT' AND cc.code = e2.deptCode) AS deptName,
         (SELECT cc.codeName FROM COMMONCODE cc
          WHERE cc.codeGroup = 'RANK' AND cc.code = e2.gradeCode) AS gradeName,
+        (SELECT cc.codeName FROM COMMONCODE cc
+         WHERE cc.codeGroup = 'AUTHORITY' AND cc.code = ea.authority) AS authorityName,
         e2.regEmpId,
         TO_CHAR(e2.regDate,  'YYYY-MM-DD') AS e2RegDate,
         (
@@ -184,6 +198,7 @@
             <include refid="selectColumns"/>
         FROM   employee1 e1
         JOIN   employee2 e2 ON e1.empId = e2.empId
+        JOIN   employeeAuthority ea ON e1.empid = ea.empid
         <include refid="searchWhere"/>
         <choose>
             <when test="sortCol != null and sortCol != ''">
@@ -225,6 +240,16 @@
         SELECT empId
         FROM   employee1
         WHERE  empId = #{empId}
+    </select>
+
+    <!-- ════════════════════════════════════════
+         [4-1] 가장 큰 사원번호 조회 (자동채번용)
+               empId 는 VARCHAR2(11) — 숫자 형태로 저장된다고 가정
+               MAX(TO_NUMBER(empId)) 로 최댓값을 구한 뒤 +1 반환
+    ════════════════════════════════════════ -->
+    <select id="findMaxEmpId" resultType="string">
+        SELECT NVL(MAX(TO_NUMBER(empId DEFAULT 0 ON CONVERSION ERROR)), 0)
+		FROM   employee1
     </select>
 
     <!-- ════════════════════════════════════════
@@ -272,13 +297,12 @@
     ════════════════════════════════════════ -->
     <update id="updateEmployee1" parameterType="com.mvc.app.domain.dto.HrmDto">
         UPDATE employee1
-        <set>
-            <if test="password      != null and password      != ''"> password      = #{password},      </if>
-            <if test="levelCode     != null">                         levelCode     = #{levelCode},     </if>
-            <if test="enabled       != null">                         enabled       = #{enabled},       </if>
-            <if test="empStatusCode != null and empStatusCode != ''"> empStatusCode = #{empStatusCode}, </if>
-            updateDate = SYSDATE,
-        </set>
+        SET
+            updateDate = SYSDATE
+            <if test="password      != null and password      != ''">, password      = #{password}      </if>
+            <if test="levelCode     != null">                         , levelCode     = #{levelCode}     </if>
+            <if test="enabled       != null">                         , enabled       = #{enabled}       </if>
+            <if test="empStatusCode != null and empStatusCode != ''">, empStatusCode = #{empStatusCode} </if>
         WHERE empId = #{empId}
     </update>
 
@@ -288,19 +312,24 @@
     ════════════════════════════════════════ -->
     <update id="updateEmployee2" parameterType="com.mvc.app.domain.dto.HrmDto">
         UPDATE employee2
-        <set>
-            <if test="name        != null and name        != ''"> name        = #{name},        </if>
-            <if test="birth       != null and birth       != ''"> birth       = #{birth},       </if>
-            <if test="profilePhoto!= null">                       profilePhoto= #{profilePhoto},</if>
-            <if test="tel         != null">                       tel         = #{tel},         </if>
-            <if test="zip         != null">                       zip         = #{zip},         </if>
-            <if test="addr1       != null">                       addr1       = #{addr1},       </if>
-            <if test="addr2       != null">                       addr2       = #{addr2},       </if>
-            <if test="email       != null">                       email       = #{email},       </if>
-            <if test="hireDate    != null and hireDate    != ''"> hireDate    = #{hireDate},    </if>
-            <if test="deptCode    != null">                       deptCode    = #{deptCode},    </if>
-            <if test="gradeCode   != null">                       gradeCode   = #{gradeCode},   </if>
-        </set>
+        SET
+            name        = #{name}
+            <if test="birth       != null and birth       != ''">, birth       = #{birth}       </if>
+            <if test="profilePhoto!= null">                       , profilePhoto= #{profilePhoto}</if>
+            <if test="tel         != null">                       , tel         = #{tel}         </if>
+            <if test="zip         != null">                       , zip         = #{zip}         </if>
+            <if test="addr1       != null">                       , addr1       = #{addr1}       </if>
+            <if test="addr2       != null">                       , addr2       = #{addr2}       </if>
+            <if test="email       != null">                       , email       = #{email}       </if>
+            <if test="hireDate    != null and hireDate    != ''">, hireDate    = #{hireDate}    </if>
+            <if test="deptCode    != null">                       , deptCode    = #{deptCode}    </if>
+            <if test="gradeCode   != null">                       , gradeCode   = #{gradeCode}   </if>
+        WHERE empId = #{empId}
+    </update>
+    
+    <update id="updateAuthority" parameterType="com.mvc.app.domain.dto.HrmDto">
+        UPDATE employeeAuthority
+        SET authority = #{authorityCode}
         WHERE empId = #{empId}
     </update>
 
@@ -331,5 +360,16 @@
             #{id}
         </foreach>
     </delete>
+
+    <!-- ════════════════════════════════════════
+         [9] 공통코드 조회 — codeGroup 별 code/codename 목록
+         반환 Map 키: code, codeName
+    ════════════════════════════════════════ -->
+    <select id="listCommonCode" parameterType="string" resultType="map">
+        SELECT code, codename AS codeName
+        FROM   commoncode
+        WHERE  codegroup = #{codeGroup}
+        ORDER BY code
+    </select>
 
 </mapper>

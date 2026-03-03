@@ -76,6 +76,24 @@ public class HrmServiceImpl implements HrmService {
     }
 
     // ──────────────────────────────────────────────
+    // [2-1] 다음 사원번호 자동채번
+    //   MAX(TO_NUMBER(empId)) + 1 을 11자리 zero-padding 으로 반환
+    //   ex) "00000000005" → "00000000006"
+    //   테이블이 비어 있으면 "00000000001" 반환
+    // ──────────────────────────────────────────────
+    @Override
+    public String getNextEmpId() {
+        try {
+            String maxStr = mapper.findMaxEmpId();          // NVL(MAX(...), '0')
+            long   next   = Long.parseLong(maxStr) + 1;
+            return String.format("%011d", next);            // 11자리 zero-padding
+        } catch (Exception e) {
+            log.error("getNextEmpId error", e);
+            return String.format("%011d", 1L);              // 오류 시 00000000001 반환
+        }
+    }
+
+    // ──────────────────────────────────────────────
     // [3] 직원 신규 등록
     //   employee1(인증) INSERT → employee2(인적) INSERT
     //   FK 제약 순서 반드시 준수
@@ -129,6 +147,7 @@ public class HrmServiceImpl implements HrmService {
             // employee1(인증정보), employee2(인적정보) 각각 UPDATE
             mapper.updateEmployee1(dto);
             mapper.updateEmployee2(dto);
+            mapper.updateAuthority(dto);
 
         } catch (Exception e) {
             log.error("updateEmployee error", e);
@@ -271,6 +290,19 @@ public class HrmServiceImpl implements HrmService {
             }
         }
         return count;
+    }
+
+    // ──────────────────────────────────────────────
+    // [9] 공통코드 조회
+    // ──────────────────────────────────────────────
+    @Override
+    public List<Map<String, String>> getCommonCodes(String codeGroup) {
+        try {
+            return mapper.listCommonCode(codeGroup);
+        } catch (Exception e) {
+            log.error("getCommonCodes error codeGroup={}", codeGroup, e);
+            return new ArrayList<>();
+        }
     }
 
     // ── 재직상태 코드 → 라벨 변환 ─────────────────────────────
