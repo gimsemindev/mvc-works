@@ -629,3 +629,80 @@
     transition: background .15s;
 }
 .btn-cancel:hover { background: #d97706; }
+
+.btn-tpl-load {
+    background: #f0f4ff;
+    color: #4e73df;
+    border: 1px solid #4e73df;
+}
+
+.btn-tpl-save {
+    background: #f0faf0;
+    color: #1cc88a;
+    border: 1px solid #1cc88a;
+}
+
+/* ════════════════════════════════
+   템플릿 불러오기 모달
+════════════════════════════════ */
+.tpl-load-box { width: 440px; }
+
+.tpl-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.tpl-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 40px;
+    color: #9aa0b4;
+    font-size: 13px;
+}
+.tpl-empty .material-symbols-outlined { font-size: 32px; color: #d1d5db; }
+
+.tpl-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border: 1px solid #e6eaf4;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all .15s;
+}
+.tpl-item:hover { border-color: #4e73df; background: #f0f3ff; }
+
+.tpl-item-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.tpl-icon { font-size: 16px !important; color: #4e73df; }
+.tpl-name { font-size: 13px; font-weight: 600; color: #1d2939; }
+
+.tpl-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.tpl-date { font-size: 11px; color: #9aa0b4; }
+
+.btn-tpl-delete {
+    background: none;
+    border: none;
+    color: #d93025;
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    opacity: .5;
+    transition: opacity .12s, background .12s;
+}
+.btn-tpl-delete:hover { opacity: 1; background: #ffe0e0; }

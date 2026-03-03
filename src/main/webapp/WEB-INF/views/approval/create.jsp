@@ -92,186 +92,15 @@
 
             <div class="form-doc-title">{{ store.selectedDocTypeName }}</div>
 
-            <!-- 기본 정보 -->
-            <div class="form-section">
-                <div class="form-section-header">
-                    <div class="form-section-title">
-                        <span class="material-symbols-outlined">info</span>
-                        기본 정보
-                    </div>
-                </div>
-                <div class="form-section-body">
-                    <div class="info-grid">
-                        <div class="form-field">
-                            <label>문서번호</label>
-                            <input type="text" value="자동으로 생성됩니다" readonly>
-                        </div>
-                        <div class="form-field">
-                            <label>작성일</label>
-                            <input type="text" :value="todayDate" readonly>
-                        </div>
-                        <div class="form-field">
-                            <label>작성자</label>
-                            <input type="text" value="경영지원팀 | 신준안 대표" readonly>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <jsp:include page="/WEB-INF/views/approval/include/approvalBasicInfo.jsp"/>
+ 
+            <jsp:include page="/WEB-INF/views/approval/include/approvalLine.jsp"/>
 
-            <!-- 결재선 정보 -->
-            <div class="form-section">
-                <div class="form-section-header">
-                    <div class="form-section-title">
-                        <span class="material-symbols-outlined">group</span>
-                        결재선 정보
-                    </div>
-                    <button class="btn-add-line" @click="approverModalVisible = true">
-                        <span class="material-symbols-outlined" style="font-size:15px">person_add</span>
-                        결재자 추가
-                    </button>
-                </div>
-                <div class="form-section-body">
-                    <div class="line-list">
-                        <div v-if="store.approvers.length === 0" class="line-empty">
-                            <span class="material-symbols-outlined">how_to_reg</span>
-                            결재자를 추가해 주세요.
-                        </div>
-                        <div v-for="(p, idx) in store.approvers" :key="p.empId"
-                             class="line-item" draggable="true"
-                             :class="{ dragging: drag.fromIdx === idx, 'drag-over': drag.overIdx === idx }"
-                             @dragstart="onDragStart(idx, $event)"
-                             @dragover.prevent="onDragOver(idx)"
-                             @drop.prevent="onDrop(idx)"
-                             @dragend="onDragEnd">
-                            <span class="drag-handle">&#9776;</span>
-                            <span class="line-seq">{{ idx + 1 }}</span>
-                            <span class="line-name">{{ p.name }}</span>
-                            <span class="line-dept">{{ p.dept }}</span>
-                            <span class="line-grade">{{ p.grade }}</span>
-                            <button class="btn-line-remove" @click.stop="store.removeApprover(idx)">
-                                <span class="material-symbols-outlined" style="font-size:14px">close</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div v-if="store.approvers.length > 0" class="line-hint">
-                        <span class="material-symbols-outlined" style="font-size:13px">info</span>
-                        드래그하여 결재 순서를 변경할 수 있습니다.
-                    </div>
-                </div>
-            </div>
+            <jsp:include page="/WEB-INF/views/approval/include/approvalRef.jsp"/>
 
-            <!-- 참조자 정보 -->
-            <div class="form-section">
-                <div class="form-section-header">
-                    <div class="form-section-title">
-                        <span class="material-symbols-outlined">person_add</span>
-                        참조자 정보
-                    </div>
-                    <button class="btn-add-line" @click="referenceModalVisible = true">
-                        <span class="material-symbols-outlined" style="font-size:15px">group_add</span>
-                        참조자 추가
-                    </button>
-                </div>
-                <div class="form-section-body">
-                    <div class="line-list ref-list">
-                        <div v-if="store.references.length === 0" class="line-empty">
-                            <span class="material-symbols-outlined">group</span>
-                            참조자를 추가해 주세요.
-                        </div>
-                        <div v-for="(p, idx) in store.references" :key="p.empId"
-                             class="line-item ref-item">
-                            <span class="line-name">{{ p.name }}</span>
-                            <span class="line-dept">{{ p.dept }}</span>
-                            <span class="line-grade">{{ p.grade }}</span>
-                            <button class="btn-line-remove" @click="store.removeReference(idx)">
-                                <span class="material-symbols-outlined" style="font-size:14px">close</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <jsp:include page="/WEB-INF/views/approval/include/approvalDetailLeave.jsp"/>
 
-            <!-- 세부 정보 -->
-            <div class="form-section">
-                <div class="form-section-header">
-                    <div class="form-section-title">
-                        <span class="material-symbols-outlined">edit_note</span>
-                        세부 정보
-                    </div>
-                </div>
-                <div class="form-section-body">
-                    <div class="detail-grid">
-                        <div class="form-field">
-                            <label>휴가 종류</label>
-                            <select>
-                                <option value="">선택</option>
-                                <option>연차</option>
-                                <option>반차(오전)</option>
-                                <option>반차(오후)</option>
-                                <option>병가</option>
-                                <option>예비군</option>
-                                <option>무급</option>
-                            </select>
-                        </div>
-                        <div class="form-field">
-                            <label>휴가 시작일</label>
-                            <div class="detail-grid-input">
-                                <input type="date">
-                                <select><option>종일</option><option>오전</option><option>오후</option></select>
-                            </div>
-                        </div>
-                        <div class="form-field">
-                            <label>휴가 종료일</label>
-                            <div class="detail-grid-input">
-                                <input type="date">
-                                <select><option>종일</option><option>오전</option><option>오후</option></select>
-                            </div>
-                        </div>
-                        <div class="form-field">
-                            <label>총 휴가일 수</label>
-                            <div class="detail-grid-input">
-                                <input type="number" placeholder="0">
-                                <span style="font-size:13px;color:#667085;white-space:nowrap;">일</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-field">
-                        <label>상세 설명</label>
-                        <textarea rows="4" placeholder="상세 내용을 입력해주세요."></textarea>
-                    </div>
-                    <div class="attach-row">
-                        <div class="form-field">
-                            <label>관련 첨부 <span style="font-size:10px;color:#9aa0b4;">ⓘ</span></label>
-                            <div class="attach-input-wrap">
-                                <button class="btn-file-select" @click="fileInput.click()">파일 선택</button>
-                                <span class="file-name-display">{{ fileName }}</span>
-                                <input type="file" ref="fileInput" style="display:none" @change="onFileChange">
-                            </div>
-                        </div>
-                        <div class="form-field">
-                            <label>첨부된 파일</label>
-                            <div class="attach-preview">첨부된 파일이 없습니다.</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 참고사항 -->
-            <div class="form-section">
-                <div class="form-section-header">
-                    <div class="form-section-title">
-                        <span class="material-symbols-outlined">menu_book</span>
-                        참고사항
-                    </div>
-                </div>
-                <div class="form-section-body">
-                    <ul class="reference-list">
-                        <li><strong>[예비군 / 민방위 신청시]</strong> 동서서 스캔하여 파일 첨부</li>
-                        <li><strong>[경조휴가 신청시]</strong> 각종 증빙서류 스캔하여 파일 첨부 (예: 청첩장, 등본 등)</li>
-                        <li>기타 필요한 내용은 상세 설명란에 기입</li>
-                    </ul>
-                </div>
-            </div>
+            <jsp:include page="/WEB-INF/views/approval/include/approvalNotice.jsp"/>
 
             <!-- 하단 버튼 -->
             <div class="form-footer">
@@ -302,7 +131,8 @@
 	"imports": {
 		"http": "/dist/util/http.js?v=2",
 		"approvalCreateStore": "/dist/util/store/approvalCreateStore.js?v=2",
-		"OrgSearchModal": "/dist/util/component/OrgSearchModal.js?v=1"
+		"OrgSearchModal": "/dist/util/component/OrgSearchModal.js?v=1",
+        "commonCodeStore": "/dist/util/store/commonCodeStore.js?v=1"
 	}
 }
 </script>
@@ -312,11 +142,13 @@
     import { createPinia } from 'pinia';
     import { useApprovalCreateStore } from 'approvalCreateStore';
     import { OrgSearchModal } from 'OrgSearchModal';
+    import { useCommonCodeStore } from 'commonCodeStore';
 
     const app = createApp({
         setup() {
             const store = useApprovalCreateStore();
             const ctx = document.querySelector('meta[name="ctx"]').content;
+            const codeStore = useCommonCodeStore();
 
             const todayDate = new Date().toLocaleDateString('ko-KR', {
                 year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short'
@@ -328,6 +160,10 @@
             const approverEmpIds = computed(() => store.approvers.map(a => a.empId));
             const referenceEmpIds = computed(() => store.references.map(r => r.empId));
 
+            // 템플릿 불러오기 모달
+            const templateLoadModalVisible = ref(false);
+            const templateList = ref([])
+
             // 파일 첨부
             const fileName = ref('선택된 파일 없음');
             const fileInput = ref(null);
@@ -337,6 +173,32 @@
 
             // 네비게이션
             const goList = () => { location.href = ctx + '/approval/list'; };
+
+            // 템플릿 저장
+            const saveTemplate = async () => {
+                const name = prompt('템플릿 이름을 입력하세요.');
+                if (!name || !name.trim()) return;
+                await store.saveTemplate(name.trim());
+            };
+
+            // 템플릿 목록 열기
+            const openTemplateLoad = async () => {
+            	templateList.value = await store.fetchTemplates();
+      			templateLoadModalVisible.value = true;
+  			};
+
+            // 템플릿 선택 → 결재선 적용
+            const onLoadTemplate = async (tempId) => {
+                const ok = await store.loadTemplate(tempId);
+                if (ok) templateLoadModalVisible.value = false;
+            };
+            
+            // 템플릿 삭제
+            const onDeleteTemplate = async (tempId) => {
+                if (!confirm('이 템플릿을 삭제하시겠습니까?')) return;
+                const ok = await store.deleteTemplate(tempId);
+                if (ok) templateList.value = await store.fetchTemplates();
+            };
 
             // 드래그 앤 드롭
             const drag = reactive({ fromIdx: null, overIdx: null });
@@ -358,16 +220,21 @@
                 drag.overIdx = null;
             };
 
-            onMounted(() => store.fetchDocTypes());
+            onMounted(() => {
+      				store.fetchDocTypes();
+      				codeStore.fetchCodes('LEAVETYPE');
+  			});
 
             return {
-                store, todayDate,
-                approverModalVisible, referenceModalVisible,
-                approverEmpIds, referenceEmpIds,
-                fileName, fileInput, onFileChange,
-                goList,
-                drag, onDragStart, onDragOver, onDrop, onDragEnd
-            };
+      				store, codeStore, todayDate,
+    				approverModalVisible, referenceModalVisible,
+      				approverEmpIds, referenceEmpIds,
+      				fileName, fileInput, onFileChange,
+                    goList, saveTemplate,
+                    templateLoadModalVisible, templateList,
+                    openTemplateLoad, onLoadTemplate, onDeleteTemplate,
+      				drag, onDragStart, onDragOver, onDrop, onDragEnd
+  				};
         }
     });
 

@@ -57,6 +57,81 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 
         removeReference(idx) {
             this.references.splice(idx, 1);
-        }
+        },
+		
+		async saveTemplate(tempName) {
+		    if (this.approvers.length === 0) {
+		        alert('결재자를 먼저 추가해 주세요.');
+		        return false;
+		    }
+
+		    try {
+		        const data = {
+		            tempName: tempName,
+		            lines: this.approvers.map(p => ({
+		                apprEmpId: p.empId,
+		                apprEmpName: p.name,
+		                apprDeptCode: p.deptCode || '',
+		                apprDeptName: p.dept || '',
+		                apprGradeCode: p.gradeCode || '',
+		                apprGradeName: p.grade || ''
+		            }))
+		        };
+
+		        await http.post('/approval/template', data);
+		        alert('템플릿이 저장되었습니다.');
+		        return true;
+		    } catch (e) {
+		        console.error('템플릿 저장 실패:', e);
+		        alert('템플릿 저장 중 오류가 발생했습니다.');
+		        return false;
+		    }
+		},
+		
+		// ── 템플릿 목록 조회 ──
+		async fetchTemplates() {
+		    try {
+		        const res = await http.get('/approval/template');
+		        return res.data.list || [];
+		    } catch (e) {
+		        console.error('템플릿 목록 조회 실패:', e);
+		        return [];
+		     }
+		},
+
+		// ── 템플릿 불러오기 (결재선에 적용) ──
+		async loadTemplate(tempId) {
+		    try {
+		        const res = await http.get('/approval/template/' + tempId);
+		        const lines = res.data.lines || [];
+
+		        this.approvers = lines.map(l => ({
+		            empId: l.apprEmpId,
+		            name: l.apprEmpName,
+		            deptCode: l.apprDeptCode,
+		            dept: l.apprDeptName,
+		            gradeCode: l.apprGradeCode,
+		            grade: l.apprGradeName
+		        }));
+
+		        return true;
+		    } catch (e) {
+		        console.error('템플릿 불러오기 실패:', e);
+		        alert('템플릿 불러오기 중 오류가 발생했습니다.');
+		        return false;
+		    }
+		},
+
+		// ── 템플릿 삭제 ──
+		async deleteTemplate(tempId) {
+		    try {
+		        await http.delete('/approval/template/' + tempId);
+		        return true;
+		    } catch (e) {
+		        console.error('템플릿 삭제 실패:', e);
+		        alert('템플릿 삭제 중 오류가 발생했습니다.');
+		        return false;
+		    }
+		}
     }
 });
