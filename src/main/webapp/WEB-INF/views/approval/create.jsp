@@ -99,8 +99,20 @@
             <jsp:include page="/WEB-INF/views/approval/include/approvalRef.jsp"/>
 
             <jsp:include page="/WEB-INF/views/approval/include/approvalDetailLeave.jsp"/>
+            <jsp:include page="/WEB-INF/views/approval/include/approvalDetailBiztrip.jsp"/>
+            <jsp:include page="/WEB-INF/views/approval/include/approvalDetailExpense.jsp"/>
+            <jsp:include page="/WEB-INF/views/approval/include/approvalDetailClaim.jsp"/>
+            <jsp:include page="/WEB-INF/views/approval/include/approvalDetailGeneral.jsp"/>
 
-            <jsp:include page="/WEB-INF/views/approval/include/approvalNotice.jsp"/>
+            <div class="form-section" v-if="store.selectedNotice">
+                <div class="form-section-header">
+                    <div class="form-section-title">
+                        <span class="material-symbols-outlined">info</span>
+                        참고사항
+                    </div>
+                </div>
+                <div class="form-section-body" v-html="store.selectedNotice"></div>
+            </div>
 
             <!-- 하단 버튼 -->
             <div class="form-footer">

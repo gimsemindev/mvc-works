@@ -21,7 +21,8 @@
     <!-- 전체 목록 -->
     <select id="listDocType" resultType="com.mvc.app.domain.dto.DocTypeDto">
         SELECT docTypeId, typeName, typeCode, description, sortOrder, useYn, regEmpId,
-               TO_CHAR(regDate, 'YYYY-MM-DD') AS regDate
+               TO_CHAR(regDate, 'YYYY-MM-DD') AS regDate,
+               formCode, notice
         FROM approvalDocType
         ORDER BY sortOrder, docTypeId
     </select>
@@ -29,7 +30,8 @@
     <!-- 1건 조회 -->
     <select id="findById" parameterType="Long" resultType="com.mvc.app.domain.dto.DocTypeDto">
         SELECT docTypeId, typeName, typeCode, description, sortOrder, useYn, regEmpId,
-               TO_CHAR(regDate, 'YYYY-MM-DD') AS regDate
+               TO_CHAR(regDate, 'YYYY-MM-DD') AS regDate,
+               formCode, notice
         FROM approvalDocType
         WHERE docTypeId = #{docTypeId}
     </select>
@@ -40,7 +42,9 @@
         SET typeName = #{typeName},
             description = #{description},
             useYn = #{useYn},
-            sortOrder = #{sortOrder}
+            sortOrder = #{sortOrder},
+            formCode = #{formCode},
+            notice = #{notice}
         WHERE docTypeId = #{docTypeId}
     </update>
 

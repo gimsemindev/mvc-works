@@ -8,12 +8,14 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class DocTypeDto {
-    private long docTypeId;      // 문서유형ID (PK)
-    private String typeName;     // 유형명 (예: 휴가신청서)
-    private String typeCode;     // 유형코드 (DOC-001 자동생성)
-    private String description;  // 설명 (예: 연차, 병가 등 각종 휴가 사용 시 제출)
+    private long docTypeId;      // 문서유형ID
+    private String typeName;     // 유형명
+    private String typeCode;     // 유형코드
+    private String description;  // 설명
     private int sortOrder;       // 정렬순서
-    private String useYn;        // 사용여부 (Y/N)
-    private String regEmpId;     // 등록자 사원번호
+    private String useYn;        // 사용여부
+    private String regEmpId;     // 등록자사원번호
     private String regDate;      // 등록일
+    private String formCode;     // 양식코드
+    private String notice;       // 참고사항
 }

@@ -706,3 +706,85 @@
     transition: opacity .12s, background .12s;
 }
 .btn-tpl-delete:hover { opacity: 1; background: #ffe0e0; }
+
+/* 2열 그리드 */
+.detail-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+/* 3열 그리드 */
+.detail-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+/* 지출 세부항목 */
+.expense-section { margin-top: 10px; }
+.expense-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+.expense-header label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #667085;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+.btn-expense-add, .btn-expense-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    color: #fff;
+}
+.btn-expense-add { background: #4e73df; }
+.btn-expense-add:hover { background: #3a5abf; }
+.btn-expense-remove { background: #d93025; }
+.btn-expense-remove:hover { background: #b7271d; }
+
+.expense-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+.expense-table th {
+    background: #f1f3f9;
+    padding: 7px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #667085;
+    text-align: center;
+    border: 1px solid #e6eaf4;
+}
+.expense-table td {
+    padding: 4px;
+    border: 1px solid #e6eaf4;
+}
+.expense-table td input {
+    width: 100%;
+    border: 1px solid #e6eaf4;
+    border-radius: 4px;
+    padding: 5px 8px;
+    font-size: 12px;
+    outline: none;
+    box-sizing: border-box;
+}
+.expense-table td input:focus { border-color: #4e73df; }
+.expense-table tfoot td {
+    padding: 8px;
+    font-size: 12px;
+}
+.text-center { text-align: center; }
+.text-right { text-align: right; }

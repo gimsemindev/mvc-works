@@ -5,48 +5,65 @@ export const useDocTypeStore = defineStore('docType', {
     state: () => ({
         list: [],
         loading: false,
-
-        form: {
-            docTypeId: null,
-            typeName: '',
-            typeCode: '',
-            description: '',
-            sortOrder: 0,
-            useYn: 'Y'
-        },
-
+		
+		form: {
+		    docTypeId: null,
+		    typeName: '',
+		    typeCode: '',
+		    description: '',
+		    sortOrder: 0,
+		    useYn: 'Y',
+		    formCode: '',
+		    notice: ''
+		},		
+		
         formMode: 'ADD'
     }),
 
     actions: {
-        async fetchList() {
-            this.loading = true;
-            try {
-                const res = await http.get('/approval/doctype');
-                this.list = res.data.list;
-            } catch (error) {
-                console.error('목록 조회 실패:', error);
-            } finally {
-                this.loading = false;
-            }
-        },
+		async fetchList() {
+		    this.loading = true;
+		    try {
+		        const res = await http.get('/approval/doctype');
+		        this.list = res.data.list;
+		    } catch (error) {
+		        console.error('목록 조회 실패:', error);
+		    } finally {
+		        this.loading = false;
+		    }
+		    this.fetchFormCodes();
+		},
 
-        openAddForm() {
-            this.form = { docTypeId: null, typeName: '', typeCode: '', description: '', sortOrder: 0, useYn: 'Y' };
-            this.formMode = 'ADD';
-        },
-
-        openEditForm(item) {
-            this.form = {
-                docTypeId: item.docTypeId,
-                typeName: item.typeName,
-                typeCode: item.typeCode,
-                description: item.description || '',
-                sortOrder: item.sortOrder,
-                useYn: item.useYn
-            };
-            this.formMode = 'EDIT';
-        },
+		async fetchFormCodes() {
+		    try {
+		        const res = await http.get('/common/code/FORMCODE');
+		        this.formCodes = (res.data.list || []).map(item => ({
+		            code: item.CODE || item.code,
+		            name: item.CODENAME || item.codeName
+		        }));
+		    } catch (e) {
+		        console.error('양식코드 조회 실패:', e);
+		    }
+		},
+				
+		openAddForm() {
+		    this.form = { docTypeId: null, typeName: '', typeCode: '', description: '', sortOrder: 0, useYn: 'Y', formCode: '', notice: '' };
+		    this.formMode = 'ADD';
+		},	
+		
+		openEditForm(item) {
+		    this.form = {
+		        docTypeId: item.docTypeId,
+		        typeName: item.typeName,
+		        typeCode: item.typeCode,
+		        description: item.description || '',
+		        sortOrder: item.sortOrder,
+		        useYn: item.useYn,
+		        formCode: item.formCode || '',
+		        notice: item.notice || ''
+		    };
+		    this.formMode = 'EDIT';
+		},
 
         async saveForm() {
             if (!this.form.typeName.trim()) {

@@ -8,12 +8,21 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
         selectedDocTypeId: null,
         selectedDocTypeName: '',
         formVisible: false,
+		selectedFormCode: '',
+		selectedNotice: '',
+		expenseRows: [{ date: '', content: '', vendor: '', amount: 0, remark: '' }],
 
         // 결재선 / 참조자
         approvers: [],
         references: []
     }),
 
+	getters: {
+	    expenseTotal: (state) => {
+	        return state.expenseRows.reduce((sum, row) => sum + (row.amount || 0), 0);
+	    }
+	},
+		
     actions: {
         // ── 문서유형 ──
         async fetchDocTypes() {
@@ -25,11 +34,14 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
             }
         },
 
-        selectDocType(id, name) {
-            this.selectedDocTypeId = id;
-            this.selectedDocTypeName = name;
-            this.formVisible = true;
-        },
+		selectDocType(id, name) {
+		    this.selectedDocTypeId = id;
+		    this.selectedDocTypeName = name;
+		    const doc = this.docTypeList.find(d => d.docTypeId === id);
+		    this.selectedFormCode = doc ? doc.formCode : '';
+		    this.selectedNotice = doc ? doc.notice : '';
+		    this.formVisible = true;
+		},
 
         // ── 결재자 ──
         addApprover(emp) {
@@ -58,7 +70,14 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
         removeReference(idx) {
             this.references.splice(idx, 1);
         },
-		
+
+		addExpenseRow() {
+		    this.expenseRows.push({ date: '', content: '', vendor: '', amount: 0, remark: '' });
+		},
+		removeExpenseRow() {
+		    if (this.expenseRows.length > 1) this.expenseRows.pop();
+		},
+						
 		async saveTemplate(tempName) {
 		    if (this.approvers.length === 0) {
 		        alert('결재자를 먼저 추가해 주세요.');

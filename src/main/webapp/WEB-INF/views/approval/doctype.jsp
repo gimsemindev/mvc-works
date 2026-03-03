@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/approvallist.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/approvaldoctype.css" type="text/css">
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
 <style>[v-cloak] { display: none; }</style>
 </head>
 <body>
@@ -99,7 +100,7 @@
 
         <!-- 추가/수정 모달 -->
         <div class="modal fade" id="formModal" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">
@@ -108,41 +109,55 @@
                         </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
-                    <div class="modal-body p-4">
-                        <div class="mb-3" v-if="store.formMode === 'EDIT'">
-                            <label>유형코드</label>
-                            <input type="text" :value="store.form.typeCode" readonly
-                                   style="background:#f8f9fc; color:#9aa0b4;">
-                            <div style="font-size:11px; color:#9aa0b4; margin-top:6px;">유형코드는 자동 생성되며 변경할 수 없습니다.</div>
-                        </div>
-                        <div class="mb-3">
-                            <label>유형명 <span style="color:#d93025;">*</span></label>
-                            <input type="text" v-model="store.form.typeName" placeholder="예: 휴가신청서">
-                        </div>
-                        <div class="mb-3">
-                            <label>설명</label>
-                            <textarea v-model="store.form.description" rows="2"
-                                      placeholder="예: 연차, 병가 등 각종 휴가 사용 시 제출"
-                                      style="width:100%; resize:vertical; border:1px solid #d1d5db; border-radius:6px; padding:8px 12px; font-size:13px;"></textarea>
-                        </div>
-                        <div class="mb-3" v-if="store.formMode === 'EDIT'">
-                            <label>정렬순서</label>
-                            <input type="number" :value="store.form.sortOrder" readonly
-                                   style="background:#f8f9fc; color:#9aa0b4;">
-                            <div style="font-size:11px; color:#9aa0b4; margin-top:6px;">정렬순서는 자동 부여됩니다.</div>
-                        </div>
-                        <div class="mb-2">
-                            <label>사용여부</label>
-                            <div style="display:flex; gap:16px; margin-top:6px;">
-                                <label style="display:flex; align-items:center; gap:6px; font-size:13px; font-weight:400; cursor:pointer;">
-                                    <input type="radio" v-model="store.form.useYn" value="Y" style="accent-color:#4e73df;"> 사용
-                                </label>
-                                <label style="display:flex; align-items:center; gap:6px; font-size:13px; font-weight:400; cursor:pointer;">
-                                    <input type="radio" v-model="store.form.useYn" value="N" style="accent-color:#4e73df;"> 미사용
-                                </label>
-                            </div>
-                        </div>
-                    </div>
+                      <div class="modal-body p-4">
+                          <div class="mb-3" v-if="store.formMode === 'EDIT'">
+                              <label>유형코드</label>
+                              <input type="text" :value="store.form.typeCode" readonly
+                                     style="background:#f8f9fc; color:#9aa0b4;">
+                              <div style="font-size:11px; color:#9aa0b4; margin-top:6px;">유형코드는 자동 생성되며 변경할 수 없습니다.</div>
+                          </div>
+                          <div class="mb-3">
+                              <label>유형명 <span style="color:#d93025;">*</span></label>
+                              <input type="text" v-model="store.form.typeName" placeholder="예: 휴가신청서">
+                          </div>
+                          <div class="mb-3">
+                              <label>양식코드</label>
+                              <select v-model="store.form.formCode"
+                                      style="width:100%; border:1px solid #d1d5db; border-radius:6px; padding:8px 12px; font-size:13px;">
+                                  <option value="">선택</option>
+                                  <option v-for="fc in store.formCodes" :key="fc.code" :value="fc.code">
+                                      {{ fc.code }} - {{ fc.name }}
+                                  </option>
+                              </select>
+                          </div>
+                          <div class="mb-3">
+                              <label>설명</label>
+                              <textarea v-model="store.form.description" rows="2"
+                                        placeholder="예: 연차, 병가 등 각종 휴가 사용 시 제출"
+                                        style="width:100%; resize:vertical; border:1px solid #d1d5db; border-radius:6px; padding:8px 12px; font-size:13px;"></textarea>
+                          </div>
+                          <div class="mb-3" v-if="store.formMode === 'EDIT'">
+                              <label>정렬순서</label>
+                              <input type="number" :value="store.form.sortOrder" readonly
+                                     style="background:#f8f9fc; color:#9aa0b4;">
+                              <div style="font-size:11px; color:#9aa0b4; margin-top:6px;">정렬순서는 자동 부여됩니다.</div>
+                          </div>
+                          <div class="mb-3">
+                              <label>참고사항</label>
+                              <div id="quill-editor" style="height:180px;"></div>
+                          </div>
+                          <div class="mb-2">
+                              <label>사용여부</label>
+                              <div style="display:flex; gap:16px; margin-top:6px;">
+                                  <label style="display:flex; align-items:center; gap:6px; font-size:13px; font-weight:400; cursor:pointer;">
+                                      <input type="radio" v-model="store.form.useYn" value="Y" style="accent-color:#4e73df;"> 사용
+                                  </label>
+                                  <label style="display:flex; align-items:center; gap:6px; font-size:13px; font-weight:400; cursor:pointer;">
+                                      <input type="radio" v-model="store.form.useYn" value="N" style="accent-color:#4e73df;"> 미사용
+                                  </label>
+                              </div>
+                          </div>
+                      </div>                    
                     <div class="modal-footer">
                         <button class="btn-modal-cancel" data-bs-dismiss="modal">취소</button>
                         <button class="btn-modal-save" @click="handleSave">저장</button>
@@ -171,14 +186,39 @@
     import { createPinia } from 'pinia';
     import { useDocTypeStore } from 'docTypeStore';
 
+    let quill = null;
+
     const app = createApp({
         setup() {
             const store = useDocTypeStore();
             const list = computed(() => store.list);
 
-            onMounted(() => store.fetchList());
+            onMounted(() => {
+                store.fetchList();
+
+                document.getElementById('formModal').addEventListener('shown.bs.modal', () => {
+                    if (!quill) {
+                        quill = new Quill('#quill-editor', {
+                            theme: 'snow',
+                            placeholder: '참고사항을 입력하세요...',
+                            modules: {
+                                toolbar: [
+                                    ['bold', 'italic', 'underline'],
+                                    [{ 'color': [] }],
+                                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                                    ['clean']
+                                ]
+                            }
+                        });
+                    }
+                    quill.clipboard.dangerouslyPasteHTML(store.form.notice || '');
+                });
+            });
 
             const handleSave = async () => {
+                if (quill) {
+                    store.form.notice = quill.root.innerHTML;
+                }
                 const result = await store.saveForm();
                 if (result) {
                     const modal = bootstrap.Modal.getInstance(document.getElementById('formModal'));
@@ -194,6 +234,7 @@
     app.mount('#vue-app');
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
