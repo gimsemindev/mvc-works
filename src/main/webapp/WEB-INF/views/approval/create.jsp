@@ -92,6 +92,15 @@
 
             <div class="form-doc-title">{{ store.selectedDocTypeName }}</div>
 
+            <div class="form-section">
+      			<div class="form-section-body">
+          			<div class="form-field">
+              			<label>제목</label>
+              			<input type="text" placeholder="제목을 입력하세요." v-model="store.title">
+          			</div>
+      			</div>
+  			</div>
+            
             <jsp:include page="/WEB-INF/views/approval/include/approvalBasicInfo.jsp"/>
  
             <jsp:include page="/WEB-INF/views/approval/include/approvalLine.jsp"/>
@@ -116,7 +125,7 @@
 
             <!-- 하단 버튼 -->
             <div class="form-footer">
-                <button class="btn-save-temp">
+                <button class="btn-save-temp" @click="store.saveDraft()">
                     <span class="material-symbols-outlined" style="font-size:16px">save</span>
                     임시저장
                 </button>
@@ -142,7 +151,7 @@
 {
 	"imports": {
 		"http": "/dist/util/http.js?v=2",
-		"approvalCreateStore": "/dist/util/store/approvalCreateStore.js?v=2",
+		"approvalCreateStore": "/dist/util/store/approvalCreateStore.js?v=3",
 		"OrgSearchModal": "/dist/util/component/OrgSearchModal.js?v=1",
         "commonCodeStore": "/dist/util/store/commonCodeStore.js?v=1"
 	}

@@ -11,11 +11,11 @@
         <div class="detail-grid-2">
             <div class="form-field">
                 <label>지출 목적 <span style="font-size:10px;color:#9aa0b4;">ⓘ</span></label>
-                <input type="text" placeholder="지출 목적을 입력하세요.">
+                 <input type="text" placeholder="지출 목적을 입력하세요." v-model="store.detailData.claimPurpose">
             </div>
             <div class="form-field">
                 <label>계좌 정보</label>
-                <input type="text" placeholder="예시) 국민은행 00000-000-00000 홍길동">
+                <input type="text" placeholder="예시) OO은행 00000-000-00000 홍길동" v-model="store.detailData.claimAccountInfo">
             </div>
         </div>
 
@@ -65,7 +65,7 @@
 
         <div class="form-field" style="margin-top:10px;">
             <label>상세 설명</label>
-            <textarea rows="5" placeholder="상세 내용을 입력하세요."></textarea>
+            <textarea rows="5" placeholder="상세 내용을 입력하세요." v-model="store.detailData.description"></textarea>
         </div>
         <div class="attach-row">
             <div class="form-field">
