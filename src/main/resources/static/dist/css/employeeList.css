@@ -138,6 +138,8 @@
 .emp-status-leave .emp-dot        { background:#f59e0b; }
 .emp-status-resigned              { background:#fef2f2; color:#b42318; }
 .emp-status-resigned .emp-dot     { background:#ef4444; }
+.emp-status-terminated 			  { background: #bde7ff; color: #0053a6; }
+.emp-status-terminated .emp-dot   { background-color: #0046ff; }
 .emp-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
 
 /* ---- 권한 배지 ---- */

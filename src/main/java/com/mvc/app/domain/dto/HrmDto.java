@@ -14,7 +14,8 @@ public class HrmDto {
     private String  password;           // 비밀번호 (BCrypt 암호화 저장, 조회 시 마스킹)
     private Integer levelCode;          // 권한레벨 숫자 (1~99 등, 51 이상=관리자)
     private Integer enabled;            // 계정 활성화 (1=활성, 0=비활성)
-    private String  empStatusCode;      // 재직상태 (CHAR(1): E=재직, L=휴직, R=퇴직)
+    private String  empStatusCode;      // 재직상태 코드 (ES01=재직, ES02=휴직, ES03=퇴직, ES04=계약만료)
+    private String  empStatusName;		// 재직상태 이름
     private String  lastLoginDate;      // 마지막 로그인일
     private Integer loginFailureCount;  // 로그인 실패 횟수
     private String  e1RegDate;          // employee1 등록일 (컬럼명 충돌 방지용 alias)

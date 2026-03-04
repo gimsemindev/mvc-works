@@ -115,13 +115,17 @@ public class HrmServiceImpl implements HrmService {
             // 기본값 처리
             if (dto.getEnabled()       == null) dto.setEnabled(1);
             if (dto.getEmpStatusCode() == null || dto.getEmpStatusCode().isBlank()) {
-                dto.setEmpStatusCode("E");   // 기본: 재직
+                dto.setEmpStatusCode("ES01");
             }
-            if (dto.getLevelCode() == null) dto.setLevelCode(1);
+            // levelCode: 엑셀 업로드 등에서 이미 값이 설정된 경우 유지, null일 때만 기본값 1 적용
+            if (dto.getLevelCode() == null) {
+                dto.setLevelCode(1);
+            }
 
             // INSERT 순서: employee1 먼저 (FK 부모)
             mapper.insertEmployee1(dto);
             mapper.insertEmployee2(dto);
+            mapper.insertAuthority(dto);
 
         } catch (Exception e) {
             log.error("insertEmployee error", e);
@@ -168,14 +172,13 @@ public class HrmServiceImpl implements HrmService {
 
     // ──────────────────────────────────────────────
     // [6] 선택 삭제
-    //   FK 제약: employee2 먼저 삭제 → employee1 삭제
+    //   employee1의 drawCode : y update 시 탈퇴 처리
     // ──────────────────────────────────────────────
     @Override
     @Transactional
     public void deleteEmployees(List<String> ids) throws Exception {
         try {
-            mapper.deleteEmployees2(ids);   // 자식 먼저
-            mapper.deleteEmployees1(ids);   // 부모 나중
+            mapper.deleteEmployees1(ids);
         } catch (Exception e) {
             log.error("deleteEmployees error", e);
             throw e;
@@ -208,8 +211,8 @@ public class HrmServiceImpl implements HrmService {
 
             // 헤더 행 (비밀번호 컬럼 제외한 헤더)
             String[] downloadHeaders = {
-                "사원번호", "이름", "부서코드", "직급코드",
-                "권한레벨", "재직상태", "입사일", "참여프로젝트"
+                "사원번호", "이름", "부서명", "직급명",
+                "권한", "재직상태", "입사일", "참여프로젝트"
             };
             Row header = sheet.createRow(0);
             for (int i = 0; i < downloadHeaders.length; i++) {
@@ -225,11 +228,10 @@ public class HrmServiceImpl implements HrmService {
                 Row row = sheet.createRow(rowNum++);
                 row.createCell(0).setCellValue(nvl(dto.getEmpId()));
                 row.createCell(1).setCellValue(nvl(dto.getName()));
-                row.createCell(2).setCellValue(nvl(dto.getDeptCode()));
-                row.createCell(3).setCellValue(nvl(dto.getGradeCode()));
-                row.createCell(4).setCellValue(dto.getLevelCode() != null
-                        ? String.valueOf(dto.getLevelCode()) : "");
-                row.createCell(5).setCellValue(statusLabel(dto.getEmpStatusCode()));
+                row.createCell(2).setCellValue(nvl(dto.getDeptName()));
+                row.createCell(3).setCellValue(nvl(dto.getGradeName()));
+                row.createCell(4).setCellValue(nvl(dto.getAuthorityName()));
+                row.createCell(5).setCellValue(nvl(dto.getEmpStatusName()));
                 row.createCell(6).setCellValue(nvl(dto.getHireDate()));
                 row.createCell(7).setCellValue(nvl(dto.getProjectNames()));
             }
@@ -241,10 +243,73 @@ public class HrmServiceImpl implements HrmService {
     }
 
     // ──────────────────────────────────────────────
+    // [7-1] 엑셀 업로드 양식 다운로드 (Apache POI)
+    //   헤더: 이름 | 비밀번호 | 부서코드 | 직급코드 | 권한코드 | 권한레벨 | 재직상태코드
+    //   ※ 사원번호는 자동채번, 참여 프로젝트는 자동 연동이므로 양식에서 제외
+    // ──────────────────────────────────────────────
+    @Override
+    public Resource exportExcelTemplate() throws Exception {
+        String[] templateHeaders = {
+            "이름", "비밀번호", "부서코드", "직급코드", "권한코드", "권한레벨", "재직상태코드"
+        };
+
+        try (Workbook wb = new XSSFWorkbook()) {
+            Sheet sheet = wb.createSheet("직원업로드양식");
+
+            // 헤더 스타일
+            CellStyle headerStyle = wb.createCellStyle();
+            headerStyle.setFillForegroundColor(IndexedColors.CORNFLOWER_BLUE.getIndex());
+            headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            headerStyle.setAlignment(HorizontalAlignment.CENTER);
+            Font hFont = wb.createFont();
+            hFont.setBold(true);
+            hFont.setColor(IndexedColors.WHITE.getIndex());
+            headerStyle.setFont(hFont);
+
+            // 헤더 행만 생성 (데이터 행 없음)
+            Row header = sheet.createRow(0);
+            for (int i = 0; i < templateHeaders.length; i++) {
+                Cell cell = header.createCell(i);
+                cell.setCellValue(templateHeaders[i]);
+                cell.setCellStyle(headerStyle);
+                sheet.setColumnWidth(i, 5000);
+            }
+
+            // 안내 행 (2번째 행 — 연한 노란 배경)
+            CellStyle guideStyle = wb.createCellStyle();
+            guideStyle.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
+            guideStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            Font gFont = wb.createFont();
+            gFont.setItalic(true);
+            gFont.setColor(IndexedColors.GREY_50_PERCENT.getIndex());
+            guideStyle.setFont(gFont);
+
+            Row guideRow = sheet.createRow(1);
+            String[] guides = {
+                "예) 홍길동", "예) password123", "예) D00121", "예) RANK03",
+                "예) AUTH01", "예) 1", "예) ES01"
+            };
+            for (int i = 0; i < guides.length; i++) {
+                Cell cell = guideRow.createCell(i);
+                cell.setCellValue(guides[i]);
+                cell.setCellStyle(guideStyle);
+            }
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            wb.write(baos);
+            return new ByteArrayResource(baos.toByteArray());
+        }
+    }
+
+    // ──────────────────────────────────────────────
     // [8] 엑셀 업로드 (Apache POI)
     //   업로드 컬럼 순서 (헤더 행=0, 데이터=1행부터):
-    //   0:사원번호 | 1:이름 | 2:비밀번호 | 3:부서코드 | 4:직급코드
-    //   5:권한레벨 | 6:재직상태(E/L/R)
+    //   0:이름 | 1:비밀번호 | 2:부서코드 | 3:직급코드
+    //   4:권한코드 | 5:권한레벨 | 6:재직상태코드
+    //
+    //   ※ 사원번호: 입력받지 않음 — getNextEmpId() 자동채번
+    //   ※ 참여 프로젝트: 입력받지 않음
+    //   ※ 모든 값 trim() 처리 후 insert
     // ──────────────────────────────────────────────
     @Override
     @Transactional
@@ -255,35 +320,39 @@ public class HrmServiceImpl implements HrmService {
             int lastRow = sheet.getLastRowNum();
 
             for (int i = 1; i <= lastRow; i++) {
-                Row row = sheet.getRow(i);
+                Row row = sheet.getRow(i);	
                 if (row == null) continue;
 
-                String empId = cellStr(row, 0);
-                String name  = cellStr(row, 1);
-                if (empId.isBlank() || name.isBlank()) continue;   // 필수값 없으면 스킵
+                // 0:이름 (필수) — 없으면 행 스킵
+                String name = cellStr(row, 0);   // 이미 trim() 처리됨
+                if (name.isBlank()) continue;
 
-                // 중복 사원번호 스킵
-                if (isDuplicateEmpId(empId)) {
-                    log.warn("엑셀 업로드 - 중복 사원번호 스킵: {}", empId);
-                    continue;
-                }
+                // 사원번호 자동채번 (입력받지 않음)
+                String nextEmpId = getNextEmpId();
 
                 HrmDto dto = new HrmDto();
-                dto.setEmpId(empId);
-                dto.setName(name);
-                dto.setPassword(cellStr(row, 2));                          // 비밀번호
-                dto.setDeptCode(cellStr(row, 3));
-                dto.setGradeCode(cellStr(row, 4));
+                dto.setEmpId(nextEmpId);
+                dto.setName(name);                                        // 이름
+                dto.setPassword(cellStr(row, 1));                         // 비밀번호 (trim 후 BCrypt 암호화는 insertEmployee에서 처리)
+                dto.setDeptCode(cellStr(row, 2));                         // 부서코드
+                dto.setGradeCode(cellStr(row, 3));                        // 직급코드
+                dto.setAuthorityCode(cellStr(row, 4));                    // 권한코드
 
                 // 권한레벨 (숫자)
                 String levelStr = cellStr(row, 5);
                 if (!levelStr.isBlank()) {
-                    try { dto.setLevelCode(Integer.parseInt(levelStr)); }
-                    catch (NumberFormatException ignore) { dto.setLevelCode(1); }
+                    try {
+                    	dto.setLevelCode(Integer.parseInt(levelStr)); 
+	                }catch (NumberFormatException ignore) { dto.setLevelCode(1); }
+                } else {
+                    dto.setLevelCode(1);
                 }
 
-                // 재직상태 (E/L/R)
-                dto.setEmpStatusCode(cellStrDefault(row, 6, "E"));
+                // 재직상태코드 (기본값 ES01=재직)
+                String statusCode = cellStr(row, 6);
+                dto.setEmpStatusCode(statusCode.isBlank() ? "ES01" : statusCode);
+
+                // 참여 프로젝트: 입력받지 않음 (별도 연동)
 
                 insertEmployee(dto);
                 count++;
@@ -305,29 +374,29 @@ public class HrmServiceImpl implements HrmService {
         }
     }
 
-    // ── 재직상태 코드 → 라벨 변환 ─────────────────────────────
-    private String statusLabel(String code) {
-        if (code == null) return "";
-        return switch (code) {
-            case "E" -> "재직";
-            case "L" -> "휴직";
-            case "R" -> "퇴직";
-            default  -> code;
-        };
-    }
-
     // ── 내부 유틸 ─────────────────────────────────────────────
     private String nvl(String s) { return s == null ? "" : s; }
 
     private String cellStr(Row row, int col) {
         Cell cell = row.getCell(col);
         if (cell == null) return "";
-        cell.setCellType(CellType.STRING);
-        return cell.getStringCellValue().trim();
-    }
-
-    private String cellStrDefault(Row row, int col, String defaultVal) {
-        String val = cellStr(row, col);
-        return val.isBlank() ? defaultVal : val;
+        switch (cell.getCellType()) {
+            case NUMERIC:
+                // 숫자 셀: 소수점 없이 정수로 변환 (ex. 5.0 → "5")
+                double d = cell.getNumericCellValue();
+                if (d == Math.floor(d) && !Double.isInfinite(d)) {
+                    return String.valueOf((long) d).trim();
+                }
+                return String.valueOf(d).trim();
+            case BOOLEAN:
+                return String.valueOf(cell.getBooleanCellValue()).trim();
+            case FORMULA:
+                try { return String.valueOf((long) cell.getNumericCellValue()).trim(); }
+                catch (Exception e) { return cell.getStringCellValue().trim(); }
+            case BLANK:
+                return "";
+            default:
+                return cell.getStringCellValue().trim();
+        }
     }
 }

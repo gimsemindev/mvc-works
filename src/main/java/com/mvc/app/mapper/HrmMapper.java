@@ -26,6 +26,7 @@ public interface HrmMapper {
     // ── 등록 : employee1 → employee2 순서로 INSERT ─────────────
     void insertEmployee1(HrmDto dto) throws SQLException;  // 인증 정보 먼저
     void insertEmployee2(HrmDto dto) throws SQLException;  // 인적 정보 후
+    void insertAuthority(HrmDto dto) throws SQLException;  // 권한 정보
 
     // ── 수정 : 각 테이블 개별 UPDATE ──────────────────────────
     void updateEmployee1(HrmDto dto) throws SQLException;  // 비밀번호, levelCode 등

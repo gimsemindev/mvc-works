@@ -104,6 +104,14 @@
                     AND    ea.authority = #{authorityCode}
                 )
             </if>
+            <!-- 부서코드 검색 -->
+            <if test="deptCode != null and deptCode != ''">
+                AND e2.deptCode = #{deptCode}
+            </if>
+            <!-- 직급코드 검색 -->
+            <if test="gradeCode != null and gradeCode != ''">
+                AND e2.gradeCode = #{gradeCode}
+            </if>
             <!-- 프로젝트명 검색 : empProject → project JOIN -->
             <if test="project != null and project != ''">
                 AND EXISTS (
@@ -132,6 +140,7 @@
                     AND    ep.isPmo = 'Y'
                 )
             </if>
+            	AND e1.drawCode is null
         </where>
     </sql>
 
@@ -161,13 +170,14 @@
         TO_CHAR(e2.hireDate, 'YYYY-MM-DD') AS hireDate,
         e2.deptCode,
         e2.gradeCode,
-        -- commoncode JOIN으로 코드명 조회 (화면 표시용)
         (SELECT cc.codeName FROM COMMONCODE cc
          WHERE cc.codeGroup = 'DEPT' AND cc.code = e2.deptCode) AS deptName,
         (SELECT cc.codeName FROM COMMONCODE cc
          WHERE cc.codeGroup = 'RANK' AND cc.code = e2.gradeCode) AS gradeName,
         (SELECT cc.codeName FROM COMMONCODE cc
          WHERE cc.codeGroup = 'AUTHORITY' AND cc.code = ea.authority) AS authorityName,
+        (SELECT cc.codeName FROM COMMONCODE cc
+         WHERE cc.codeGroup = 'EMPSTATUS' AND cc.code = e1.empstatuscode) AS empStatusName,
         e2.regEmpId,
         TO_CHAR(e2.regDate,  'YYYY-MM-DD') AS e2RegDate,
         (
@@ -284,11 +294,27 @@
              #{addr1,        jdbcType=VARCHAR},
              #{addr2,        jdbcType=VARCHAR},
              #{email,        jdbcType=VARCHAR},
-             #{hireDate,     jdbcType=DATE},
+             SYSDATE,
              #{deptCode,     jdbcType=VARCHAR},
              #{gradeCode,    jdbcType=VARCHAR},
              #{regEmpId,     jdbcType=VARCHAR},
              SYSDATE)
+    </insert>
+    
+    <!-- ════════════════════════════════════════
+         [5-3] 직원 권한 등록 — employeeAuthority INSERT
+    ════════════════════════════════════════ -->
+    <insert id="insertAuthority" parameterType="com.mvc.app.domain.dto.HrmDto">
+        INSERT INTO employeeAuthority
+            (
+            empId, 
+            authority
+            )
+        VALUES
+            (
+            #{empId},
+            #{authorityCode}
+             )
     </insert>
 
     <!-- ════════════════════════════════════════
@@ -334,32 +360,22 @@
     </update>
 
     <!-- ════════════════════════════════════════
-         [7] 단건 삭제 — FK 제약으로 employee2 먼저
+         [7] 단건 탈퇴 — employee1 drawCode 탈퇴여부 'y' 처리
     ════════════════════════════════════════ -->
-    <delete id="deleteEmployee2" parameterType="string">
-        DELETE FROM employee2 WHERE empId = #{empId}
-    </delete>
-    <delete id="deleteEmployee1" parameterType="string">
-        DELETE FROM employee1 WHERE empId = #{empId}
-    </delete>
+    <update id="deleteEmployee1" parameterType="string">
+        UPDATE employee1 SET drawCode = 'y' WHERE empId = #{empId}
+    </update>
 
     <!-- ════════════════════════════════════════
-         [8] 벌크 삭제 — FK 제약으로 employee2 먼저
+         [8] 벌크 삭제 — employee1 drawCode 탈퇴여부 'y' 처리
     ════════════════════════════════════════ -->
-    <delete id="deleteEmployees2" parameterType="list">
-        DELETE FROM employee2
+    <update id="deleteEmployees1" parameterType="list">
+        UPDATE employee1 SET drawCode = 'y'
         WHERE empId IN
         <foreach collection="list" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
-    </delete>
-    <delete id="deleteEmployees1" parameterType="list">
-        DELETE FROM employee1
-        WHERE empId IN
-        <foreach collection="list" item="id" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-    </delete>
+    </update>
 
     <!-- ════════════════════════════════════════
          [9] 공통코드 조회 — codeGroup 별 code/codename 목록

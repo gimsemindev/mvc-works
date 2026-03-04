@@ -48,10 +48,35 @@
                                placeholder="프로젝트명 입력" @keyup.enter="store.search()">
                     </div>
 
+                    <!-- 부서 -->
+                    <div class="emp-filter-group">
+                        <label>부서</label>
+                        <select v-model="store.searchParams.deptCode" @change="store.search()">
+                            <option value="">전체</option>
+                            <option v-for="d in store.deptOptions"
+                                    :key="d.CODE" :value="d.CODE">
+                                {{ d.CODENAME }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- 직급 -->
+                    <div class="emp-filter-group">
+                        <label>직급</label>
+                        <select v-model="store.searchParams.gradeCode" @change="store.search()">
+                            <option value="">전체</option>
+                            <option v-for="g in store.gradeOptions"
+                                    :key="g.CODE" :value="g.CODE">
+                                {{ g.CODENAME }}
+                            </option>
+                        </select>
+                    </div>
+
+
                     <!-- 재직상태 (empStatusCode) -->
                     <div class="emp-filter-group">
                         <label>재직상태</label>
-                        <select v-model="store.searchParams.empStatusCode">
+                        <select v-model="store.searchParams.empStatusCode" @change="store.search()">
                             <option value="">전체</option>
                             <option v-for="s in store.statusOptions"
                                     :key="s.CODE" :value="s.CODE">
@@ -60,16 +85,23 @@
                         </select>
                     </div>
 
-                    <!-- 권한레벨 (levelCode) -->
+                    <!-- 권한등급 (authorityCode) -->
                     <div class="emp-filter-group" style="min-width:150px;">
-                        <label>권한레벨</label>
-                        <select v-model="store.searchParams.authorityCode">
+                        <label>권한등급</label>
+                        <select v-model="store.searchParams.authorityCode" @change="store.search()">
                             <option value="">전체</option>
                             <option v-for="lv in store.authorityOptions"
                                     :key="lv.CODE" :value="lv.CODE">
                                 {{ lv.CODENAME }}
                             </option>
                         </select>
+                    </div>
+                    
+                    <!-- 권한레벨 (levelCode) -->
+                    <div class="emp-filter-group">
+                        <label>권한레벨</label>
+                        <input type="text" v-model="store.searchParams.levelCode"
+                               placeholder="권한레벨 입력" @keyup.enter="store.search()">
                     </div>
 
                     <!-- PMO 필터 (empProject.isPmo 기준) -->
@@ -125,6 +157,9 @@
                     </button>
                     <button class="emp-btn emp-btn-excel-down" @click="store.excelDownload()">
                         <i class="bi bi-file-earmark-arrow-down"></i> 엑셀 다운로드
+                    </button>
+                    <button class="emp-btn emp-btn-excel-template" @click="store.excelTemplateDownload()">
+                        <i class="bi bi-file-earmark-ruled"></i> 엑셀 양식 다운로드
                     </button>
                     <button class="emp-btn emp-btn-excel-up"   @click="store.triggerExcelUpload()">
                         <i class="bi bi-file-earmark-arrow-up"></i> 엑셀 업로드
@@ -190,8 +225,11 @@
                                     </span>
                                 </th>
 
-                                <!-- 권한레벨 -->
-                                <th>권한레벨</th>
+                                <!-- 권한 -->
+                                <th>권한</th>
+
+                                <!-- 레벨 -->
+                                <th>레벨</th>
 
                                 <!-- 재직상태 -->
                                 <th class="sortable" @click="store.sortBy('status')">
@@ -207,7 +245,7 @@
 
                             <!-- 로딩 -->
                             <tr v-if="store.loading">
-                                <td colspan="10" style="text-align:center; padding:30px; color:#94a3b8;">
+                                <td colspan="11" style="text-align:center; padding:30px; color:#94a3b8;">
                                     <i class="bi bi-arrow-repeat" style="animation:spin 1s linear infinite;"></i>
                                     &nbsp;불러오는 중...
                                 </td>
@@ -215,7 +253,7 @@
 
                             <!-- 데이터 없음 -->
                             <tr v-else-if="store.list.length === 0">
-                                <td colspan="10" style="text-align:center; padding:30px; color:#94a3b8;">
+                                <td colspan="11" style="text-align:center; padding:30px; color:#94a3b8;">
                                     조회된 직원 정보가 없습니다.
                                 </td>
                             </tr>
@@ -299,7 +337,7 @@
                                 <td class="emp-editable" @dblclick.stop="store.activateRowEdit(emp)">
                                     <select v-if="emp._editing || emp._isNew" class="emp-edit-select"
                                             v-model="emp.deptCode"
-                                            @change="store.markDirty(emp)" @click.stop>
+                                            @change="store.onDeptChange(emp)" @click.stop>
                                         <option value="">（없음）</option>
                                         <option v-for="d in store.deptOptions" :key="d.CODE" :value="d.CODE">{{ d.CODENAME }}</option>
                                     </select>
@@ -310,7 +348,7 @@
                                 <td class="emp-editable" @dblclick.stop="store.activateRowEdit(emp)">
                                     <select v-if="emp._editing || emp._isNew" class="emp-edit-select"
                                             v-model="emp.gradeCode"
-                                            @change="store.markDirty(emp)" @click.stop>
+                                            @change="store.onGradeChange(emp)" @click.stop>
                                         <option value="">（없음）</option>
                                         <option v-for="g in store.gradeOptions" :key="g.CODE" :value="g.CODE">{{ g.CODENAME }}</option>
                                     </select>
@@ -321,11 +359,22 @@
                                 <td class="emp-editable" @dblclick.stop="store.activateRowEdit(emp)">
                                     <select v-if="emp._editing || emp._isNew" class="emp-edit-select"
                                             v-model="emp.authorityCode"
-                                            @change="store.markDirty(emp)" @click.stop>
+                                            @change="store.onAuthorityChange(emp)" @click.stop>
                                         <option value="">（없음）</option>
                                         <option v-for="l in store.authorityOptions" :key="l.CODE" :value="l.CODE">{{ l.CODENAME }}</option>
                                     </select>
                                     <span v-else>{{ emp.authorityName || emp.authorityCode || '-' }}</span>
+                                </td>
+
+                                <!-- 레벨 (편집 가능) -->
+                                <td class="emp-editable" @dblclick.stop="store.activateRowEdit(emp)">
+                                    <input v-if="emp._editing || emp._isNew"
+                                           type="number" v-model.number="emp.levelCode"
+                                           class="emp-edit-input"
+                                           style="width:60px; text-align:center;"
+                                           min="1" max="99"
+                                           @input="store.markDirty(emp)" @click.stop>
+                                    <span v-else>{{ emp.levelCode != null ? emp.levelCode : '-' }}</span>
                                 </td>
 
                                 <!-- 재직상태 (empStatusCode, 편집 가능) -->
@@ -342,10 +391,10 @@
                                     <template v-else>
                                         <span class="emp-status-badge"
                                               :class="{
-                                                  'emp-status-employed': emp.empStatusCode === 'ES01',
-                                                  'emp-status-leave'   : emp.empStatusCode === 'ES02',
-                                                  'emp-status-resigned': emp.empStatusCode === 'ES03',
-                                                  'emp-status-resigned': emp.empStatusCode === 'ES04'
+                                                  'emp-status-employed'  : emp.empStatusCode === 'ES01',
+                                                  'emp-status-leave'     : emp.empStatusCode === 'ES02',
+                                                  'emp-status-resigned'  : emp.empStatusCode === 'ES03',
+                                                  'emp-status-terminated': emp.empStatusCode === 'ES04'
                                               }">
                                             <span class="emp-dot"></span>
                                             {{ store.statusLabel(emp.empStatusCode) }}

@@ -54,11 +54,13 @@ public class HrmController {
             @RequestParam(name = "pmoN",           defaultValue = "false") boolean pmoN,
             @RequestParam(name = "sortCol",        defaultValue = "")      String sortCol,
             @RequestParam(name = "sortDir",        defaultValue = "asc")   String sortDir,
-            @RequestParam(name = "authorityCode",  defaultValue = "")	   String authorityCode) {
+            @RequestParam(name = "authorityCode",  defaultValue = "")	   String authorityCode,
+            @RequestParam(name = "deptCode",       defaultValue = "")      String deptCode,
+            @RequestParam(name = "gradeCode",      defaultValue = "")      String gradeCode) {
 
         try {
             Map<String, Object> params = buildSearchParams(
-                name, empNo, project, empStatusCode, levelCode, pmoY, pmoN, sortCol, sortDir, authorityCode
+                name, empNo, project, empStatusCode, levelCode, pmoY, pmoN, sortCol, sortDir, authorityCode, deptCode, gradeCode
             );
 
             int totalCount = hrmService.dataCount(params);
@@ -172,11 +174,13 @@ public class HrmController {
             @RequestParam(name = "levelCode",     defaultValue = "") String levelCode,
             @RequestParam(name = "pmoY",          defaultValue = "false") boolean pmoY,
             @RequestParam(name = "pmoN",          defaultValue = "false") boolean pmoN,
-            @RequestParam(name = "authorityCode", defaultValue = "") String authorityCode) {
+            @RequestParam(name = "authorityCode", defaultValue = "") String authorityCode,
+            @RequestParam(name = "deptCode",      defaultValue = "") String deptCode,
+            @RequestParam(name = "gradeCode",     defaultValue = "") String gradeCode) {
 
         try {
             Map<String, Object> params = buildSearchParams(
-                name, empNo, project, empStatusCode, levelCode, pmoY, pmoN, "", "asc", authorityCode
+                name, empNo, project, empStatusCode, levelCode, pmoY, pmoN, "", "asc", authorityCode, deptCode, gradeCode
             );
 
             Resource resource = hrmService.exportExcel(params);
@@ -238,6 +242,28 @@ public class HrmController {
     }
 
     // ──────────────────────────────────────────────
+    // [8-1] 엑셀 업로드 양식 다운로드 (GET /api/hrm/excel/template)
+    //   헤더 행(이름, 비밀번호, 부서코드, 직급코드, 권한코드, 권한레벨, 재직상태코드)만 있는 빈 양식 반환
+    //   ※ 사원번호·참여 프로젝트는 자동처리이므로 양식에 포함하지 않음
+    // ──────────────────────────────────────────────
+    @GetMapping("/excel/template")
+    public ResponseEntity<?> downloadExcelTemplate() {
+        try {
+            Resource resource = hrmService.exportExcelTemplate();
+            String filename = URLEncoder.encode("직원업로드양식.xlsx", StandardCharsets.UTF_8)
+                              .replace("+", "%20");
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename*=UTF-8''" + filename)
+                    .header("Content-Type",
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    .body(resource);
+        } catch (Exception e) {
+            log.error("엑셀 양식 다운로드 오류", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    // ──────────────────────────────────────────────
     // [8] 공통코드 일괄 조회 (GET /api/hrm/codes)
     //   화면 초기 로딩 시 부서·직급·재직상태 옵션 조회
     // ──────────────────────────────────────────────
@@ -263,7 +289,8 @@ public class HrmController {
             String empStatusCode, String levelCode,
             boolean pmoY, boolean pmoN,
             String sortCol, String sortDir,
-            String authorityCode) {
+            String authorityCode,
+            String deptCode, String gradeCode) {
 
         Map<String, Object> map = new HashMap<>();
         map.put("name",          name);
@@ -273,6 +300,8 @@ public class HrmController {
         map.put("pmoY",          pmoY);
         map.put("pmoN",          pmoN);
         map.put("authorityCode", (authorityCode != null && !authorityCode.isBlank()) ? authorityCode : null);
+        map.put("deptCode",      (deptCode  != null && !deptCode.isBlank())  ? deptCode  : null);
+        map.put("gradeCode",     (gradeCode != null && !gradeCode.isBlank()) ? gradeCode : null);
         if (levelCode != null && !levelCode.isBlank()) {
             try { map.put("levelCode", Integer.parseInt(levelCode)); }
             catch (NumberFormatException e) { map.put("levelCode", null); }

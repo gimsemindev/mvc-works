@@ -15,6 +15,8 @@ export const useHrmStore = defineStore('hrm', {
             name:          '',
             empNo:         '',      // empId 검색용 (LIKE)
             project:       '',
+            deptCode:      '',      // 부서 공통코드 검색용
+            gradeCode:     '',      // 직급 공통코드 검색용
             empStatusCode: '',      // E=재직 / L=휴직 / R=퇴직
             levelCode:     '',      // 권한레벨 숫자
 			authorityCode: '',      // 권한 공통코드 검색용
@@ -34,7 +36,7 @@ export const useHrmStore = defineStore('hrm', {
         deptOptions:   [],   // { code, codeName } — codeGroup='DEPT'
         gradeOptions:  [],   // { code, codeName } — codeGroup='RANK'
         statusOptions: [],   // { code, codeName } — codeGroup='EMPSTATUS'
-		authorityOptions: [],
+		authorityOptions: []
     }),
 
     // ──────────────────────────────────────────────
@@ -213,8 +215,13 @@ export const useHrmStore = defineStore('hrm', {
         //   - 사원번호(empId)는 _isNew=true 일 때만 수정 가능
         // ════════════════════════════════════════════
         activateRowEdit(emp) {
+            // 다른 편집 중인 행을 닫을 때 별도 처리 불필요
+            // — 부서/직급/권한은 @change 시점에 코드명이 emp 객체에 즉시 반영됨
+            // — 재직상태/레벨은 v-model 로 emp 객체에 직접 바인딩되므로 자동 유지
             this.list.forEach(e => {
-                if (e !== emp && e._editing && !e._isNew) e._editing = false;
+                if (e !== emp && e._editing && !e._isNew) {
+                    e._editing = false;
+                }
             });
             emp._editing = true;
         },
@@ -261,9 +268,17 @@ export const useHrmStore = defineStore('hrm', {
         // [9] 엑셀 다운로드
         // ════════════════════════════════════════════
         excelDownload() {
-            const { name, empNo, project, empStatusCode, levelCode, authorityCode, pmoY, pmoN } = this.searchParams;
-            const qs = new URLSearchParams({ name, empNo, project, empStatusCode, levelCode, authorityCode, pmoY, pmoN });
+            const { name, empNo, project, deptCode, gradeCode, empStatusCode, levelCode, authorityCode, pmoY, pmoN } = this.searchParams;
+            const qs = new URLSearchParams({ name, empNo, project, deptCode, gradeCode, empStatusCode, levelCode, authorityCode, pmoY, pmoN });
             location.href = '/api/hrm/excel/download?' + qs;
+        },
+
+        // ════════════════════════════════════════════
+        // [9-1] 엑셀 업로드 양식 다운로드
+        //   헤더(이름·비밀번호·부서코드·직급코드·권한코드·권한레벨·재직상태코드)만 있는 빈 양식
+        // ════════════════════════════════════════════
+        excelTemplateDownload() {
+            location.href = '/api/hrm/excel/template';
         },
 
         // ════════════════════════════════════════════
@@ -306,6 +321,26 @@ export const useHrmStore = defineStore('hrm', {
         // ════════════════════════════════════════════
         deactivateAll() { this.list.forEach(e => { e._editing = false; }); },
         markDirty(emp)  { emp._dirty = true; },
+
+        // ════════════════════════════════════════════
+        // 코드값 변경 시 코드명을 emp 객체에 즉시 동기화
+        //   → _editing=false 전환 후 <span> 렌더링에서 올바른 값 표시
+        // ════════════════════════════════════════════
+        onDeptChange(emp) {
+            const found = this.deptOptions.find(d => d.CODE === emp.deptCode);
+            emp.deptName = found ? found.CODENAME : emp.deptCode;
+            emp._dirty = true;
+        },
+        onGradeChange(emp) {
+            const found = this.gradeOptions.find(g => g.CODE === emp.gradeCode);
+            emp.gradeName = found ? found.CODENAME : emp.gradeCode;
+            emp._dirty = true;
+        },
+        onAuthorityChange(emp) {
+            const found = this.authorityOptions.find(a => a.CODE === emp.authorityCode);
+            emp.authorityName = found ? found.CODENAME : emp.authorityCode;
+            emp._dirty = true;
+        },
 
         // ════════════════════════════════════════════
         // 정렬

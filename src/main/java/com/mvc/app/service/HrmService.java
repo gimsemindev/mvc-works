@@ -48,6 +48,13 @@ public interface HrmService {
     /** 현재 검색 조건 기준 전체 데이터를 엑셀로 반환 */
     Resource exportExcel(Map<String, Object> params) throws Exception;
 
+    /**
+     * 엑셀 업로드용 빈 양식 파일 반환
+     *  헤더: 이름 | 비밀번호 | 부서코드 | 직급코드 | 권한코드 | 권한레벨 | 재직상태코드
+     *  ※ 사원번호·참여 프로젝트는 자동처리이므로 양식에 포함하지 않음
+     */
+    Resource exportExcelTemplate() throws Exception;
+
     /** 엑셀 업로드 → DB 일괄 등록, 등록된 건수 반환 */
     int importExcel(MultipartFile file) throws Exception;
 
