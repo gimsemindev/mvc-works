@@ -60,20 +60,26 @@
 	</update>
 
 	<!-- 사원 정보 조회 (by empId) -->
-	<select id="findByEmpId" parameterType="String" resultType="com.mvc.app.domain.dto.EmployeeDto">
-		SELECT e1.empId, password, levelCode, enabled,
-			TO_CHAR(e1.regDate, 'YYYY-MM-DD') regDate,
-			TO_CHAR(e1.updateDate, 'YYYY-MM-DD HH24:MI:SS') updateDate,
-			TO_CHAR(lastLoginDate, 'YYYY-MM-DD') lastLoginDate,
-			loginFailureCount, empStatusCode,
-			name, TO_CHAR(birth, 'YYYY-MM-DD') birth, tel,
-			profilePhoto, zip, addr1, addr2, email, ipAddr,
-			authority
-		FROM employee1 e1
-		LEFT OUTER JOIN employee2 e2 ON e1.empId = e2.empId
-		LEFT OUTER JOIN employeeAuthority ea ON e1.empId = ea.empId
-		WHERE e1.empId = #{empId}
-	</select>
+    <select id="findByEmpId" parameterType="String" resultType="com.mvc.app.domain.dto.EmployeeDto">
+        SELECT e1.empId, password, levelCode, e1.enabled,
+            TO_CHAR(e1.regDate, 'YYYY-MM-DD') regDate,
+            TO_CHAR(e1.updateDate, 'YYYY-MM-DD HH24:MI:SS') updateDate,
+            TO_CHAR(lastLoginDate, 'YYYY-MM-DD') lastLoginDate,
+            loginFailureCount, empStatusCode,
+            name, TO_CHAR(birth, 'YYYY-MM-DD') birth, tel,
+            profilePhoto, zip, addr1, addr2, email, ipAddr,
+            authority,
+            e2.deptCode,
+            e2.gradeCode,
+            cd.codeName AS deptName,
+            cg.codeName AS gradeName
+        FROM employee1 e1
+        LEFT OUTER JOIN employee2 e2 ON e1.empId = e2.empId
+        LEFT OUTER JOIN employeeAuthority ea ON e1.empId = ea.empId
+        LEFT OUTER JOIN commonCode cd ON cd.codeGroup = 'DEPT' AND cd.code = e2.deptCode
+        LEFT OUTER JOIN commonCode cg ON cg.codeGroup = 'RANK' AND cg.code = e2.gradeCode
+        WHERE e1.empId = #{empId}
+    </select>
 
 	<!-- 패스워드 실패 횟수 -->
 	<select id="checkFailureCount" parameterType="String" resultType="Integer">

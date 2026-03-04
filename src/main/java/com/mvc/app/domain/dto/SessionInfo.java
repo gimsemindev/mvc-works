@@ -19,4 +19,8 @@ public class SessionInfo {
 	private String email;
 	private int userLevel;
 	private String avatar;      // profilePhoto
+	private String deptCode;    
+	private String deptName;    
+	private String gradeCode;   
+	private String gradeName;   
 }

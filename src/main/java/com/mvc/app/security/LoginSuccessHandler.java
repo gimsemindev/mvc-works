@@ -56,6 +56,10 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler{
 			        .email(dto.getEmail())
 			        .userLevel(dto.getLevelCode() > 0 ? dto.getLevelCode() : 1)
 			        .avatar(dto.getProfilePhoto())
+			        .deptCode(dto.getDeptCode())
+			        .deptName(dto.getDeptName())
+			        .gradeCode(dto.getGradeCode())
+			        .gradeName(dto.getGradeName())
 			        .build();
 
 			//session member로 가져오기 위한 set

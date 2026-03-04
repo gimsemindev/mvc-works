@@ -20,7 +20,7 @@
             </div>
             <div class="form-field">
                 <label>작성자</label>
-                <input type="text" value="경영지원팀 | 신준안 대표" readonly>
+                <input type="text" value="${sessionScope.member.deptName} | ${sessionScope.member.name} ${sessionScope.member.gradeName}" readonly>
             </div>
         </div>
     </div>
