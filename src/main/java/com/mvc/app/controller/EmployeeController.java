@@ -45,9 +45,7 @@ public class EmployeeController {
 	}
 
 	@PostMapping("account")
-	public String memberSubmit(EmployeeDto dto,
-			final RedirectAttributes reAttr,
-			Model model) {
+	public String memberSubmit(EmployeeDto dto, final RedirectAttributes reAttr, Model model) {
 
 		try {
 			dto.setIpAddr(RequestUtils.getClientIp());
@@ -108,8 +106,7 @@ public class EmployeeController {
 	}
 
 	@GetMapping("pwd")
-	public String pwdForm(@RequestParam(name = "dropout", required = false) String dropout,
-			Model model) {
+	public String pwdForm(@RequestParam(name = "dropout", required = false) String dropout, Model model) {
 
 		if (dropout == null) {
 			model.addAttribute("mode", "update");
@@ -121,10 +118,8 @@ public class EmployeeController {
 	}
 
 	@PostMapping("pwd")
-	public String pwdSubmit(@RequestParam(name = "password") String password,
-			@RequestParam(name = "mode") String mode,
-			final RedirectAttributes reAttr,
-			Model model) {
+	public String pwdSubmit(@RequestParam(name = "password") String password, @RequestParam(name = "mode") String mode,
+			final RedirectAttributes reAttr, Model model) {
 
 		try {
 			SessionInfo info = LoginMemberUtil.getSessionInfo();
@@ -132,7 +127,7 @@ public class EmployeeController {
 
 			boolean bPwd = service.isPasswordCheck(info.getEmpId(), password);
 
-			if (! bPwd) {
+			if (!bPwd) {
 				model.addAttribute("mode", mode);
 				model.addAttribute("message", "패스워드가 일치하지 않습니다.");
 
@@ -144,9 +139,8 @@ public class EmployeeController {
 
 				// 회원탈퇴 처리
 				/*
-				  Map<String, Object> map = new HashMap<>();
-				  map.put("empId", info.getEmpId());
-				  map.put("filename", info.getAvatar());
+				 * Map<String, Object> map = new HashMap<>(); map.put("empId", info.getEmpId());
+				 * map.put("filename", info.getAvatar());
 				 */
 
 				// 로그아웃
@@ -166,7 +160,7 @@ public class EmployeeController {
 			model.addAttribute("mode", "update");
 
 			// 회원정보수정폼
-			return "member/member";
+			return "member/editProfile";
 
 		} catch (NullPointerException e) {
 			LoginMemberUtil.logout();
@@ -178,30 +172,46 @@ public class EmployeeController {
 
 	@PostMapping("update")
 	public String updateSubmit(EmployeeDto dto,
-			final RedirectAttributes reAttr,
+			@RequestParam(name = "deleteProfile", required = false) String deleteProfile, RedirectAttributes reAttr,
 			Model model) {
 
 		StringBuilder sb = new StringBuilder();
+
 		try {
+
 			SessionInfo info = LoginMemberUtil.getSessionInfo();
 			dto.setEmpId(info.getEmpId());
 
-			service.updateEmployee(dto, uploadPath);
+			if ("Y".equals(deleteProfile)) {
 
-			// 세션의 profile photo 변경
-			info.setAvatar(dto.getProfilePhoto());
+				Map<String, Object> map = new HashMap<>();
+				map.put("empId", info.getEmpId());
+				map.put("filename", info.getAvatar());
+
+				service.deleteProfilePhoto(map, uploadPath);
+
+				dto.setProfilePhoto(null);
+				info.setAvatar("");
+			}
+
+			service.updateEmployee(dto, uploadPath);
+			EmployeeDto newDto = service.findByEmpId(info.getEmpId());
+
+			info.setAvatar(newDto.getProfilePhoto());
+
+			reAttr.addFlashAttribute("dto", newDto);
 
 			sb.append(dto.getName() + "님의 회원정보가 정상적으로 변경되었습니다.<br>");
-			sb.append("메인화면으로 이동 하시기 바랍니다.<br>");
+
 		} catch (Exception e) {
-			sb.append(dto.getName() + "님의 회원정보 변경이 실패했습니다.<br>");
-			sb.append("잠시후 다시 변경 하시기 바랍니다.<br>");
+
+			sb.append("회원정보 변경이 실패했습니다.<br>");
 		}
 
 		reAttr.addFlashAttribute("title", "회원 정보 수정");
 		reAttr.addFlashAttribute("message", sb.toString());
 
-		return "redirect:/member/complete";
+		return "redirect:/home";
 	}
 
 	// 패스워드 찾기
@@ -209,7 +219,7 @@ public class EmployeeController {
 	public String pwdFindForm(HttpSession session) throws Exception {
 		SessionInfo info = LoginMemberUtil.getSessionInfo();
 
-		if(info != null) {
+		if (info != null) {
 			return "redirect:/";
 		}
 
@@ -217,13 +227,12 @@ public class EmployeeController {
 	}
 
 	@PostMapping("pwdFind")
-	public String pwdFindSubmit(@RequestParam(name = "empId") String empId,
-			RedirectAttributes reAttr,
-			Model model) throws Exception {
+	public String pwdFindSubmit(@RequestParam(name = "empId") String empId, RedirectAttributes reAttr, Model model)
+			throws Exception {
 
 		try {
 			EmployeeDto dto = service.findByEmpId(empId);
-			if(dto == null || dto.getEmail() == null || dto.getEnabled() == 0) {
+			if (dto == null || dto.getEmail() == null || dto.getEnabled() == 0) {
 				model.addAttribute("message", "등록된 아이디가 아닙니다.");
 
 				return "member/pwdFind";
@@ -249,25 +258,28 @@ public class EmployeeController {
 
 	@ResponseBody
 	@PostMapping("deleteProfile")
-	public Map<String, ?> deleteProfilePhoto(@RequestParam(name = "profilePhoto") String profilePhoto) {
-		// 프로파일 포토 삭제
-		Map<String, Object> model = new HashMap<String, Object>();
+	public Map<String, ?> deleteProfilePhoto() {
+
+		Map<String, Object> model = new HashMap<>();
 
 		SessionInfo info = LoginMemberUtil.getSessionInfo();
 
 		String state = "false";
+
 		try {
-			if(! profilePhoto.isBlank()) {
-				Map<String, Object> map = new HashMap<>();
-				map.put("empId", info.getEmpId());
-				map.put("filename", info.getAvatar());
 
-				service.deleteProfilePhoto(map, uploadPath);
+			Map<String, Object> map = new HashMap<>();
+			map.put("empId", info.getEmpId());
+			map.put("filename", info.getAvatar());
 
-				info.setAvatar("");
-				state = "true";
-			}
+			service.deleteProfilePhoto(map, uploadPath);
+
+			info.setAvatar("");
+
+			state = "true";
+
 		} catch (Exception e) {
+			log.error("deleteProfile error", e);
 		}
 
 		model.put("state", state);
@@ -276,14 +288,12 @@ public class EmployeeController {
 	}
 
 	@GetMapping("updatePwd")
-	public String updatePwdForm() throws Exception{
+	public String updatePwdForm() throws Exception {
 		return "member/updatePwd";
 	}
 
 	@PostMapping("updatePwd")
-	public String updatePwdSubmit(
-			@RequestParam(name = "password") String password,
-			Model model) throws Exception{
+	public String updatePwdSubmit(@RequestParam(name = "password") String password, Model model) throws Exception {
 
 		try {
 			SessionInfo info = LoginMemberUtil.getSessionInfo();

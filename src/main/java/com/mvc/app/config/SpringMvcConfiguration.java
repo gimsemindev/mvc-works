@@ -12,9 +12,8 @@ public class SpringMvcConfiguration implements WebMvcConfigurer {
 	
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		// 브라우저에서 /uploads/로 시작하는 요청이 오면 로컬의 uploadRoot 경로에서 파일을 찾도록 설정 
-		registry.addResourceHandler("/uploads/**")
-			.addResourceLocations("file:///" + uploadRoot);
-	}
 
+	    registry.addResourceHandler("/uploads/**")
+	            .addResourceLocations("file:" + uploadRoot + "/");
+	}
 }

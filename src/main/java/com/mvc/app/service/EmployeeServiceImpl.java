@@ -26,8 +26,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 	private final StorageService storageService;
 	private final MailSender mailSender;
 	private final PasswordEncoder bcryptEncoder;
-	
-	@Transactional(rollbackFor = {Exception.class})
+
+	@Transactional(rollbackFor = { Exception.class })
 	@Override
 	public void insertEmployee(EmployeeDto dto, String uploadPath) throws Exception {
 		try {
@@ -87,23 +87,33 @@ public class EmployeeServiceImpl implements EmployeeService {
 		}
 	}
 
-	@Transactional(rollbackFor = {Exception.class})
+	@Transactional(rollbackFor = { Exception.class })
 	@Override
 	public void updateEmployee(EmployeeDto dto, String uploadPath) throws Exception {
+
 		try {
+
 			if (dto.getSelectFile() != null && !dto.getSelectFile().isEmpty()) {
-				if (!dto.getProfilePhoto().isBlank()) {
+
+				if (dto.getProfilePhoto() != null && !dto.getProfilePhoto().isBlank()) {
 					storageService.deleteFile(uploadPath, dto.getProfilePhoto());
 				}
+
 				String saveFilename = storageService.uploadFileToServer(dto.getSelectFile(), uploadPath);
+
 				dto.setProfilePhoto(saveFilename);
 			}
+			String newPwd = dto.getNewPwd();
 
-			boolean bPwdUpdate = !isPasswordCheck(dto.getEmpId(), dto.getPassword());
-			if (bPwdUpdate) {
-				String encPassword = bcryptEncoder.encode(dto.getPassword());
-				dto.setPassword(encPassword);
-				mapper.updateEmployeePassword(dto);
+			if (newPwd != null && !newPwd.isBlank()) {
+
+				// 기존 비밀번호와 다르면 변경
+				if (!isPasswordCheck(dto.getEmpId(), newPwd)) {
+
+					dto.setPassword(bcryptEncoder.encode(newPwd));
+
+					mapper.updateEmployeePassword(dto);
+				}
 			}
 			mapper.updateEmployee2(dto);
 
@@ -172,7 +182,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 		}
 	}
 
-	@Transactional(rollbackFor = {Exception.class})
+	@Transactional(rollbackFor = { Exception.class })
 	@Override
 	public void deleteEmployee(Map<String, Object> map, String uploadPath) throws Exception {
 		try {
@@ -236,8 +246,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 				sb.deleteCharAt(index);
 			}
 
-			String result = dto.getName() + "님의 새로 발급된 임시 패스워드는 <b> "
-					+ password.toString() + " </b> 입니다.<br>"
+			String result = dto.getName() + "님의 새로 발급된 임시 패스워드는 <b> " + password.toString() + " </b> 입니다.<br>"
 					+ "로그인 후 반드시 패스워드를 변경하시기 바랍니다.";
 
 			Mail mail = new Mail();
@@ -299,7 +308,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 		}
 	}
 
-	@Transactional(rollbackFor = {Exception.class})
+	@Transactional(rollbackFor = { Exception.class })
 	@Override
 	public void updateRefreshToken(EmployeeDto dto) throws Exception {
 		try {
@@ -325,14 +334,18 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 	@Override
 	public boolean isPasswordCheck(String empId, String password) {
+
+		if (password == null || password.isBlank()) {
+			return false;
+		}
+
 		try {
 			EmployeeDto dto = Objects.requireNonNull(findByEmpId(empId));
 			return bcryptEncoder.matches(password, dto.getPassword());
-		} catch (NullPointerException e) {
-		} catch (Exception e) {
-		}
 
-		return false;
+		} catch (Exception e) {
+			return false;
+		}
 	}
 
 }
