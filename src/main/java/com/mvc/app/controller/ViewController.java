@@ -14,6 +14,11 @@ public class ViewController {
 	public String handleHrmEmployee() {
 		return "hrm/employeeMain";  
 	}
+	
+	@GetMapping("/activity-log")
+	public String handleHrmactivitylog() {
+		return "hrm/activityLogMain";  
+	}
 
 	@GetMapping("/hrm/org")
 	public String handleHrmOrg() {

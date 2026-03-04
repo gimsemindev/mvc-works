@@ -20,9 +20,9 @@
     </a>
     <ul class="sub-menu" id="hrmSubMenu">
         <li><a href="${pageContext.request.contextPath}/hrm">직원 정보통합 관리</a></li>
-        <li><a href="${pageContext.request.contextPath}/hrm/org">직원 조직 관리</a></li>
-        <li><a href="${pageContext.request.contextPath}/hrm/performance">직원 성과 관리</a></li>
-        <li><a href="${pageContext.request.contextPath}/hrm/records">인사관리 기록</a></li>
+        <li><a href="${pageContext.request.contextPath}/activity-log">직원 조직 관리 - 미구현</a></li>
+        <li><a href="${pageContext.request.contextPath}/activity-log">직원 성과 관리 - 미구현</a></li>
+        <li><a href="${pageContext.request.contextPath}/activity-log">인사관리 기록</a></li>
     </ul>
     
     <div class="nav-section">Approval</div>
