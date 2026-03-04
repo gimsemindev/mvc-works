@@ -29,11 +29,10 @@ public class EmployeeDto {
 	private String addr2;
 	private String email;
 	private String ipAddr;
-	
-	private String deptCode;
-	private String deptName;
-	private String gradeCode;
-	private String gradeName;	
+	private String deptCode;        // 부서코드
+	private String deptName;        // 부서명
+	private String gradeCode;       // 직급코드
+	private String gradeName;       // 직급명	
 
 	private MultipartFile selectFile;
 
@@ -41,6 +40,9 @@ public class EmployeeDto {
 	private String oldAuthority;
 
 	private String refreshTokenValue;
+	
+	private String newPwd;
+	private String confirmPwd;
 
 	private long num;
 	private String regEmpId;        // 등록사원번호 (employeeStatus 등록자)
