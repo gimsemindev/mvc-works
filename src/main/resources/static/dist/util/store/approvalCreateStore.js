@@ -255,38 +255,6 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 				    detail.description = editorEl ? editorEl.innerHTML : '';
 				}
 
-		        if (this.selectedFormCode === 'FM001') {
-		            detail.leaveType = this.detailData.leaveType;
-		            detail.leaveStartDate = this.detailData.leaveStartDate;
-		            detail.leaveStartDayType = this.detailData.leaveStartDayType;
-		            detail.leaveEndDate = this.detailData.leaveEndDate;
-		            detail.leaveEndDayType = this.detailData.leaveEndDayType;
-		            detail.leaveTotalDays = this.detailData.leaveTotalDays;
-		            detail.description = this.detailData.description;
-		        } else if (this.selectedFormCode === 'FM002') {
-		            detail.biztripPurpose = this.detailData.biztripPurpose;
-		            detail.biztripCompanion = this.detailData.biztripCompanion;
-		            detail.biztripStartDate = this.detailData.biztripStartDate;
-		            detail.biztripEndDate = this.detailData.biztripEndDate;
-		            detail.description = this.detailData.description;
-		        } else if (this.selectedFormCode === 'FM003') {
-		            detail.expensePurpose = this.detailData.expensePurpose;
-		            detail.expensePayMethod = this.detailData.expensePayMethod;
-		            detail.expenseDueDate = this.detailData.expenseDueDate;
-		            detail.expenseRows = this.expenseRows;
-		            detail.description = this.detailData.description;
-		        } else if (this.selectedFormCode === 'FM004') {
-		            detail.claimPurpose = this.detailData.claimPurpose;
-		            detail.claimAccountInfo = this.detailData.claimAccountInfo;
-		            detail.expenseRows = this.expenseRows;
-		            detail.description = this.detailData.description;
-		        } else if (this.selectedFormCode === 'FM005') {
-		            detail.generalPurpose = this.detailData.generalPurpose;
-		            // Quill 에디터 내용 가져오기
-		            const editorEl = document.querySelector('#general-editor .ql-editor');
-		            detail.description = editorEl ? editorEl.innerHTML : '';
-		        }
-
 		        const data = {
 		            docTypeId: this.selectedDocTypeId,
 		            title: this.title,
