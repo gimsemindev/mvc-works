@@ -12,9 +12,10 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 		selectedNotice: '',
 		expenseRows: [{ date: '', content: '', vendor: '', amount: 0, remark: '' }],
 
-        // 결재선 / 참조자
+        // 결재선 / 참조자 / 첨부파일
         approvers: [],
         references: [],
+		attachedFiles: [],
 
 		title: '',
 		detailData: {
@@ -98,9 +99,38 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
             this.references.splice(idx, 1);
         },
 
+		// ── 첨부파일 ──
+		addFiles(fileList) {
+		    Array.from(fileList).forEach(file => {
+		        if (this.attachedFiles.length >= 10) {
+		            alert('첨부파일은 최대 10개까지 가능합니다.');
+		            return;
+		        }
+		        if (file.size > 50 * 1024 * 1024) {
+		            alert(file.name + ': 파일 크기가 50MB를 초과합니다.');
+		            return;
+		        }
+		        if (this.attachedFiles.some(f => f.name === file.name && f.size === file.size)) {
+		            return;
+		        }
+		        this.attachedFiles.push(file);
+		    });
+		},
+				
+		removeFile(idx) {
+		    this.attachedFiles.splice(idx, 1);
+		},
+
+		formatFileSize(bytes) {
+		    if (bytes < 1024) return bytes + 'B';
+		    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + 'KB';
+		    return (bytes / (1024 * 1024)).toFixed(2) + 'MB';
+		},	
+			
 		addExpenseRow() {
 		    this.expenseRows.push({ date: '', content: '', vendor: '', amount: 0, remark: '' });
 		},
+		
 		removeExpenseRow() {
 		    if (this.expenseRows.length > 1) this.expenseRows.pop();
 		},
@@ -249,7 +279,17 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 					
 		        };
 
-		        await http.post('/approval/doc', data);
+				const formData = new FormData();
+				formData.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+
+				this.attachedFiles.forEach(file => {
+				    formData.append('files', file);
+				});
+
+				await http.post('/approval/doc', formData, {
+				    headers: { 'Content-Type': 'multipart/form-data' }
+				});
+				
 		        alert('임시저장되었습니다.');
 				const ctx = document.querySelector('meta[name="ctx"]').content;
 				location.href = ctx + '/approval/list';

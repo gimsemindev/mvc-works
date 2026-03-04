@@ -4,9 +4,10 @@ import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.mvc.app.domain.dto.ApprovalDocDto;
 import com.mvc.app.domain.dto.SessionInfo;
@@ -25,7 +26,9 @@ public class ApprovalDocRestController {
 
     // 임시저장
     @PostMapping
-    public ResponseEntity<?> saveDraft(@RequestBody ApprovalDocDto dto) {
+    public ResponseEntity<?> saveDraft(
+            @RequestPart("data") ApprovalDocDto dto,
+            @RequestPart(value = "files", required = false) MultipartFile[] files) {
         try {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
             dto.setWriterEmpId(info.getEmpId());
@@ -38,7 +41,7 @@ public class ApprovalDocRestController {
             log.info("★ deptCode={}, deptName={}, gradeCode={}, gradeName={}",
             	      info.getDeptCode(), info.getDeptName(), info.getGradeCode(), info.getGradeName());
             
-            service.saveDraft(dto);
+            service.saveDraft(dto, files);
             return ResponseEntity.ok(Map.of("msg", "임시저장 완료"));
         } catch (Exception e) {
             log.info("saveDraft : ", e);

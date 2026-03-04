@@ -59,4 +59,10 @@
         )
     </insert>
 
+	<!-- 첨부파일 -->
+    <insert id="insertFile" parameterType="com.mvc.app.domain.dto.ApprovalFileDto">
+        INSERT INTO approvalFile (fileId, docId, oriFilename, saveFilename, fileSize, regDate)
+        VALUES (approvalFile_seq.NEXTVAL, #{docId}, #{oriFilename}, #{saveFilename}, #{fileSize}, SYSDATE)
+    </insert>
+
 </mapper>

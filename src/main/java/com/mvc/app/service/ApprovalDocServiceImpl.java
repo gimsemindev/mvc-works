@@ -2,13 +2,17 @@ package com.mvc.app.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.mvc.app.common.StorageService;
 import com.mvc.app.domain.dto.ApprovalDocDto;
+import com.mvc.app.domain.dto.ApprovalFileDto;
 import com.mvc.app.domain.dto.ApprovalLineDto;
 import com.mvc.app.domain.dto.ApprovalRefDto;
 import com.mvc.app.mapper.ApprovalDocMapper;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -16,10 +20,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ApprovalDocServiceImpl implements ApprovalDocService {
     private final ApprovalDocMapper mapper;
+    private final StorageService storageService;  // 추가
 
+    @Value("${file.upload-root}/approval")
+    private String uploadPath;
+    
     @Override
     @Transactional
-    public void saveDraft(ApprovalDocDto dto) throws Exception {
+    public void saveDraft(ApprovalDocDto dto, MultipartFile[] files) throws Exception {
         try {
             // 1. 기안서 저장 (selectKey로 docId 자동 세팅)
             dto.setDocStatus("DRAFT");
@@ -40,6 +48,20 @@ public class ApprovalDocServiceImpl implements ApprovalDocService {
                 for (ApprovalRefDto ref : dto.getRefs()) {
                     ref.setDocId(dto.getDocId());
                     mapper.insertRef(ref);
+                }
+            }
+
+            // 4. 첨부파일 저장
+            if (files != null) {
+                for (MultipartFile file : files) {
+                    if (file.isEmpty()) continue;
+                    String saveFilename = storageService.uploadFileToServer(file, uploadPath);
+                    ApprovalFileDto fileDto = new ApprovalFileDto();
+                    fileDto.setDocId(dto.getDocId());
+                    fileDto.setOriFilename(file.getOriginalFilename());
+                    fileDto.setSaveFilename(saveFilename);
+                    fileDto.setFileSize(file.getSize());
+                    mapper.insertFile(fileDto);
                 }
             }
         } catch (Exception e) {

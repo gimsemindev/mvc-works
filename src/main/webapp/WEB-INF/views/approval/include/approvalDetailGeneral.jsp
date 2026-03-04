@@ -19,20 +19,6 @@
             <label>상세 설명</label>
             <div id="general-editor" style="min-height:200px;"></div>
         </div>
-        <div class="attach-row">
-            <div class="form-field">
-                <label>관련 첨부 <span style="font-size:10px;color:#9aa0b4;">ⓘ</span></label>
-                <div class="attach-input-wrap">
-                    <button class="btn-file-select" @click="fileInput.click()">파일 선택</button>
-                    <span class="file-name-display">{{ fileName }}</span>
-                    <input type="file" ref="fileInput" style="display:none" @change="onFileChange">
-                </div>
-            </div>
-            <div class="form-field">
-                <label>첨부된 파일</label>
-                <div class="attach-preview">첨부된 파일이 없습니다.</div>
-            </div>
-        </div>
     </div>
 </div>
 

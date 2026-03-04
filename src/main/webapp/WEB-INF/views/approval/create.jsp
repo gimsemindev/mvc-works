@@ -113,6 +113,8 @@
             <jsp:include page="/WEB-INF/views/approval/include/approvalDetailClaim.jsp"/>
             <jsp:include page="/WEB-INF/views/approval/include/approvalDetailGeneral.jsp"/>
 
+            <jsp:include page="/WEB-INF/views/approval/include/approvalAttach.jsp"/>
+
             <div class="form-section" v-if="store.selectedNotice">
                 <div class="form-section-header">
                     <div class="form-section-title">
@@ -150,10 +152,10 @@
 <script type="importmap">
 {
 	"imports": {
-		"http": "/dist/util/http.js?v=2",
-		"approvalCreateStore": "/dist/util/store/approvalCreateStore.js?v=3",
-		"OrgSearchModal": "/dist/util/component/OrgSearchModal.js?v=1",
-        "commonCodeStore": "/dist/util/store/commonCodeStore.js?v=1"
+		"http": "/dist/util/http.js",
+		"approvalCreateStore": "/dist/util/store/approvalCreateStore.js",
+		"OrgSearchModal": "/dist/util/component/OrgSearchModal.js",
+        "commonCodeStore": "/dist/util/store/commonCodeStore.js"
 	}
 }
 </script>
@@ -184,13 +186,6 @@
             // 템플릿 불러오기 모달
             const templateLoadModalVisible = ref(false);
             const templateList = ref([])
-
-            // 파일 첨부
-            const fileName = ref('선택된 파일 없음');
-            const fileInput = ref(null);
-            const onFileChange = (e) => {
-                fileName.value = e.target.files[0] ? e.target.files[0].name : '선택된 파일 없음';
-            };
 
             // 네비게이션
             const goList = () => { location.href = ctx + '/approval/list'; };
@@ -250,7 +245,6 @@
       				store, codeStore, todayDate,
     				approverModalVisible, referenceModalVisible,
       				approverEmpIds, referenceEmpIds,
-      				fileName, fileInput, onFileChange,
                     goList, saveTemplate,
                     templateLoadModalVisible, templateList,
                     openTemplateLoad, onLoadTemplate, onDeleteTemplate,
