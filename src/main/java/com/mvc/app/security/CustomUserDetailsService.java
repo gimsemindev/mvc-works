@@ -49,6 +49,10 @@ public class CustomUserDetailsService implements UserDetailsService {
 				.email(member.getEmail())
 				.userLevel(NumericRoleGranted.getUserLevel(member.getAuthority()))
 				.avatar(member.getProfilePhoto())
+		        .deptCode(member.getDeptCode())
+		        .deptName(member.getDeptName())
+		        .gradeCode(member.getGradeCode())
+		        .gradeName(member.getGradeName())				
 				.build();
 
 		return CustomUserDetails.builder()

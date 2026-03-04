@@ -49,11 +49,13 @@
     <insert id="insertRef" parameterType="com.mvc.app.domain.dto.ApprovalRefDto">
         INSERT INTO approvalReference (
             refId, docId, refEmpId, refEmpName,
-            refDeptName, refGradeName
+            refDeptCode, refDeptName,
+            refGradeCode, refGradeName
         ) VALUES (
             approvalReference_seq.NEXTVAL, #{docId},
             #{refEmpId}, #{refEmpName},
-            #{refDeptName}, #{refGradeName}
+            #{refDeptCode}, #{refDeptName},
+            #{refGradeCode}, #{refGradeName}
         )
     </insert>
 

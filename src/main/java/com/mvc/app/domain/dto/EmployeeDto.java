@@ -29,10 +29,11 @@ public class EmployeeDto {
 	private String addr2;
 	private String email;
 	private String ipAddr;
-	private String deptCode;        // 부서코드
-	private String deptName;        // 부서명
-	private String gradeCode;       // 직급코드
-	private String gradeName;       // 직급명	
+	
+	private String deptCode;
+	private String deptName;
+	private String gradeCode;
+	private String gradeName;	
 
 	private MultipartFile selectFile;
 

@@ -69,10 +69,10 @@
             name, TO_CHAR(birth, 'YYYY-MM-DD') birth, tel,
             profilePhoto, zip, addr1, addr2, email, ipAddr,
             authority,
-            e2.deptCode,
-            e2.gradeCode,
-            cd.codeName AS deptName,
-            cg.codeName AS gradeName
+            e2.deptCode AS "deptCode",
+            e2.gradeCode AS "gradeCode",
+            cd.codeName AS "deptName",
+            cg.codeName AS "gradeName"
         FROM employee1 e1
         LEFT OUTER JOIN employee2 e2 ON e1.empId = e2.empId
         LEFT OUTER JOIN employeeAuthority ea ON e1.empId = ea.empId

@@ -30,7 +30,14 @@ public class ApprovalDocRestController {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
             dto.setWriterEmpId(info.getEmpId());
             dto.setWriterEmpName(info.getName());
-
+            dto.setWriterDeptCode(info.getDeptCode());
+            dto.setWriterDeptName(info.getDeptName());
+            dto.setWriterGradeCode(info.getGradeCode());
+            dto.setWriterGradeName(info.getGradeName());
+        	
+            log.info("★ deptCode={}, deptName={}, gradeCode={}, gradeName={}",
+            	      info.getDeptCode(), info.getDeptName(), info.getGradeCode(), info.getGradeName());
+            
             service.saveDraft(dto);
             return ResponseEntity.ok(Map.of("msg", "임시저장 완료"));
         } catch (Exception e) {

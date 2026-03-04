@@ -49,6 +49,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler{
 			// 로그인 날짜 변경
 			memberService.updateLastLogin(authentication.getName());
 			
+			
 			//SessionInfo에 세션관련 값 builder
 			SessionInfo sessionInfo = SessionInfo.builder()
 			        .empId(dto.getEmpId())
@@ -65,6 +66,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler{
 			//session member로 가져오기 위한 set
 			HttpSession session = request.getSession();
 			session.setAttribute("member", sessionInfo);
+			
 			
 			// 패스워드 변경이 90일이 지난 경우 패스워드 변경 폼으로 이동
 			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

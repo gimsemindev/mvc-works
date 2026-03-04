@@ -238,12 +238,15 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 		                apprGradeCode: p.gradeCode || '',
 		                apprGradeName: p.grade || ''
 		            })),
-		            refs: this.references.map(r => ({
-		                refEmpId: r.empId,
-		                refEmpName: r.name,
-		                refDeptName: r.dept || '',
-		                refGradeName: r.grade || ''
-		            }))
+					refs: this.references.map(r => ({
+					    refEmpId: r.empId,
+					    refEmpName: r.name,
+					    refDeptCode: r.deptCode || '',
+					    refDeptName: r.dept || '',
+					    refGradeCode: r.gradeCode || '',
+					    refGradeName: r.grade || ''
+					}))
+					
 		        };
 
 		        await http.post('/approval/doc', data);

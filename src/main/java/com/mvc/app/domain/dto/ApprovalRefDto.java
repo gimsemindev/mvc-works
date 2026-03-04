@@ -12,6 +12,8 @@ public class ApprovalRefDto {
     private long docId;
     private String refEmpId;
     private String refEmpName;
+    private String refDeptCode;
     private String refDeptName;
+    private String refGradeCode;
     private String refGradeName;
 }
