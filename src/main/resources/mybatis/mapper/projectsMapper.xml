@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mvc.app.mapper.ProjectsMapper">
+
+	<insert id="insertProject" parameterType="com.mvc.app.domain.dto.ProjectsDto">
+		INSERT INTO (projectId, projectType, pmoType, title, description, startDate, endDate, createdDate, status, progress)
+			VALUES(project_seq.NEXTVAL, #{projectType}, #{pmoType}, #{title}, #{description}, #{startDate}, #{endDate}, SYSDATE, 1, 0)
+	</insert>
+	
+	<insert id="insertProjectMembers">
+		
+	</insert>
+	
+	<select id="projectslist">
+		
+	</select>
+
+</mapper>

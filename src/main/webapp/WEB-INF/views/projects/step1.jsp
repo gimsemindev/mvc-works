@@ -2,11 +2,14 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core"%>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
 
+
+<input type="hidden" name="projectType" id="projectType" value="I">
+<input type="hidden" name="pmoType" id="pmoType" value="S">
 <div class="mb-5">
     <h2 class="section-title">Project type</h2>
     <p class="section-desc">먼저 프로젝트의 타입을 선택해 주세요.</p>
 
-    <div class="select-card" onclick="selectOnlyOne(event.currentTarget, 'type-group')">
+    <div class="select-card" onclick="selectOnlyOne(event.currentTarget, 'projectType', 'I')">
         <div class="icon-box"><i class="fas fa-user"></i></div>
         <div class="card-content">
             <div class="title">Personal Project</div>
@@ -15,7 +18,7 @@
         <i class="fas fa-check-circle check-mark"></i>
     </div>
 
-    <div class="select-card" onclick="selectOnlyOne(event.currentTarget, 'type-group')">
+    <div class="select-card" onclick="selectOnlyOne(event.currentTarget, 'projectType', 'T')">
         <div class="icon-box"><i class="fas fa-users"></i></div>
         <div class="card-content">
             <div class="title">Team Project</div>
@@ -29,7 +32,7 @@
     <h2 class="section-title">Project manage</h2>
     <p class="section-desc">프로젝트를 관리할 수 있는 권한을 설정합니다.</p>
 
-    <div class="select-card" onclick="selectOnlyOne(event.currentTarget, 'manage-group')">
+    <div class="select-card" onclick="selectOnlyOne(event.currentTarget, 'pmoType', 'A')">
         <div class="icon-box"><i class="fas fa-globe"></i></div>
         <div class="card-content">
             <div class="title">Everyone</div>
@@ -38,7 +41,7 @@
         <i class="fas fa-check-circle check-mark"></i>
     </div>
 
-    <div class="select-card" onclick="selectOnlyOne(event.currentTarget, 'manage-group')">
+    <div class="select-card" onclick="selectOnlyOne(event.currentTarget, 'pmoType', 'S')">
         <div class="icon-box"><i class="fas fa-user-shield"></i></div>
         <div class="card-content">
             <div class="title">Select Specific Managers</div>
@@ -49,11 +52,13 @@
 </div>
 
 <script type="text/javascript">
-function selectOnlyOne(element, groupName) {
+function selectOnlyOne(element, inputId, value) {
     const parentSection = element.parentElement;
     parentSection.querySelectorAll('.select-card').forEach(card => {
         card.classList.remove('selected');
     });
     element.classList.add('selected');
+    
+    document.getElementById(inputId).value = value;
 }
 </script>
