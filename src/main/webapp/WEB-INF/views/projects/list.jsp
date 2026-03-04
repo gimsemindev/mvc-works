@@ -31,7 +31,7 @@
             <div class="col-md-3">
                 <div class="stat-card">
                     <div class="d-flex justify-content-between align-items-start">
-                        <div class="stat-icon bg-primary bg-opacity-10 text-primary"><i class="fas fa-list-check"></i></div>
+                        <div class="stat-icon bg-primaryblue bg-opacity-10 text-primary"><i class="fas fa-list-check"></i></div>
                         <span class="stat-trend bg-success bg-opacity-10 text-success">+12%</span>
                     </div>
                     <div class="stat-label">Total Projects</div>

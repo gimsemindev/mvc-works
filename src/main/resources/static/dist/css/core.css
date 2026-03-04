@@ -324,6 +324,7 @@ a.border-link-down:hover::after {
 .bg-light { background-color: #f8f9fa !important; }
 .bg-light-secondary { background-color: #f2f8fe !important; }
 .bg-primary { background-color: #0d6efd !important; color: #ffffff; }
+.bg-primaryblue { background-color: #e6f7ff; }
 
 .mx-auto { margin-left: auto; margin-right: auto; }
 
