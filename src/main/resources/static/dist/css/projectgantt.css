@@ -295,3 +295,14 @@ body {
 .page-item:not(.active):hover {
     background-color: #f1f5f9;
 }
+
+
+.project-table td.project-name {
+    cursor: pointer; /* 마우스 포인터를 손가락 모양으로 변경 */
+    transition: color 0.2s;
+}
+
+.project-table td.project-name:hover {
+    color: var(--gt-primary-blue); /* 마우스 올렸을 때 색상 변화 (선택사항) */
+    text-decoration: underline;    /* 밑줄 추가 (선택사항) */
+}

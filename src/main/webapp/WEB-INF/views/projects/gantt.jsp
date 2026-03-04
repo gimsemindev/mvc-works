@@ -55,7 +55,7 @@
                 <tbody>
                     <tr>
                         <td class="text-center">1</td>
-                        <td class="project-name">Duralux ERP 시스템 고도화</td>
+                        <td class="project-name" onclick="location.href='${pageContext.request.contextPath}/projects/ganttarticle'">Duralux ERP 시스템 고도화</td>
                         <td class="text-center">2024.01.01</td>
                         <td class="text-center">2024.06.30</td>
                         <td class="text-center">92 / 182 일</td>
