@@ -65,6 +65,8 @@
 
 <script src="${pageContext.request.contextPath}/dist/js/projectEnter.js"></script>
 <script src="${pageContext.request.contextPath}/dist/js/projectCreate.js"></script>
+<script src="${pageContext.request.contextPath}/dist/js/projectCreatestep2.js"></script>
+
 
 </body>
 </html>
