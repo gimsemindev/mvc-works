@@ -10,6 +10,8 @@ import com.mvc.app.domain.dto.ApprovalFileDto;
 import com.mvc.app.domain.dto.ApprovalLineDto;
 import com.mvc.app.domain.dto.ApprovalRefDto;
 import com.mvc.app.mapper.ApprovalDocMapper;
+import java.util.List;
+import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,8 +31,10 @@ public class ApprovalDocServiceImpl implements ApprovalDocService {
     @Transactional
     public void saveDraft(ApprovalDocDto dto, MultipartFile[] files) throws Exception {
         try {
-            // 1. 기안서 저장 (selectKey로 docId 자동 세팅)
-            dto.setDocStatus("DRAFT");
+            // 1. 결재 저장
+        	if (dto.getDocStatus() == null || dto.getDocStatus().isBlank()) {
+        	    dto.setDocStatus("DRAFT");
+        	}
             mapper.insertDoc(dto);
 
             // 2. 결재선 저장
@@ -68,5 +72,12 @@ public class ApprovalDocServiceImpl implements ApprovalDocService {
             log.info("saveDraft : ", e);
             throw e;
         }
+    }
+    
+    @Override
+    public Map<String, Object> listDraft(Map<String, Object> map) throws Exception {
+        int totalCount = mapper.countDraft(map);
+        List<ApprovalDocDto> list = mapper.listDraft(map);
+        return Map.of("totalCount", totalCount, "list", list);
     }
 }

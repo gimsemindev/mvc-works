@@ -131,7 +131,7 @@
                     <span class="material-symbols-outlined" style="font-size:16px">save</span>
                     임시저장
                 </button>
-                <button class="btn-submit">
+                <button class="btn-submit" @click="store.submitDoc()">
                     <span class="material-symbols-outlined" style="font-size:16px">send</span>
                     결재전송
                 </button>

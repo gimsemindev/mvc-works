@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import com.mvc.app.domain.dto.ApprovalDocDto;
 import com.mvc.app.domain.dto.SessionInfo;
 import com.mvc.app.security.LoginMemberUtil;
@@ -46,6 +50,31 @@ public class ApprovalDocRestController {
         } catch (Exception e) {
             log.info("saveDraft : ", e);
             return ResponseEntity.internalServerError().body(Map.of("msg", "임시저장 실패"));
+        }
+    }
+    
+    @GetMapping
+    public ResponseEntity<?> listDraft(
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "startDate", required = false) String startDate,
+            @RequestParam(name = "endDate", required = false) String endDate,
+            @RequestParam(name = "pageNo", defaultValue = "1") int pageNo,
+            @RequestParam(name = "pageSize", defaultValue = "20") int pageSize) {
+        try {
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+            Map<String, Object> map = new HashMap<>();
+            map.put("empId", info.getEmpId());
+            map.put("keyword", keyword);
+            map.put("startDate", startDate);
+            map.put("endDate", endDate);
+            map.put("pageSize", pageSize);
+            map.put("offset", (pageNo - 1) * pageSize);
+
+            Map<String, Object> result = service.listDraft(map);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.info("listDraft : ", e);
+            return ResponseEntity.internalServerError().body(Map.of("msg", "목록 조회 실패"));
         }
     }
 }

@@ -13,7 +13,7 @@
             docId, docTypeId, title, content, detailData,
             docStatus, writerEmpId, writerEmpName,
             writerDeptCode, writerDeptName,
-            writerGradeCode, writerGradeName, regDate
+            writerGradeCode, writerGradeName, regDate, submitDate
         ) VALUES (
             #{docId}, #{docTypeId}, #{title},
             #{content, jdbcType=VARCHAR},
@@ -23,8 +23,9 @@
             #{writerDeptName, jdbcType=VARCHAR},
             #{writerGradeCode, jdbcType=VARCHAR},
             #{writerGradeName, jdbcType=VARCHAR},
-            SYSDATE
-        )
+            SYSDATE,
+            CASE WHEN #{docStatus} = 'PENDING' THEN SYSDATE ELSE NULL END
+        )        
     </insert>
 
     <!-- 결재선 등록 -->
@@ -40,7 +41,7 @@
             #{apprEmpId}, #{apprEmpName},
             #{apprDeptCode}, #{apprDeptName},
             #{apprGradeCode}, #{apprGradeName},
-            'APPROVER', 'PENDING'
+            'APPROVER', 'WAIT'
         )
     </insert>
 
@@ -65,4 +66,42 @@
         VALUES (approvalFile_seq.NEXTVAL, #{docId}, #{oriFilename}, #{saveFilename}, #{fileSize}, SYSDATE)
     </insert>
 
+    <!-- 임시저장 목록 -->
+    <select id="listDraft" parameterType="map" resultType="com.mvc.app.domain.dto.ApprovalDocDto">
+        SELECT d.docId, d.title, d.docStatus,
+               d.writerEmpName, d.writerGradeName,
+               d.regDate, t.typeName
+        FROM approvalDoc d
+        LEFT JOIN approvalDocType t ON d.docTypeId = t.docTypeId
+        WHERE d.writerEmpId = #{empId}
+          AND d.docStatus = 'DRAFT'
+        <if test="keyword != null and keyword != ''">
+            AND d.title LIKE '%' || #{keyword} || '%'
+        </if>
+        <if test="startDate != null and startDate != ''">
+            AND d.regDate &gt;= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND d.regDate &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+        </if>
+        ORDER BY d.docId DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
+    </select>
+    
+    <!-- 임시저장 건수 -->
+    <select id="countDraft" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM approvalDoc d
+        WHERE d.writerEmpId = #{empId}
+          AND d.docStatus = 'DRAFT'
+        <if test="keyword != null and keyword != ''">
+            AND d.title LIKE '%' || #{keyword} || '%'
+        </if>
+        <if test="startDate != null and startDate != ''">
+            AND d.regDate &gt;= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND d.regDate &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+        </if>
+    </select>
 </mapper>

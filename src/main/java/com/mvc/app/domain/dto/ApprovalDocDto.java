@@ -27,4 +27,5 @@ public class ApprovalDocDto {
     // 결재선 + 참조자
     private List<ApprovalLineDto> lines;
     private List<ApprovalRefDto> refs;
+    private String typeName;
 }

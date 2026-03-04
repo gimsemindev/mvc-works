@@ -222,7 +222,38 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 
 		    try {
 		        // 세부양식 데이터 구성
-		        const detail = { formCode: this.selectedFormCode };
+				const detail = { formCode: this.selectedFormCode };
+
+				if (this.selectedFormCode === 'FM001') {
+				    detail.leaveType = this.detailData.leaveType;
+				    detail.leaveStartDate = this.detailData.leaveStartDate;
+				    detail.leaveStartDayType = this.detailData.leaveStartDayType;
+				    detail.leaveEndDate = this.detailData.leaveEndDate;
+				    detail.leaveEndDayType = this.detailData.leaveEndDayType;
+				    detail.leaveTotalDays = this.detailData.leaveTotalDays;
+				    detail.description = this.detailData.description;
+				} else if (this.selectedFormCode === 'FM002') {
+				    detail.biztripPurpose = this.detailData.biztripPurpose;
+				    detail.biztripCompanion = this.detailData.biztripCompanion;
+				    detail.biztripStartDate = this.detailData.biztripStartDate;
+				    detail.biztripEndDate = this.detailData.biztripEndDate;
+				    detail.description = this.detailData.description;
+				} else if (this.selectedFormCode === 'FM003') {
+				    detail.expensePurpose = this.detailData.expensePurpose;
+				    detail.expensePayMethod = this.detailData.expensePayMethod;
+				    detail.expenseDueDate = this.detailData.expenseDueDate;
+				    detail.expenseRows = this.expenseRows;
+				    detail.description = this.detailData.description;
+				} else if (this.selectedFormCode === 'FM004') {
+				    detail.claimPurpose = this.detailData.claimPurpose;
+				    detail.claimAccountInfo = this.detailData.claimAccountInfo;
+				    detail.expenseRows = this.expenseRows;
+				    detail.description = this.detailData.description;
+				} else if (this.selectedFormCode === 'FM005') {
+				    detail.generalPurpose = this.detailData.generalPurpose;
+				    const editorEl = document.querySelector('#general-editor .ql-editor');
+				    detail.description = editorEl ? editorEl.innerHTML : '';
+				}
 
 		        if (this.selectedFormCode === 'FM001') {
 		            detail.leaveType = this.detailData.leaveType;
@@ -297,6 +328,98 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 		    } catch (e) {
 		        console.error('임시저장 실패:', e);
 		        alert('임시저장 중 오류가 발생했습니다.');
+		        return false;
+		    }
+		},
+		async submitDoc() {
+		    if (!this.selectedDocTypeId) {
+		        alert('문서유형을 선택해 주세요.');
+		        return false;
+		    }
+		    if (!this.title.trim()) {
+		        alert('제목을 입력해 주세요.');
+		        return false;
+		    }
+		    if (this.approvers.length === 0) {
+		        alert('결재자를 1명 이상 추가해 주세요.');
+		        return false;
+		    }
+		    if (!confirm('결재를 상신하시겠습니까?')) return false;
+
+		    try {
+		        const detail = { formCode: this.selectedFormCode };
+
+		        if (this.selectedFormCode === 'FM001') {
+		            detail.leaveType = this.detailData.leaveType;
+		            detail.leaveStartDate = this.detailData.leaveStartDate;
+		            detail.leaveStartDayType = this.detailData.leaveStartDayType;
+		            detail.leaveEndDate = this.detailData.leaveEndDate;
+		            detail.leaveEndDayType = this.detailData.leaveEndDayType;
+		            detail.leaveTotalDays = this.detailData.leaveTotalDays;
+		            detail.description = this.detailData.description;
+		        } else if (this.selectedFormCode === 'FM002') {
+		            detail.biztripPurpose = this.detailData.biztripPurpose;
+		            detail.biztripCompanion = this.detailData.biztripCompanion;
+		            detail.biztripStartDate = this.detailData.biztripStartDate;
+		            detail.biztripEndDate = this.detailData.biztripEndDate;
+		            detail.description = this.detailData.description;
+		        } else if (this.selectedFormCode === 'FM003') {
+		            detail.expensePurpose = this.detailData.expensePurpose;
+		            detail.expensePayMethod = this.detailData.expensePayMethod;
+		            detail.expenseDueDate = this.detailData.expenseDueDate;
+		            detail.expenseRows = this.expenseRows;
+		            detail.description = this.detailData.description;
+		        } else if (this.selectedFormCode === 'FM004') {
+		            detail.claimPurpose = this.detailData.claimPurpose;
+		            detail.claimAccountInfo = this.detailData.claimAccountInfo;
+		            detail.expenseRows = this.expenseRows;
+		            detail.description = this.detailData.description;
+		        } else if (this.selectedFormCode === 'FM005') {
+		            detail.generalPurpose = this.detailData.generalPurpose;
+		            const editorEl = document.querySelector('#general-editor .ql-editor');
+		            detail.description = editorEl ? editorEl.innerHTML : '';
+		        }
+
+		        const data = {
+		            docTypeId: this.selectedDocTypeId,
+		            docStatus: 'PENDING',
+		            title: this.title,
+		            detailData: JSON.stringify(detail),
+		            lines: this.approvers.map((p, idx) => ({
+		                apprEmpId: p.empId,
+		                apprEmpName: p.name,
+		                apprDeptCode: p.deptCode || '',
+		                apprDeptName: p.dept || '',
+		                apprGradeCode: p.gradeCode || '',
+		                apprGradeName: p.grade || ''
+		            })),
+		            refs: this.references.map(r => ({
+		                refEmpId: r.empId,
+		                refEmpName: r.name,
+		                refDeptCode: r.deptCode || '',
+		                refDeptName: r.dept || '',
+		                refGradeCode: r.gradeCode || '',
+		                refGradeName: r.grade || ''
+		            }))
+		        };
+
+		        const formData = new FormData();
+		        formData.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
+		        this.attachedFiles.forEach(file => {
+		            formData.append('files', file);
+		        });
+
+		        await http.post('/approval/doc', formData, {
+		            headers: { 'Content-Type': 'multipart/form-data' }
+		        });
+
+		        alert('결재가 상신되었습니다.');
+		        const ctx = document.querySelector('meta[name="ctx"]').content;
+		        location.href = ctx + '/approval/list';
+		        return true;
+		    } catch (e) {
+		        console.error('상신 실패:', e);
+		        alert('상신 중 오류가 발생했습니다.');
 		        return false;
 		    }
 		}		
