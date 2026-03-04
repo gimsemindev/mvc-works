@@ -33,7 +33,7 @@
         <li><a href="${pageContext.request.contextPath}/approval/list">결재 리스트</a></li>
     </ul>    
     <div class="nav-section">Projects</div>
-    <a href="${pageContext.request.contextPath}/projects" class="nav-link active"><i class="fas fa-briefcase"></i> Projects</a>
+    <a class="nav-link active"><i class="fas fa-briefcase"></i> Projects</a>
     <ul class="sub-menu">
         <li><a href="${pageContext.request.contextPath}/projects/list" class="active">Projects List</a></li>
         <li><a href="${pageContext.request.contextPath}/projects/gantt">Projects Gantt</a></li>
