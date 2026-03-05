@@ -19,4 +19,8 @@ public interface ApprovalDocMapper {
     public void insertFile(ApprovalFileDto dto) throws SQLException;
     public List<ApprovalDocDto> listDraft(Map<String, Object> map) throws SQLException;
     public int countDraft(Map<String, Object> map) throws SQLException;
+    public List<ApprovalDocDto> listSent(Map<String, Object> map) throws SQLException;
+    public int countSent(Map<String, Object> map) throws SQLException;
+    public List<ApprovalDocDto> listInbox(Map<String, Object> map) throws SQLException;
+    public int countInbox(Map<String, Object> map) throws SQLException;
 }

@@ -77,4 +77,52 @@ public class ApprovalDocRestController {
             return ResponseEntity.internalServerError().body(Map.of("msg", "목록 조회 실패"));
         }
     }
+    
+    // 보낸 결재함
+    @GetMapping("/sent")
+    public ResponseEntity<?> listSent(
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "startDate", required = false) String startDate,
+            @RequestParam(name = "endDate", required = false) String endDate,
+            @RequestParam(name = "pageNo", defaultValue = "1") int pageNo,
+            @RequestParam(name = "pageSize", defaultValue = "20") int pageSize) {
+        try {
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+            Map<String, Object> map = new HashMap<>();
+            map.put("empId", info.getEmpId());
+            map.put("keyword", keyword);
+            map.put("startDate", startDate);
+            map.put("endDate", endDate);
+            map.put("pageSize", pageSize);
+            map.put("offset", (pageNo - 1) * pageSize);
+            return ResponseEntity.ok(service.listSent(map));
+        } catch (Exception e) {
+            log.info("listSent : ", e);
+            return ResponseEntity.internalServerError().body(Map.of("msg", "목록 조회 실패"));
+        }
+    }
+
+    // 받은 결재함
+    @GetMapping("/inbox")
+    public ResponseEntity<?> listInbox(
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "startDate", required = false) String startDate,
+            @RequestParam(name = "endDate", required = false) String endDate,
+            @RequestParam(name = "pageNo", defaultValue = "1") int pageNo,
+            @RequestParam(name = "pageSize", defaultValue = "20") int pageSize) {
+        try {
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+            Map<String, Object> map = new HashMap<>();
+            map.put("empId", info.getEmpId());
+            map.put("keyword", keyword);
+            map.put("startDate", startDate);
+            map.put("endDate", endDate);
+            map.put("pageSize", pageSize);
+            map.put("offset", (pageNo - 1) * pageSize);
+            return ResponseEntity.ok(service.listInbox(map));
+        } catch (Exception e) {
+            log.info("listInbox : ", e);
+            return ResponseEntity.internalServerError().body(Map.of("msg", "목록 조회 실패"));
+        }
+    }    
 }

@@ -19,15 +19,15 @@
     <!-- Approval List -->
     <div class="filter-section">
         <div class="filter-label">Approval List</div>
-        <a class="filter-link active" href="#">
+        <a class="filter-link" href="#">
             <span class="material-symbols-outlined">inbox</span>
             전체 결재함
         </a>
-        <a class="filter-link" href="#">
+        <a class="filter-link" :class="{ active: store.filterType === 'sent' }" href="#" @click.prevent="store.filterType = 'sent'; store.search()">
             <span class="material-symbols-outlined">send</span>
             보낸 결재함
         </a>
-        <a class="filter-link" href="#">
+        <a class="filter-link" :class="{ active: store.filterType === 'inbox' }" href="#" @click.prevent="store.filterType = 'inbox'; store.search()">
             <span class="material-symbols-outlined">move_to_inbox</span>
             받은 결재함
         </a>
@@ -35,8 +35,7 @@
             <span class="material-symbols-outlined">bookmarks</span>
             참조 결재함
         </a>
-        <a class="filter-link" :class="{ active: store.filterType === 'draft' }"
-           href="#" @click.prevent="store.filterType = 'draft'; store.search()">
+        <a class="filter-link" :class="{ active: store.filterType === 'draft' }" href="#" @click.prevent="store.filterType = 'draft'; store.search()">
             <span class="material-symbols-outlined">edit_note</span>
             임시 저장함
         </a>

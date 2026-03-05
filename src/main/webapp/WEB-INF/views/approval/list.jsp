@@ -38,7 +38,7 @@
 {
     "imports": {
         "http": "/dist/util/http.js?v=2",
-        "approvalListStore": "/dist/util/store/approvalListStore.js?v=1"
+        "approvalListStore": "/dist/util/store/approvalListStore.js"
     }
 }
 </script>
@@ -55,9 +55,11 @@
 
             const goCreate = () => { location.href = ctx + '/approval/create'; };
 
-            onMounted(() => {
-                store.fetchList();
-            });
+    		onMounted(() => {
+      						const params = new URLSearchParams(location.search);
+      						store.filterType = params.get('type') || 'draft';
+      						store.fetchList();
+      						});
 
             return { store, ctx, goCreate };
         }

@@ -5,7 +5,7 @@ export const useApprovalListStore = defineStore('approvalList', {
     state: () => ({
         list: [],
         totalCount: 0,
-        filterType: 'draft',
+        filterType: '',
         keyword: '',
         startDate: '',
         endDate: '',
@@ -31,7 +31,14 @@ export const useApprovalListStore = defineStore('approvalList', {
                 params.append('pageNo', this.pageNo);
                 params.append('pageSize', this.pageSize);
 
-                const res = await http.get('/approval/doc?' + params.toString());
+				const urlMap = {
+				    draft: '/approval/doc',
+				    sent:  '/approval/doc/sent',
+				    inbox: '/approval/doc/inbox'
+				};
+				const url = urlMap[this.filterType] || '/approval/doc';
+				
+				const res = await http.get(url + '?' + params.toString());
                 this.list = res.data.list || [];
                 this.totalCount = res.data.totalCount || 0;
             } catch (e) {

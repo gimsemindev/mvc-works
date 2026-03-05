@@ -80,4 +80,18 @@ public class ApprovalDocServiceImpl implements ApprovalDocService {
         List<ApprovalDocDto> list = mapper.listDraft(map);
         return Map.of("totalCount", totalCount, "list", list);
     }
+    
+    @Override
+    public Map<String, Object> listSent(Map<String, Object> map) throws Exception {
+        int totalCount = mapper.countSent(map);
+        List<ApprovalDocDto> list = mapper.listSent(map);
+        return Map.of("totalCount", totalCount, "list", list);
+    }
+
+    @Override
+    public Map<String, Object> listInbox(Map<String, Object> map) throws Exception {
+        int totalCount = mapper.countInbox(map);
+        List<ApprovalDocDto> list = mapper.listInbox(map);
+        return Map.of("totalCount", totalCount, "list", list);
+    }   
 }

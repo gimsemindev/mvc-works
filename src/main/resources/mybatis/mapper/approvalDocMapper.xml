@@ -104,4 +104,82 @@
             AND d.regDate &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
         </if>
     </select>
+    
+  <!-- 보낸 결재함 목록 -->
+  <select id="listSent" parameterType="map" resultType="com.mvc.app.domain.dto.ApprovalDocDto">
+      SELECT d.docId, d.title, d.docStatus,
+             d.writerEmpName, d.writerGradeName,
+             d.regDate, t.typeName
+      FROM approvalDoc d
+      LEFT JOIN approvalDocType t ON d.docTypeId = t.docTypeId
+      WHERE d.writerEmpId = #{empId}
+        AND d.docStatus != 'DRAFT'
+      <if test="keyword != null and keyword != ''">
+          AND d.title LIKE '%' || #{keyword} || '%'
+      </if>
+      <if test="startDate != null and startDate != ''">
+          AND d.regDate &gt;= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+      </if>
+      <if test="endDate != null and endDate != ''">
+          AND d.regDate &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+      </if>
+      ORDER BY d.docId DESC
+      OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
+  </select>
+
+  <select id="countSent" parameterType="map" resultType="int">
+      SELECT COUNT(*)
+      FROM approvalDoc d
+      WHERE d.writerEmpId = #{empId}
+        AND d.docStatus != 'DRAFT'
+      <if test="keyword != null and keyword != ''">
+          AND d.title LIKE '%' || #{keyword} || '%'
+      </if>
+      <if test="startDate != null and startDate != ''">
+          AND d.regDate &gt;= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+      </if>
+      <if test="endDate != null and endDate != ''">
+          AND d.regDate &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+      </if>
+  </select>
+
+  <!-- 받은 결재함 목록 -->
+  <select id="listInbox" parameterType="map" resultType="com.mvc.app.domain.dto.ApprovalDocDto">
+      SELECT d.docId, d.title, d.docStatus,
+             d.writerEmpName, d.writerGradeName,
+             d.regDate, t.typeName
+      FROM approvalDoc d
+      LEFT JOIN approvalDocType t ON d.docTypeId = t.docTypeId
+      INNER JOIN approvalLine l ON d.docId = l.docId
+      WHERE l.apprEmpId = #{empId}
+        AND d.docStatus != 'DRAFT'
+      <if test="keyword != null and keyword != ''">
+          AND d.title LIKE '%' || #{keyword} || '%'
+      </if>
+      <if test="startDate != null and startDate != ''">
+          AND d.regDate &gt;= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+      </if>
+      <if test="endDate != null and endDate != ''">
+          AND d.regDate &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+      </if>
+      ORDER BY d.docId DESC
+      OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
+  </select>
+
+  <select id="countInbox" parameterType="map" resultType="int">
+      SELECT COUNT(*)
+      FROM approvalDoc d
+      INNER JOIN approvalLine l ON d.docId = l.docId
+      WHERE l.apprEmpId = #{empId}
+        AND d.docStatus != 'DRAFT'
+      <if test="keyword != null and keyword != ''">
+          AND d.title LIKE '%' || #{keyword} || '%'
+      </if>
+      <if test="startDate != null and startDate != ''">
+          AND d.regDate &gt;= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+      </if>
+      <if test="endDate != null and endDate != ''">
+          AND d.regDate &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+      </if>
+  </select>   
 </mapper>
