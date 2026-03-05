@@ -6,14 +6,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>직원관리 - Duralux ERP</title>
+<title>직원관리</title>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/employeeList.css" type="text/css">
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp"/>
 </head>
 <body>
 
-<%-- 사이드바, 헤더는 vue-app 밖에서 include --%>
 <jsp:include page="/WEB-INF/views/layout/sidebar.jsp"/>
 
 <div class="emp-content">
@@ -21,8 +20,7 @@
     <header>
         <jsp:include page="/WEB-INF/views/layout/header.jsp"/>
     </header>
-
-    <%-- Vue 앱은 본문 영역만 담당 --%>
+    
     <div id="vue-app">
         <jsp:include page="/WEB-INF/views/hrm/employeeList.jsp"/>
     </div>

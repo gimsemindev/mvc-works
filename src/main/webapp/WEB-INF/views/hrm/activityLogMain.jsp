@@ -6,7 +6,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>활동내역 - Duralux ERP</title>
+<title>활동내역</title>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/activityLog.css" type="text/css">
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp"/>

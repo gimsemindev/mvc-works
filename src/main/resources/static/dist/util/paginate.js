@@ -1,13 +1,12 @@
 export function getPagination(currentPage, totalPage, blockSize = 10) {
     // 현재 페이지가 속한 블록의 시작과 끝 계산
-    // 현재 13페이지라면 -> 시작 11, 끝 20 (단, totalPage가 15라면 끝은 15)
 	const currentBlock = Math.ceil(currentPage / blockSize);
 	let startPage = (currentBlock - 1) * blockSize + 1;
 	let endPage = startPage + blockSize - 1;
 
 	if (endPage > totalPage) endPage = totalPage;
 
-    // 페이지 번호 배열 생성 [11, 12, 13, 14, 15]
+    // 페이지 번호 배열 생성
 	const pages = [];
 	for (let i = startPage; i <= endPage; i++) {
 		pages.push(i);
