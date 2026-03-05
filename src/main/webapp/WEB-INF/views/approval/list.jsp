@@ -38,7 +38,8 @@
 {
     "imports": {
         "http": "/dist/util/http.js?v=2",
-        "approvalListStore": "/dist/util/store/approvalListStore.js"
+        "approvalListStore": "/dist/util/store/approvalListStore.js",
+        "commonCodeStore": "/dist/util/store/commonCodeStore.js"
     }
 }
 </script>
@@ -47,21 +48,29 @@
     import { createApp, onMounted } from 'vue';
     import { createPinia } from 'pinia';
     import { useApprovalListStore } from 'approvalListStore';
+    import { useCommonCodeStore } from 'commonCodeStore';
 
     const app = createApp({
         setup() {
             const store = useApprovalListStore();
+            const codeStore = useCommonCodeStore();
             const ctx = document.querySelector('meta[name="ctx"]').content;
 
             const goCreate = () => { location.href = ctx + '/approval/create'; };
+            const goDoc = (item) => {
+                location.href = item.docStatus === 'DRAFT'
+                    ? ctx + '/approval/create?docId=' + item.docId
+                    : ctx + '/approval/view?docId=' + item.docId;
+            };
 
-    		onMounted(() => {
+    		onMounted(async () => {
+      						await codeStore.fetchCodes('DOCSTATUS');
       						const params = new URLSearchParams(location.search);
       						store.filterType = params.get('type') || 'draft';
       						store.fetchList();
       						});
 
-            return { store, ctx, goCreate };
+            return { store, codeStore, ctx, goCreate, goDoc };
         }
     });
 

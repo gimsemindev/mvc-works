@@ -3,6 +3,8 @@ import http from 'http';
 
 export const useApprovalCreateStore = defineStore('approvalCreate', {
     state: () => ({
+        editMode: false,
+        editDocId: null,
         // 문서유형
         docTypeList: [],
         selectedDocTypeId: null,
@@ -61,6 +63,64 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
                 console.error('문서유형 로딩 실패:', e);
             }
         },
+
+		async loadDraft(docId) {
+		    try {
+		        const res = await http.get('/approval/doc/' + docId);
+		        const doc = res.data;
+
+		        this.editMode = true;
+		        this.editDocId = doc.docId;
+		        this.title = doc.title;
+		        this.selectedDocTypeId = doc.docTypeId;
+
+		        const docType = this.docTypeList.find(d => d.docTypeId === doc.docTypeId);
+		        if (docType) {
+		            this.selectedDocTypeName = docType.typeName;
+		            this.selectedFormCode = docType.formCode;
+		            this.selectedNotice = docType.notice || '';
+		        } else {
+		            this.selectedDocTypeName = doc.typeName || '';
+		            this.selectedFormCode = doc.formCode || '';
+		        }
+		        this.formVisible = true;
+
+		        // detailData 파싱
+		        if (doc.detailData) {
+		            try {
+		                const parsed = JSON.parse(doc.detailData);
+		                Object.keys(parsed).forEach(key => {
+		                    if (key === 'expenseRows') {
+		                        this.expenseRows = parsed.expenseRows || [];
+		                    } else if (key !== 'formCode') {
+		                        this.detailData[key] = parsed[key];
+		                    }
+		                });
+		            } catch(e) { console.warn('detailData 파싱 실패:', e); }
+		        }
+
+		        // 결재선 복원
+		        if (doc.lines && doc.lines.length > 0) {
+		            this.approvers = doc.lines.map(l => ({
+		                empId: l.apprEmpId, name: l.apprEmpName,
+		                deptCode: l.apprDeptCode, dept: l.apprDeptName,
+		                gradeCode: l.apprGradeCode, grade: l.apprGradeName
+		            }));
+		        }
+
+		        // 참조자 복원
+		        if (doc.refs && doc.refs.length > 0) {
+		            this.references = doc.refs.map(r => ({
+		                empId: r.refEmpId, name: r.refEmpName,
+		                deptCode: r.refDeptCode, dept: r.refDeptName,
+		                gradeCode: r.refGradeCode, grade: r.refGradeName
+		            }));
+		        }
+		    } catch (e) {
+		        console.error('임시저장 문서 로딩 실패:', e);
+		        alert('문서를 불러오지 못했습니다.');
+		    }
+		},
 
 		selectDocType(id, name) {
 		    this.selectedDocTypeId = id;
@@ -278,6 +338,8 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 					
 		        };
 
+				if (this.editMode) data.oldDocId = this.editDocId;
+
 				const formData = new FormData();
 				formData.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
 
@@ -288,7 +350,7 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 				await http.post('/approval/doc', formData, {
 				    headers: { 'Content-Type': 'multipart/form-data' }
 				});
-				
+
 		        alert('임시저장되었습니다.');
 				const ctx = document.querySelector('meta[name="ctx"]').content;
 				location.href = ctx + '/approval/list';
@@ -370,6 +432,8 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 		                refGradeName: r.grade || ''
 		            }))
 		        };
+
+		        if (this.editMode) data.oldDocId = this.editDocId;
 
 		        const formData = new FormData();
 		        formData.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));

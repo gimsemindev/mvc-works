@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import http from 'http';
+import { useCommonCodeStore } from 'commonCodeStore';
 
 export const useApprovalViewStore = defineStore('approvalView', {
     state: () => ({
@@ -20,15 +21,8 @@ export const useApprovalViewStore = defineStore('approvalView', {
                 const res = await http.get('/approval/doc/' + docId);
                 this.doc  = res.data;
 
-                // docTypeId → selectedFormCode 매핑
-                const codeMap = {
-                    1: 'FM001',  // 휴가신청서
-                    2: 'FM002',  // 출장신청서
-                    3: 'FM003',  // 지출결의서
-                    4: 'FM004',  // 비용청구서
-                    5: 'FM005',  // 일반신청서
-                };
-                this.selectedFormCode = codeMap[this.doc.docTypeId] || '';
+				// DB에서 가져온 formCode 사용
+				this.selectedFormCode = this.doc.formCode || '';
 
                 // detailData JSON 파싱
                 if (this.doc.detailData) {
@@ -59,20 +53,46 @@ export const useApprovalViewStore = defineStore('approvalView', {
             return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
         },
 
-        // 상태 한글 변환
+        // 상태 한글 변환 (공통코드 DOCSTATUS)
         statusLabel(code) {
-            return { DRAFT: '임시저장', PENDING: '결재중', APPROVED: '승인', REJECTED: '반려' }[code] || code;
+            const codeStore = useCommonCodeStore();
+            const found = codeStore.getCodes('DOCSTATUS').find(c => c.code === code);
+            return found ? found.name : code;
         },
 
-        // 결재선 상태 한글 변환
+        // 결재선 상태 한글 변환 (공통코드 LINESTATUS)
         lineStatusLabel(code) {
-            return { WAIT: '대기', APPROVED: '승인', REJECTED: '반려' }[code] || code;
+            const codeStore = useCommonCodeStore();
+            const found = codeStore.getCodes('LINESTATUS').find(c => c.code === code);
+            return found ? found.name : code;
+        },
+
+        // 결재취소
+        async cancelDoc(docId) {
+            try {
+                await http.post('/approval/doc/' + docId + '/cancel');
+                alert('결재가 취소되었습니다.');
+                return true;
+            } catch (e) {
+                const msg = e.response?.data?.msg || '취소 처리 중 오류가 발생했습니다.';
+                alert(msg);
+                return false;
+            }
         }
     },
 
     getters: {
         expenseTotal: (state) => {
             return (state.expenseRows || []).reduce((sum, r) => sum + (Number(r.amount) || 0), 0);
+        },
+        canCancel: (state) => {
+            if (!state.doc) return false;
+            const s = state.doc.docStatus;
+            if (s === 'REJECTED') return true;
+            if (s === 'PENDING' && state.doc.lines) {
+                return state.doc.lines.every(l => l.apprStatus === 'WAIT');
+            }
+            return false;
         }
     }
 });

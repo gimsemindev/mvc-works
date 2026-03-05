@@ -14,6 +14,7 @@ public interface ApprovalDocService {
 	public Map<String, Object> listRef(Map<String, Object> map) throws Exception;
     public Map<String, Object> listAll(Map<String, Object> map) throws Exception;
     public ApprovalDocDto getDoc(long docId) throws Exception;
-    
+    public boolean cancelDoc(long docId, String empId) throws Exception;
+
 }
 

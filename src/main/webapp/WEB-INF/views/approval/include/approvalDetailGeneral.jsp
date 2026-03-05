@@ -1,8 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8"%>
 
-<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
-
 <div class="form-section" v-if="store.selectedFormCode === 'FM005'">
     <div class="form-section-header">
         <div class="form-section-title">
@@ -21,31 +18,3 @@
         </div>
     </div>
 </div>
-
-<script>
-(function() {
-    let quill = null;
-    const observer = new MutationObserver(function() {
-        const el = document.getElementById('general-editor');
-        if (el && !quill) {
-            quill = new Quill(el, {
-                theme: 'snow',
-                placeholder: '상세 내용을 입력해주세요.',
-                modules: {
-                    toolbar: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        [{ 'align': [] }],
-                        ['link', 'image'],
-                        ['clean']
-                    ]
-                }
-            });          
-        }
-    });
-    const app = document.getElementById('vue-app');
-    if (app) observer.observe(app, { childList: true, subtree: true });
-})();
-</script>

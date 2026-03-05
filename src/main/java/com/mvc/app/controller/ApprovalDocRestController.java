@@ -186,4 +186,21 @@ public class ApprovalDocRestController {
         }
     }
 
+    // 결재취소
+    @PostMapping("/{docId}/cancel")
+    public ResponseEntity<?> cancelDoc(@PathVariable("docId") long docId) {
+        try {
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+            boolean ok = service.cancelDoc(docId, info.getEmpId());
+            if (ok) {
+                return ResponseEntity.ok(Map.of("msg", "결재가 취소되었습니다."));
+            } else {
+                return ResponseEntity.badRequest().body(Map.of("msg", "취소할 수 없는 문서입니다."));
+            }
+        } catch (Exception e) {
+            log.info("cancelDoc : ", e);
+            return ResponseEntity.internalServerError().body(Map.of("msg", "취소 처리 실패"));
+        }
+    }
+
 }

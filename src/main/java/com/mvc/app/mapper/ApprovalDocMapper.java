@@ -30,6 +30,10 @@ public interface ApprovalDocMapper {
     public ApprovalDocDto getDoc(long docId) throws SQLException;
     public List<ApprovalLineDto> getLines(long docId) throws SQLException;
     public List<ApprovalFileDto> getFiles(long docId) throws SQLException;
-
-
+    public List<ApprovalRefDto> getRefs(long docId) throws SQLException;
+    public void deleteFiles(long docId) throws SQLException;
+    public void deleteRefs(long docId) throws SQLException;
+    public void deleteLines(long docId) throws SQLException;
+    public void deleteDoc(long docId) throws SQLException;
+    public int cancelDoc(Map<String, Object> map) throws SQLException;
 }

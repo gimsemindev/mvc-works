@@ -8,11 +8,28 @@
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/projectlist.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/approvalview.css" type="text/css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/approvalcreate.css" type="text/css">
 <meta name="ctx"   content="${pageContext.request.contextPath}">
 <meta name="docId" content="${param.docId}">
 <style>[v-cloak] { display: none; }</style>
+<style>
+.form-section input,
+.form-section select,
+.form-section textarea {
+    pointer-events: none;
+    background-color: #f9fafb;
+    color: #344054;
+}
+.btn-expense-add, .btn-expense-remove {
+    display: none;
+}
+.ql-toolbar { display: none; }
+.ql-editor { pointer-events: none; background-color: #f9fafb; color: #344054; }
+</style>
 </head>
 <body>
 
@@ -22,22 +39,22 @@
 <main id="main-content">
 <div id="vue-app" v-cloak>
 
-    <!-- 로딩 -->
+   
     <div v-if="store.loading" style="text-align:center; padding:60px; color:#9aa0b4;">
         <span class="material-symbols-outlined" style="font-size:32px;">hourglass_empty</span>
         <p>불러오는 중...</p>
     </div>
 
-    <!-- 에러 -->
+    
     <div v-else-if="store.error" style="text-align:center; padding:60px; color:#e53e3e;">
         <span class="material-symbols-outlined" style="font-size:32px;">error</span>
         <p>{{ store.error }}</p>
     </div>
 
-    <!-- 본문 -->
+    
     <template v-else-if="store.doc">
 
-        <!-- 페이지 헤더 -->
+        
         <div class="page-header">
             <span class="material-symbols-outlined">forward_to_inbox</span>
             <span class="page-header-label">전자결재</span>
@@ -45,7 +62,7 @@
             <span class="page-header-doc">{{ store.doc.typeName }}</span>
         </div>
 
-        <!-- ① 기본 정보 -->
+        
         <div class="view-section">
             <div class="view-section-header">
                 <span class="material-symbols-outlined">info</span>
@@ -85,7 +102,7 @@
             </div>
         </div>
 
-        <!-- ② 결재선 정보 -->
+        
         <div class="view-section">
             <div class="view-section-header">
                 <span class="material-symbols-outlined">group</span>
@@ -93,7 +110,7 @@
             </div>
             <div class="view-section-body">
                 <div v-if="store.doc.lines && store.doc.lines.length > 0" class="line-grid">
-                    <div class="line-card" v-for="line in store.doc.lines" :key="line.lineId">
+                    <div class="line-card" :class="'line-' + line.apprStatus" v-for="line in store.doc.lines" :key="line.lineId">
                         <div class="line-card-header">{{ line.stepOrder }}단계</div>
                         <div class="line-card-body">
                             <div class="line-card-name">{{ line.apprEmpName }}</div>
@@ -108,14 +125,32 @@
             </div>
         </div>
 
-        <!-- ③ 세부 정보 - 문서 유형별 include -->
+        <!-- 참조자 정보 -->
+        <div class="view-section" v-if="store.doc.refs && store.doc.refs.length > 0">
+            <div class="view-section-header">
+                <span class="material-symbols-outlined">visibility</span>
+                참조자 정보
+            </div>
+            <div class="view-section-body">
+                <div class="line-grid">
+                    <div class="line-card" v-for="ref in store.doc.refs" :key="ref.refId">
+                        <div class="line-card-body">
+                            <div class="line-card-name">{{ ref.refEmpName }}</div>
+                            <div class="line-card-dept">{{ ref.refDeptName }} · {{ ref.refGradeName }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
         <jsp:include page="/WEB-INF/views/approval/include/approvalDetailLeave.jsp"/>
         <jsp:include page="/WEB-INF/views/approval/include/approvalDetailBiztrip.jsp"/>
         <jsp:include page="/WEB-INF/views/approval/include/approvalDetailExpense.jsp"/>
         <jsp:include page="/WEB-INF/views/approval/include/approvalDetailClaim.jsp"/>
         <jsp:include page="/WEB-INF/views/approval/include/approvalDetailGeneral.jsp"/>
 
-        <!-- ④ 첨부파일 -->
+        
         <div class="view-section">
             <div class="view-section-header">
                 <span class="material-symbols-outlined">attach_file</span>
@@ -137,8 +172,14 @@
             </div>
         </div>
 
-        <!-- 하단 버튼 -->
+        
         <div class="view-footer">
+            <button class="btn-cancel"
+                    v-if="store.doc.writerEmpId === currentEmpId && store.canCancel"
+                    @click="cancelDoc">
+                <span class="material-symbols-outlined" style="font-size:15px">cancel</span>
+                결재취소
+            </button>
             <button class="btn-back" @click="goList">
                 <span class="material-symbols-outlined" style="font-size:15px">arrow_back</span>
                 목록
@@ -155,9 +196,9 @@
 <script type="importmap">
 {
     "imports": {
-        "http":              "/dist/util/http.js?v=2",
-        "approvalViewStore": "/dist/util/store/approvalViewStore.js?v=3",
-        "commonCodeStore":   "/dist/util/store/commonCodeStore.js?v=1"
+        "http":              "/dist/util/http.js",
+        "approvalViewStore": "/dist/util/store/approvalViewStore.js",
+        "commonCodeStore":   "/dist/util/store/commonCodeStore.js"
     }
 }
 </script>
@@ -177,7 +218,15 @@
             const ctx   = document.querySelector('meta[name="ctx"]').content;
             const docId = document.querySelector('meta[name="docId"]').content;
 
+            const currentEmpId = '${sessionScope.member.empId}';
+
             const goList = () => { location.href = ctx + '/approval/list'; };
+
+            const cancelDoc = async () => {
+                if (!confirm('결재를 취소하시겠습니까?')) return;
+                const ok = await store.cancelDoc(docId);
+                if (ok) location.href = ctx + '/approval/list';
+            };
 
             const download = (saveFilename, oriFilename) => {
                 const a = document.createElement('a');
@@ -187,8 +236,15 @@
             };
 
             onMounted(async () => {
-                await codeStore.fetchCodes();   // 공통코드 먼저 로드
-                if (docId) store.fetchDoc(docId);
+                  await codeStore.fetchCodes('DOCSTATUS');
+                  await codeStore.fetchCodes('LINESTATUS');
+                  if (docId) {
+   					  await store.fetchDoc(docId);
+      				  // formCode에 따라 필요한 공통코드 로드
+      				  if (store.selectedFormCode === 'FM001') {
+                          await codeStore.fetchCodes('LEAVETYPE');
+                      }
+            }
 
 
                 if (typeof Quill !== 'undefined') {
@@ -220,7 +276,7 @@
                 }
             });
 
-            return { store, codeStore, goList, download };
+            return { store, codeStore, goList, download, cancelDoc, currentEmpId };
         }
     });
 

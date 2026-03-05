@@ -30,4 +30,6 @@ public class ApprovalDocDto {
     private List<ApprovalRefDto> refs;
     private List<ApprovalFileDto> files;
     private String typeName;
+    private String formCode;
+    private long oldDocId;    // 임시저장 수정 시 기존 문서 ID
 }

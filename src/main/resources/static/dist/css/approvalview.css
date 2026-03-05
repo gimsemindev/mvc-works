@@ -114,6 +114,16 @@
     margin-bottom: 8px;
 }
 
+/* ── 결재선 상태별 색상 ── */
+.line-WAIT     { border-color: #e6eaf4; }
+.line-WAIT .line-card-header     { background: #f8f9fc; color: #667085; }
+.line-APPROVED { border-color: #b6e5d8; }
+.line-APPROVED .line-card-header { background: #e0f5ef; color: #1a9660; }
+.line-REJECTED { border-color: #f5c6c6; }
+.line-REJECTED .line-card-header { background: #fde8e8; color: #e53e3e; }
+.line-HOLD     { border-color: #fde0a5; }
+.line-HOLD .line-card-header     { background: #fff4e0; color: #d97706; }
+
 /* ── 세부정보 그리드 ── */
 .detail-grid {
     display: grid;

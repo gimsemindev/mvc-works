@@ -33,24 +33,22 @@
                 </td>
             </tr>
             <!-- 데이터 목록 -->
-            <tr v-for="item in store.list" :key="item.docId">
-                <td class="cb-col"><input type="checkbox" name="chk" :value="item.docId"></td>
+            <tr v-for="item in store.list" :key="item.docId"
+                @click="goDoc(item)"
+                style="cursor:pointer;">
+                <td class="cb-col" @click.stop><input type="checkbox" name="chk" :value="item.docId"></td>
                 <td>{{ item.regDate }}</td>
                 <td>{{ item.typeName }}</td>
-                <td class="td-title">
-    				<a :href="ctx + '/approval/view?docId=' + item.docId"
-       				style="color:#1d2939; text-decoration:none;">
-        				{{ item.title }}
-    				</a>
-				</td>
+                <td class="td-title">{{ item.title }}</td>
                 <td>{{ item.writerEmpName }} {{ item.writerGradeName }}</td>
                 <td>
                     <span class="status-badge"
                           :class="{'status-임시': item.docStatus === 'DRAFT',
                                    'status-진행': item.docStatus === 'PENDING',
                                    'status-승인': item.docStatus === 'APPROVED',
-                                   'status-반려': item.docStatus === 'REJECTED'}">
-                        {{ {DRAFT:'임시저장', PENDING:'결재중', APPROVED:'승인', REJECTED:'반려'}[item.docStatus] || item.docStatus }}
+                                   'status-반려': item.docStatus === 'REJECTED',
+                                   'status-취소': item.docStatus === 'CANCELED'}">
+                        {{ (codeStore.getCodes('DOCSTATUS').find(c => c.code === item.docStatus) || {}).name || item.docStatus }}
                     </span>
                 </td>
             </tr>

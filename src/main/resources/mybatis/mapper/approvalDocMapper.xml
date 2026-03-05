@@ -283,7 +283,8 @@
                d.writerGradeCode, d.writerGradeName,
                TO_CHAR(d.regDate, 'YYYY-MM-DD') AS regDate,
                TO_CHAR(d.submitDate, 'YYYY-MM-DD') AS submitDate,
-               t.typeName
+               t.typeName,
+               t.formCode
         FROM approvalDoc d
         LEFT JOIN approvalDocType t ON d.docTypeId = t.docTypeId
         WHERE d.docId = #{docId}
@@ -309,5 +310,47 @@
         WHERE docId = #{docId}
         ORDER BY fileId ASC
     </select> 
-    
+
+    <!-- 참조자 조회 -->
+    <select id="getRefs" parameterType="long"
+            resultType="com.mvc.app.domain.dto.ApprovalRefDto">
+        SELECT refId, docId, refEmpId, refEmpName,
+               refDeptCode, refDeptName, refGradeCode, refGradeName
+        FROM approvalReference
+        WHERE docId = #{docId}
+        ORDER BY refId ASC
+    </select>
+
+    <!-- 임시저장 삭제 (하위 테이블 먼저 삭제) -->
+    <delete id="deleteFiles" parameterType="long">
+        DELETE FROM approvalFile WHERE docId = #{docId}
+    </delete>
+    <delete id="deleteRefs" parameterType="long">
+        DELETE FROM approvalReference WHERE docId = #{docId}
+    </delete>
+    <delete id="deleteLines" parameterType="long">
+        DELETE FROM approvalLine WHERE docId = #{docId}
+    </delete>
+    <delete id="deleteDoc" parameterType="long">
+        DELETE FROM approvalDoc WHERE docId = #{docId} AND docStatus = 'DRAFT'
+    </delete>
+
+    <!-- 결재취소 (기안자 본인, PENDING(1차미결재) 또는 REJECTED만) -->
+    <update id="cancelDoc" parameterType="map">
+        UPDATE approvalDoc
+        SET docStatus = 'CANCELED'
+        WHERE docId = #{docId}
+          AND writerEmpId = #{empId}
+          AND (
+              (docStatus = 'REJECTED')
+              OR
+              (docStatus = 'PENDING'
+               AND NOT EXISTS (
+                   SELECT 1 FROM approvalLine
+                   WHERE docId = #{docId}
+                     AND lineStatusCode != 'WAIT'
+               ))
+          )
+    </update>
+
 </mapper>

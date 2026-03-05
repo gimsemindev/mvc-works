@@ -10,6 +10,7 @@ import com.mvc.app.domain.dto.ApprovalFileDto;
 import com.mvc.app.domain.dto.ApprovalLineDto;
 import com.mvc.app.domain.dto.ApprovalRefDto;
 import com.mvc.app.mapper.ApprovalDocMapper;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,6 +36,14 @@ public class ApprovalDocServiceImpl implements ApprovalDocService {
         	if (dto.getDocStatus() == null || dto.getDocStatus().isBlank()) {
         	    dto.setDocStatus("DRAFT");
         	}
+            // 편집 모드: 기존 DRAFT 삭제
+            if (dto.getOldDocId() > 0) {
+                mapper.deleteFiles(dto.getOldDocId());
+                mapper.deleteRefs(dto.getOldDocId());
+                mapper.deleteLines(dto.getOldDocId());
+                mapper.deleteDoc(dto.getOldDocId());
+            }
+
             mapper.insertDoc(dto);
 
             // 2. 결재선 저장
@@ -115,7 +124,17 @@ public class ApprovalDocServiceImpl implements ApprovalDocService {
         if (doc != null) {
             doc.setLines(mapper.getLines(docId));
             doc.setFiles(mapper.getFiles(docId));
+            doc.setRefs(mapper.getRefs(docId));
         }
         return doc;
-    }    
+    }
+
+    @Override
+    public boolean cancelDoc(long docId, String empId) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        map.put("docId", docId);
+        map.put("empId", empId);
+        int cnt = mapper.cancelDoc(map);
+        return cnt > 0;
+    }
 }

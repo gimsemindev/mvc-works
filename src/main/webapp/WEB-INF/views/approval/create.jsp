@@ -11,6 +11,9 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/projectlist.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/approvalcreate.css" type="text/css">
 <meta name="ctx" content="${pageContext.request.contextPath}">
+<meta name="docId" content="${param.docId}">
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <style>[v-cloak] { display: none; }</style>
 </head>
 <body>
@@ -173,6 +176,11 @@
             const ctx = document.querySelector('meta[name="ctx"]').content;
             const codeStore = useCommonCodeStore();
 
+            const docId = document.querySelector('meta[name="docId"]').content;
+            if (docId) {
+                store.formVisible = true;
+            }
+
             const todayDate = new Date().toLocaleDateString('ko-KR', {
                 year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short'
             });
@@ -236,10 +244,13 @@
                 drag.overIdx = null;
             };
 
-            onMounted(() => {
-      				store.fetchDocTypes();
-      				codeStore.fetchCodes('LEAVETYPE');
-  			});
+            onMounted(async () => {
+                await store.fetchDocTypes();
+                codeStore.fetchCodes('LEAVETYPE');
+                if (docId) {
+                    await store.loadDraft(docId);
+                }
+            });
 
             return {
       				store, codeStore, todayDate,
@@ -257,6 +268,32 @@
     app.use(createPinia());
     app.mount('#vue-app');
 </script>
-
+<script>
+(function() {
+    let quill = null;
+    const observer = new MutationObserver(function() {
+        const el = document.getElementById('general-editor');
+        if (el && !quill) {
+            quill = new Quill(el, {
+                theme: 'snow',
+                placeholder: '상세 내용을 입력해주세요.',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'align': [] }],
+                        ['link', 'image'],
+                        ['clean']
+                    ]
+                }
+            });
+        }
+    });
+    const app = document.getElementById('vue-app');
+    if (app) observer.observe(app, { childList: true, subtree: true });
+})();
+</script>
 </body>
 </html>
