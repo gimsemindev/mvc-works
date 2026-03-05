@@ -28,4 +28,8 @@ public class ApprovalController {
         return "approval/doctype";
     }
 
+    @GetMapping("view")
+    public String approvalView() {
+        return "approval/view";
+    }
 }

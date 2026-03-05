@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.mvc.app.domain.dto.ApprovalDocDto;
@@ -169,6 +170,19 @@ public class ApprovalDocRestController {
         } catch (Exception e) {
             log.info("listAll : ", e);
             return ResponseEntity.internalServerError().body(Map.of("msg", "목록 조회 실패"));
+        }
+    }
+    
+ // 문서 상세 조회
+    @GetMapping("/{docId}")
+    public ResponseEntity<?> getDoc(@PathVariable("docId") long docId) {
+        try {
+            ApprovalDocDto doc = service.getDoc(docId);
+            if (doc == null) return ResponseEntity.notFound().build();
+            return ResponseEntity.ok(doc);
+        } catch (Exception e) {
+            log.info("getDoc : ", e);
+            return ResponseEntity.internalServerError().body(Map.of("msg", "조회 실패"));
         }
     }
 

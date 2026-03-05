@@ -37,7 +37,12 @@
                 <td class="cb-col"><input type="checkbox" name="chk" :value="item.docId"></td>
                 <td>{{ item.regDate }}</td>
                 <td>{{ item.typeName }}</td>
-                <td class="td-title">{{ item.title }}</td>
+                <td class="td-title">
+    				<a :href="ctx + '/approval/view?docId=' + item.docId"
+       				style="color:#1d2939; text-decoration:none;">
+        				{{ item.title }}
+    				</a>
+				</td>
                 <td>{{ item.writerEmpName }} {{ item.writerGradeName }}</td>
                 <td>
                     <span class="status-badge"

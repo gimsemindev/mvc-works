@@ -27,4 +27,9 @@ public interface ApprovalDocMapper {
     public int countRef(Map<String, Object> map) throws SQLException;
     public List<ApprovalDocDto> listAll(Map<String, Object> map) throws SQLException;
     public int countAll(Map<String, Object> map) throws SQLException;
+    public ApprovalDocDto getDoc(long docId) throws SQLException;
+    public List<ApprovalLineDto> getLines(long docId) throws SQLException;
+    public List<ApprovalFileDto> getFiles(long docId) throws SQLException;
+
+
 }

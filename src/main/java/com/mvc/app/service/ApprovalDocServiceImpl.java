@@ -108,4 +108,14 @@ public class ApprovalDocServiceImpl implements ApprovalDocService {
         List<ApprovalDocDto> list = mapper.listAll(map);
         return Map.of("totalCount", totalCount, "list", list);
     }
+    
+    @Override
+    public ApprovalDocDto getDoc(long docId) throws Exception {
+        ApprovalDocDto doc = mapper.getDoc(docId);
+        if (doc != null) {
+            doc.setLines(mapper.getLines(docId));
+            doc.setFiles(mapper.getFiles(docId));
+        }
+        return doc;
+    }    
 }

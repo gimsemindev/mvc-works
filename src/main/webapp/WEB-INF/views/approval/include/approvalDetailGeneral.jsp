@@ -42,7 +42,7 @@
                         ['clean']
                     ]
                 }
-            });
+            });          
         }
     });
     const app = document.getElementById('vue-app');

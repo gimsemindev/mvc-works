@@ -23,9 +23,11 @@ public class ApprovalDocDto {
     private String writerGradeCode;
     private String writerGradeName;
     private String regDate;
+    private String submitDate;
 
-    // 결재선 + 참조자
+    // 결재선 + 참조자 + 첨부파일
     private List<ApprovalLineDto> lines;
     private List<ApprovalRefDto> refs;
+    private List<ApprovalFileDto> files;
     private String typeName;
 }
