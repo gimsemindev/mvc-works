@@ -3,22 +3,19 @@ import http from 'http';
 import { getPagination } from 'paginate';
 
 export const useActivityLogStore = defineStore('activityLog', {
-
-    // ──────────────────────────────────────────────
-    // State
-    // ──────────────────────────────────────────────
     state: () => ({
         list: [],
         sessionName: '',
 
+		//검색 파라메터
         searchParams: {
-            actorEmpId: '',     // 사원번호 (actor_emp_id) LIKE 검색
-            actorName:  '',     // 이름 (actor_name) LIKE 검색
-            targetMenu: '',     // 메뉴 (target_menu) LIKE 검색
-            result:     '',     // 처리결과 (SUCCESS / FAIL / 전체='')
-            actionType: '',     // 작업유형 (INSERT / UPDATE / DELETE / BULK_UPDATE / EXCEL_IMPORT)
-            startDate:  '',     // 로그일 시작 (yyyy-MM-dd)
-            endDate:    '',     // 로그일 종료 (yyyy-MM-dd)
+            actorEmpId: '',     // 사원번호
+            actorName:  '',     // 이름
+            targetMenu: '',     // 메뉴
+            result:     '',     // 처리결과
+            actionType: '',     // 작업유형
+            startDate:  '',     // 로그일 시작
+            endDate:    '',     // 로그일 종료
             page:       1
         },
 
@@ -34,14 +31,9 @@ export const useActivityLogStore = defineStore('activityLog', {
         showDetail: false,
     }),
 
-    // ──────────────────────────────────────────────
-    // Actions
-    // ──────────────────────────────────────────────
     actions: {
-
-        // ════════════════════════════════════════════
-        // [1] 목록 조회 (GET /api/activity-log)
-        // ════════════════════════════════════════════
+		
+        // 목록 조회
         async fetchList(page = this.searchParams.page) {
             this.loading = true;
             this.searchParams.page = page;
@@ -74,16 +66,12 @@ export const useActivityLogStore = defineStore('activityLog', {
             }
         },
 
-        // ════════════════════════════════════════════
-        // [2] 검색 (1페이지부터)
-        // ════════════════════════════════════════════
+        //검색
         search() {
             this.fetchList(1);
         },
 
-        // ════════════════════════════════════════════
-        // [3] 검색 조건 초기화
-        // ════════════════════════════════════════════
+        //검색 조건 초기화
         resetSearch() {
             this.searchParams = {
                 actorEmpId: '',
@@ -100,9 +88,7 @@ export const useActivityLogStore = defineStore('activityLog', {
             this.fetchList(1);
         },
 
-        // ════════════════════════════════════════════
-        // [4] 정렬
-        // ════════════════════════════════════════════
+        //정렬
         sortBy(col) {
             if (this.sortCol === col) {
                 this.sortDir = this.sortDir === 'asc' ? 'desc' : 'asc';
@@ -117,9 +103,7 @@ export const useActivityLogStore = defineStore('activityLog', {
             return this.sortDir === 'asc' ? 'asc' : 'desc';
         },
 
-        // ════════════════════════════════════════════
-        // [5] 상세 모달 열기/닫기
-        // ════════════════════════════════════════════
+        //상세 모달
         openDetail(item) {
             this.detailItem = item;
             this.showDetail = true;
@@ -129,17 +113,13 @@ export const useActivityLogStore = defineStore('activityLog', {
             this.showDetail = false;
         },
 
-        // ════════════════════════════════════════════
-        // [6] 순번 계산
-        // ════════════════════════════════════════════
+        //순번 계산
         getRowNo(index) {
             const offset = (this.searchParams.page - 1) * this.pageInfo.pageSize;
             return this.pageInfo.totalCount - offset - index;
         },
 
-        // ════════════════════════════════════════════
-        // [7] 액션 타입 한글 라벨
-        // ════════════════════════════════════════════
+        //한글 label
         actionLabel(type) {
             const map = {
                 INSERT:       '등록',
@@ -151,9 +131,7 @@ export const useActivityLogStore = defineStore('activityLog', {
             return map[type] || type;
         },
 
-        // ════════════════════════════════════════════
-        // [8] JSON 포맷 (상세 모달 출력용)
-        // ════════════════════════════════════════════
+        //상세 모달 출력을 위한 JSON 포멧
         formatJson(jsonStr) {
             if (!jsonStr) return '-';
             try {
@@ -163,9 +141,7 @@ export const useActivityLogStore = defineStore('activityLog', {
             }
         },
 
-        // ════════════════════════════════════════════
-        // [9] 엑셀 다운로드
-        // ════════════════════════════════════════════
+        //엑셀 다운로드
         excelDownload() {
             const { actorEmpId, actorName, targetMenu, result, actionType, startDate, endDate } = this.searchParams;
             const qs = new URLSearchParams({ actorEmpId, actorName, targetMenu, result, actionType, startDate, endDate });
