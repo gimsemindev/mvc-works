@@ -171,7 +171,8 @@ public class EmployeeController {
 	}
 
 	@PostMapping("update")
-	public String updateSubmit(EmployeeDto dto,
+	public String updateSubmit(EmployeeDto dto, @RequestParam(name = "newPwd", required = false) String newPwd,
+			@RequestParam(name = "confirmPwd", required = false) String confirmPwd,
 			@RequestParam(name = "deleteProfile", required = false) String deleteProfile, RedirectAttributes reAttr,
 			Model model) {
 
@@ -192,6 +193,17 @@ public class EmployeeController {
 
 				dto.setProfilePhoto(null);
 				info.setAvatar("");
+			}
+
+			if (newPwd != null && !newPwd.isBlank()) {
+
+				if (!newPwd.equals(confirmPwd)) {
+					model.addAttribute("message", "비밀번호가 일치하지 않습니다.");
+					model.addAttribute("dto", dto);
+					return "member/editProfile";
+				}
+
+				dto.setPassword(newPwd);
 			}
 
 			service.updateEmployee(dto, uploadPath);

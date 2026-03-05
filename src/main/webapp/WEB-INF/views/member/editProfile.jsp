@@ -24,14 +24,15 @@
 	<main class="d-flex justify-content-center align-items-center py-5">
 
 		<form method="post" enctype="multipart/form-data"
-			action="${pageContext.request.contextPath}/member/update">
+			action="${pageContext.request.contextPath}/member/update"
+			onsubmit="return sendOk();">
 
 			<div class="profile-card">
 
-				<h4 class="mb-4 fw-bold">Edit Profile</h4>
+				<h4 class="mb-4 fw-bold">${dto.name}</h4>
 
 				<!-- 프로필 영역 -->
-				<div class="d-flex align-items-center gap-4">
+				<div class="d-flex align-items-center gap-4 mb-2">
 
 					<c:choose>
 						<c:when test="${empty dto.profilePhoto}">
@@ -57,17 +58,28 @@
 
 				<!-- 개인정보 -->
 				<div>
-					<div class="section-title">Personal Information</div>
+					<div class="section-title">개인 정보</div>
 
 					<div class="row g-4">
-						<div class="col-md-6">
-							<label class="form-label">이름</label> <input type="text"
-								class="form-control" value="${dto.name}" disabled>
-						</div>
+
 
 						<div class="col-md-6">
 							<label class="form-label">사원번호</label> <input type="text"
 								class="form-control" value="${dto.empId}" disabled>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label">생년월일</label> <input type="text"
+								class="form-control" value="${dto.birth}" disabled>
+						</div>
+
+						<div class="col-md-6">
+							<label class="form-label">부서</label> <input type="text"
+								class="form-control" value="${dto.deptName}" disabled>
+						</div>
+
+						<div class="col-md-6">
+							<label class="form-label">직급</label> <input type="text"
+								class="form-control" value="${dto.gradeName}" disabled>
 						</div>
 
 						<div class="col-md-6">
@@ -79,15 +91,37 @@
 							<label class="form-label">이메일</label> <input type="email"
 								class="form-control" name="email" value="${dto.email}">
 						</div>
+						<div class="col-md-6">
+							<label for="btn-zip" class="form-label font-roboto">우편번호</label>
+							<div class="row g-3">
+								<div class="col-8">
+									<input class="form-control" type="text" name="zip" id="zip"
+										value="${dto.zip}" readonly tabindex="-1">
+								</div>
+								<div class="col-4">
+									<button type="button" class="btn btn-outline-primary"
+										id="btn-zip" onclick="daumPostcode();">우편번호찾기</button>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-md-6">
+							<label class="form-label font-roboto">기본주소</label> <input
+								class="form-control" type="text" name="addr1" id="addr1"
+								value="${dto.addr1}" readonly tabindex="-1">
+						</div>
+						<div class="col-md-6">
+							<label for="addr2" class="form-label font-roboto">상세주소</label> <input
+								class="form-control" type="text" name="addr2" id="addr2"
+								value="${dto.addr2}">
+						</div>
 					</div>
 				</div>
-
-				<hr class="divider">
-
+				<br>
+				<hr />
+				<br>
 				<!-- 비밀번호 -->
 				<div>
-					<div class="section-title">비밀번호 변경 (선택)</div>
-
 					<div class="row g-4">
 						<div class="col-md-6">
 							<label class="form-label">새 비밀번호</label> <input type="password"
@@ -114,6 +148,10 @@
 			</div>
 		</form>
 	</main>
+
+	<script
+		src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
 	<script>
 		document
 				.querySelector("input[name='selectFile']")
@@ -135,8 +173,7 @@
 
 							reader.readAsDataURL(file);
 						});
-	</script>
-	<script>
+		
 	function deleteProfilePhoto(){
 
 	    if(!confirm("프로필 사진을 삭제하시겠습니까?")){
@@ -159,6 +196,64 @@
 	        }
 	    });
 	}
-</script>
+	
+	function sendOk() {
+
+	    const newPwd = document.querySelector("input[name='newPwd']").value;
+	    const confirmPwd = document.querySelector("input[name='confirmPwd']").value;
+
+	    if(newPwd || confirmPwd){
+
+	        if(newPwd !== confirmPwd){
+	            alert("비밀번호가 일치하지 않습니다.");
+	            return false;
+	        }
+
+	        if(newPwd.length < 8){
+	            alert("비밀번호는 8자 이상 입력하세요.");
+	            return false;
+	        }
+	    }
+
+	    return true;
+	}
+	
+    function daumPostcode() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                let fullAddr = ''; // 최종 주소 변수
+                let extraAddr = ''; // 조합형 주소 변수
+
+                // 사용자가 선택한 주소 타입에 따라 해당 주소 값 가져오기
+                if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택한 경우
+                    fullAddr = data.roadAddress;
+
+                } else { // 사용자가 지번 주소를 선택한 경우(J)
+                    fullAddr = data.jibunAddress;
+                }
+
+                // 주소가 도로명 타입인 경우 조합
+                if(data.userSelectedType === 'R'){
+                    // 법정동명이 있을 경우 추가
+                    if(data.bname !== ''){
+                        extraAddr += data.bname;
+                    }
+                    // 건물명이 있을 경우 추가
+                    if(data.buildingName !== ''){
+                        extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                    }
+                    // 조합형주소의 유무에 따라 양쪽에 괄호를 추가하여 최종 주소 작성
+                    fullAddr += (extraAddr !== '' ? ' ('+ extraAddr +')' : '');
+                }
+
+                // 우편번호와 주소 정보를 해당 필드에 넣는다.
+                document.getElementById('zip').value = data.zonecode;
+                document.getElementById('addr1').value = fullAddr;
+
+                document.getElementById('addr2').focus();
+            }
+        }).open();
+    }
+	</script>
 </body>
 </html>
