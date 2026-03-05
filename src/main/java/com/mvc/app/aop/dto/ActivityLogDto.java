@@ -4,11 +4,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * 활동 로그 DTO
- *  - AOP Aspect → ActivityLogMapper 로 전달되는 데이터 객체
- *  - activity_log 테이블 컬럼과 1:1 대응
- */
 @Getter
 @Setter
 @Builder

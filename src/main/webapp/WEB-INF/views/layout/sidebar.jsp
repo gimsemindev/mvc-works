@@ -9,8 +9,17 @@
     <div class="sidebar-brand">MVC</div>
 
     <div class="nav-section">Navigation</div>
-    <a href="${pageContext.request.contextPath}/" class="nav-link"><i class="fas fa-th-large"></i> __Dashboards__</a>
-    <a href="${pageContext.request.contextPath}/" class="nav-link"><i class="fas fa-file-invoice"></i> Reports</a>
+    <a href="${pageContext.request.contextPath}/" class="nav-link"><i class="fas fa-th-large"></i> Dashboards</a>
+    <%-- 그룹웨어 토글 메뉴 --%>
+    <a href="#" class="nav-link nav-toggle" id="groupToggle">
+        <i class="fas fa-file-invoice"></i> 그룹웨어
+        <i class="fas fa-chevron-down toggle-icon" id="groupArrow"></i>
+    </a>
+    <ul class="sub-menu" id="groupSubMenu">
+        <li><a href="${pageContext.request.contextPath}/">공지사항 - 미구현</a></li>
+        <li><a href="${pageContext.request.contextPath}/report/main">주간보고서 - 구현 중</a></li>
+        <li><a href="${pageContext.request.contextPath}/">채팅 - 미구현</a></li>
+    </ul>
     <a href="${pageContext.request.contextPath}/" class="nav-link"><i class="fas fa-th-large"></i> Applications</a>
 
     <%-- 인사관리 토글 메뉴 --%>
