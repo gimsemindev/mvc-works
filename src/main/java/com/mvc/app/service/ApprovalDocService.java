@@ -11,4 +11,7 @@ public interface ApprovalDocService {
 	public Map<String, Object> listDraft(Map<String, Object> map) throws Exception;
 	public Map<String, Object> listSent(Map<String, Object> map) throws Exception;
 	public Map<String, Object> listInbox(Map<String, Object> map) throws Exception;
+	public Map<String, Object> listRef(Map<String, Object> map) throws Exception;
+    public Map<String, Object> listAll(Map<String, Object> map) throws Exception;
 }
+

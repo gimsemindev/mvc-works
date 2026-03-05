@@ -23,4 +23,8 @@ public interface ApprovalDocMapper {
     public int countSent(Map<String, Object> map) throws SQLException;
     public List<ApprovalDocDto> listInbox(Map<String, Object> map) throws SQLException;
     public int countInbox(Map<String, Object> map) throws SQLException;
+    public List<ApprovalDocDto> listRef(Map<String, Object> map) throws SQLException;
+    public int countRef(Map<String, Object> map) throws SQLException;
+    public List<ApprovalDocDto> listAll(Map<String, Object> map) throws SQLException;
+    public int countAll(Map<String, Object> map) throws SQLException;
 }

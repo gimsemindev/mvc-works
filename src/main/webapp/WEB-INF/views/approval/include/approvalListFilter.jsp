@@ -19,7 +19,7 @@
     <!-- Approval List -->
     <div class="filter-section">
         <div class="filter-label">Approval List</div>
-        <a class="filter-link" href="#">
+       <a class="filter-link" :class="{ active: store.filterType === 'all' }" href="#" @click.prevent="store.filterType = 'all'; store.search()">
             <span class="material-symbols-outlined">inbox</span>
             전체 결재함
         </a>
@@ -31,7 +31,7 @@
             <span class="material-symbols-outlined">move_to_inbox</span>
             받은 결재함
         </a>
-        <a class="filter-link" href="#">
+        <a class="filter-link" :class="{ active: store.filterType === 'ref' }" href="#" @click.prevent="store.filterType = 'ref'; store.search()">
             <span class="material-symbols-outlined">bookmarks</span>
             참조 결재함
         </a>

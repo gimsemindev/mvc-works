@@ -34,7 +34,9 @@ export const useApprovalListStore = defineStore('approvalList', {
 				const urlMap = {
 				    draft: '/approval/doc',
 				    sent:  '/approval/doc/sent',
-				    inbox: '/approval/doc/inbox'
+				    inbox: '/approval/doc/inbox',
+					ref: '/approval/doc/ref',
+					all: '/approval/doc/all',
 				};
 				const url = urlMap[this.filterType] || '/approval/doc';
 				

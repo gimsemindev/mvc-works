@@ -181,5 +181,98 @@
       <if test="endDate != null and endDate != ''">
           AND d.regDate &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
       </if>
-  </select>   
+  </select>
+
+<select id="listRef" parameterType="map" resultType="com.mvc.app.domain.dto.ApprovalDocDto">
+        SELECT d.docId, d.title, d.docStatus,
+               d.writerEmpName, d.writerGradeName,
+               d.regDate, t.typeName
+        FROM approvalDoc d
+        LEFT JOIN approvalDocType t ON d.docTypeId = t.docTypeId
+        INNER JOIN approvalReference r ON d.docId = r.docId
+        WHERE r.refEmpId = #{empId}
+          AND d.docStatus != 'DRAFT'
+        <if test="keyword != null and keyword != ''">
+            AND d.title LIKE '%' || #{keyword} || '%'
+        </if>
+        <if test="startDate != null and startDate != ''">
+            AND d.regDate &gt;= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND d.regDate &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+        </if>
+        ORDER BY d.docId DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
+    </select>
+
+    <select id="countRef" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM approvalDoc d
+        INNER JOIN approvalReference r ON d.docId = r.docId
+        WHERE r.refEmpId = #{empId}
+          AND d.docStatus != 'DRAFT'
+        <if test="keyword != null and keyword != ''">
+            AND d.title LIKE '%' || #{keyword} || '%'
+        </if>
+        <if test="startDate != null and startDate != ''">
+            AND d.regDate &gt;= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND d.regDate &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+        </if>
+    </select>
+
+    <!-- ────────────────────────────────────────────────
+         전체 결재함 목록 / 건수
+         (내가 기안 OR 결재선에 포함 OR 참조자로 포함)
+    ──────────────────────────────────────────────── -->
+    <select id="listAll" parameterType="map" resultType="com.mvc.app.domain.dto.ApprovalDocDto">
+        SELECT DISTINCT d.docId, d.title, d.docStatus,
+               d.writerEmpName, d.writerGradeName,
+               d.regDate, t.typeName
+        FROM approvalDoc d
+        LEFT JOIN approvalDocType t ON d.docTypeId = t.docTypeId
+        LEFT JOIN approvalLine l     ON d.docId = l.docId
+        LEFT JOIN approvalReference r ON d.docId = r.docId
+        WHERE d.docStatus != 'DRAFT'
+          AND (
+              d.writerEmpId = #{empId}
+           OR l.apprEmpId   = #{empId}
+           OR r.refEmpId    = #{empId}
+          )
+        <if test="keyword != null and keyword != ''">
+            AND d.title LIKE '%' || #{keyword} || '%'
+        </if>
+        <if test="startDate != null and startDate != ''">
+            AND d.regDate &gt;= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND d.regDate &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+        </if>
+        ORDER BY d.docId DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
+    </select>
+
+    <select id="countAll" parameterType="map" resultType="int">
+        SELECT COUNT(DISTINCT d.docId)
+        FROM approvalDoc d
+        LEFT JOIN approvalLine l      ON d.docId = l.docId
+        LEFT JOIN approvalReference r ON d.docId = r.docId
+        WHERE d.docStatus != 'DRAFT'
+          AND (
+              d.writerEmpId = #{empId}
+           OR l.apprEmpId   = #{empId}
+           OR r.refEmpId    = #{empId}
+          )
+        <if test="keyword != null and keyword != ''">
+            AND d.title LIKE '%' || #{keyword} || '%'
+        </if>
+        <if test="startDate != null and startDate != ''">
+            AND d.regDate &gt;= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND d.regDate &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+        </if>
+    </select>
+  
 </mapper>
