@@ -24,7 +24,8 @@
 	<main class="d-flex justify-content-center align-items-center py-5">
 
 		<form method="post" enctype="multipart/form-data"
-			action="${pageContext.request.contextPath}/member/update">
+			action="${pageContext.request.contextPath}/member/update"
+			onsubmit="return sendOk();">
 
 			<div class="profile-card">
 
@@ -135,8 +136,7 @@
 
 							reader.readAsDataURL(file);
 						});
-	</script>
-	<script>
+		
 	function deleteProfilePhoto(){
 
 	    if(!confirm("프로필 사진을 삭제하시겠습니까?")){
@@ -159,6 +159,27 @@
 	        }
 	    });
 	}
-</script>
+	
+	function sendOk() {
+
+	    const newPwd = document.querySelector("input[name='newPwd']").value;
+	    const confirmPwd = document.querySelector("input[name='confirmPwd']").value;
+
+	    if(newPwd || confirmPwd){
+
+	        if(newPwd !== confirmPwd){
+	            alert("비밀번호가 일치하지 않습니다.");
+	            return false;
+	        }
+
+	        if(newPwd.length < 8){
+	            alert("비밀번호는 8자 이상 입력하세요.");
+	            return false;
+	        }
+	    }
+
+	    return true;
+	}
+	</script>
 </body>
 </html>
