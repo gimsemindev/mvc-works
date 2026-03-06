@@ -27,9 +27,19 @@
 		<div class="card profile-card">
 			<div class="profile-top">
 
-				<img src="/uploads/member/${sessionScope.member.avatar}"
-					class="profile-avatar" onerror="this.src='/dist/images/avatar.png'">
-
+				<c:choose>
+					<c:when test="${empty dto.profilePhoto}">
+						<img
+							src="${pageContext.request.contextPath}/dist/images/avatar.png"
+							class="profile-avatar">
+					</c:when>
+					<c:otherwise>
+						<img
+							src="${pageContext.request.contextPath}/uploads/member/${dto.profilePhoto}"
+							class="profile-avatar"
+							onerror="this.onerror=null; this.src='${pageContext.request.contextPath}/dist/images/avatar.png';">
+					</c:otherwise>
+				</c:choose>
 				<div>
 					<div class="profile-name">${sessionScope.member.name}</div>
 					<div class="profile-grade">${sessionScope.member.gradeName}</div>
