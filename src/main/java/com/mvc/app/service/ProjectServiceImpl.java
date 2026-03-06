@@ -59,4 +59,13 @@ public class ProjectServiceImpl implements ProjectService {
 		return null;
 	}
 	
+	@Override
+	public List<ProjectsDto> projectslist(String empId) throws Exception {
+		try {
+			return mapper.findProjectsByEmpId(empId);
+		} catch (Exception e) {
+			log.info("projectslist : ", e);
+			throw e;
+		}
+	}
 }

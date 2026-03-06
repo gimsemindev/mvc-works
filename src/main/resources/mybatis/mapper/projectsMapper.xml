@@ -4,43 +4,65 @@
 <mapper namespace="com.mvc.app.mapper.ProjectsMapper">
 
 	<!-- 프로젝트 생성 -->
-	<insert id="insertProject" parameterType="com.mvc.app.domain.dto.ProjectsDto">
-	<selectKey keyProperty="projectId" resultType="long" order="BEFORE">
-        SELECT PROJECTS_SEQ .NEXTVAL FROM DUAL
-    </selectKey>
-		INSERT INTO project (projectId, projectType, pmoType, title, description, startDate, endDate, createdDate, status, progress)
-			VALUES(#{projectId}, #{projectType}, #{pmoType}, #{title}, #{description}, #{startDate}, #{endDate}, SYSDATE, 1, 0)
+	<insert id="insertProject"
+		parameterType="com.mvc.app.domain.dto.ProjectsDto">
+		<selectKey keyProperty="projectId" resultType="long"
+			order="BEFORE">
+			SELECT PROJECTS_SEQ .NEXTVAL FROM DUAL
+		</selectKey>
+		INSERT INTO project (projectId, projectType, pmoType, title,
+		description, startDate, endDate, createdDate, status, progress)
+		VALUES(#{projectId}, #{projectType}, #{pmoType}, #{title},
+		#{description}, #{startDate}, #{endDate}, SYSDATE, 1, 0)
 	</insert>
-	
+
 	<!-- 프로젝트 구성원 조성 및 역할 부여 -->
 	<insert id="insertProjectMembers" parameterType="map">
-	    INSERT INTO EMPPROJECT (empprojId, empId, projectId, role)
-	    	SELECT 'EP' || LPAD(EMPPROJECT_SEQ.NEXTVAL, 9, '0'), A.* FROM (
-		    <foreach collection="members" item="member" separator="UNION ALL">
-		        SELECT
-		               #{member.empId}, #{projectId}, NVL(#{member.role}, 'P')
-		        FROM DUAL
-		    </foreach>
-		    ) A
+		INSERT INTO EMPPROJECT (empprojId, empId, projectId, role)
+		SELECT 'EP'
+		|| LPAD(EMPPROJECT_SEQ.NEXTVAL, 9, '0'), A.* FROM (
+		<foreach collection="members" item="member"
+			separator="UNION ALL">
+			SELECT
+			#{member.empId}, #{projectId}, NVL(#{member.role},
+			'P')
+			FROM DUAL
+		</foreach>
+		) A
 	</insert>
-	
+
 	<!-- 프로젝트 단계 설정 -->
 	<insert id="insertProjectStep" parameterType="map">
-	    INSERT INTO STAGE (stageId, projectId, stgTitle, sequence, stgStatus, stgProgress, stgCreatedDate)
-	    SELECT 'STG' || LPAD(STAGE_SEQ.NEXTVAL, 8, '0'), B.projectId, B.stgTitle, B.sequence, '1', 0, SYSDATE FROM (
-	        <foreach collection="stages" item="stage" separator="UNION ALL">
-	            SELECT
-	                #{projectId} as projectId,
-	                #{stage.stgTitle} as stgTitle,
-	                #{stage.sequence} as sequence
-	            FROM DUAL
-	        </foreach>
-	    ) B
+		INSERT INTO STAGE (stageId, projectId, stgTitle, sequence, stgStatus,
+		stgProgress, stgCreatedDate)
+		SELECT 'STG' || LPAD(STAGE_SEQ.NEXTVAL, 8,
+		'0'), B.projectId, B.stgTitle,
+		B.sequence, '1', 0, SYSDATE FROM (
+		<foreach collection="stages" item="stage"
+			separator="UNION ALL">
+			SELECT
+			#{projectId} as projectId,
+			#{stage.stgTitle} as
+			stgTitle,
+			#{stage.sequence} as sequence
+			FROM DUAL
+		</foreach>
+		) B
 	</insert>
-	
+
 	<!-- 프로젝트 리스트 -->
 	<select id="projectslist">
-		
+
 	</select>
 
+	<select id="findProjectsByEmpId" parameterType="string"
+		resultType="com.mvc.app.domain.dto.ProjectsDto">
+
+		SELECT p.*
+		FROM PROJECT p
+		JOIN EMPPROJECT ep
+		ON p.projectId = ep.projectId
+		WHERE ep.empId = #{empId}
+
+	</select>
 </mapper>

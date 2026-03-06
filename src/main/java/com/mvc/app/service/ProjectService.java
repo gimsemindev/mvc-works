@@ -11,4 +11,5 @@ public interface ProjectService {
 	
 	public List<ProjectsDto> projectslist(Map<String, Object> map) throws Exception;
 	
+	public List<ProjectsDto> projectslist(String empId) throws Exception;
 }

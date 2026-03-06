@@ -71,23 +71,30 @@
 
 			<div class="approval-grid">
 
-				<div class="approval-box">
-					<div class="approval-count">${approval.wait}</div>
-					<div>미결재 문서</div>
-				</div>
+				<div class="approval-grid">
 
-				<div class="approval-box">
-					<div class="approval-count">${approval.progress}</div>
-					<div>미확인 문서</div>
-				</div>
+					<div class="approval-box"
+						onclick="location.href='${pageContext.request.contextPath}/approval/list?type=sent'">
+						<div class="approval-count">${approval.wait}</div>
+						<span class="material-symbols-outlined">send</span>
+						<div>보낸 결재</div>
+					</div>
 
-				<div class="approval-box">
-					<div class="approval-count">${approval.done}</div>
-					<div>받은 문서</div>
-				</div>
+					<div class="approval-box"
+						onclick="location.href='${pageContext.request.contextPath}/approval/list?type=inbox'">
+						<div class="approval-count">${approval.progress}</div>
+						<span class="material-symbols-outlined">move_to_inbox</span>
+						<div>받은 결재</div>
+					</div>
 
+					<div class="approval-box"
+						onclick="location.href='${pageContext.request.contextPath}/approval/list?type=all'">
+						<div class="approval-count">${approval.done}</div>
+						<span class="material-symbols-outlined">inbox</span>
+						<div>전체 결재</div>
+					</div>
+				</div>
 			</div>
-
 		</div>
 
 		<!-- 내 할일 -->
