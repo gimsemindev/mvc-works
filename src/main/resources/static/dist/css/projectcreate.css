@@ -6,6 +6,7 @@
     --bg-light: #f8f9fc;
     --border-color: #eaecf0;
     --text-muted: #667085;
+    --text-dark: #1d2939;
     --success-green: #10b981;
 }
 
@@ -160,6 +161,12 @@ body {
 .select-card.selected {
     border: 2px dashed var(--success-green);
     background-color: #f0fdf4;
+}
+
+.select-card.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 .icon-box {
@@ -541,12 +548,12 @@ body {
 }
 
 .member-name {
-    font-weight: 600;
-    font-size: 0.95rem;
-    color: #1d2939;
+    font-weight: 800;
+    font-size: 1.40rem;
+    color: var(--text-dark);
 }
 
-.member-email {
+.member-org {
     font-size: 0.85rem;
     color: var(--text-muted);
 }

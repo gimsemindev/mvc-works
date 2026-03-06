@@ -7,10 +7,8 @@ import com.mvc.app.domain.dto.ProjectsDto;
 
 public interface ProjectService {
 	// 프로젝트 생성
-	public void insertProject(ProjectsDto dto) throws Exception;
+	public void createFullProject(ProjectsDto dto, List<Map<String, Object>> members, List<Map<String, Object>> stages) throws Exception;
 	
-	// 프로젝트 생성 step3 구성원 인서트
-	public void insertProjectMembers(ProjectsDto dto) throws Exception;
+	public List<ProjectsDto> projectslist(Map<String, Object> map) throws Exception;
 	
-	public List<ProjectsDto> projectslist(Map<String, Object> map);
 }

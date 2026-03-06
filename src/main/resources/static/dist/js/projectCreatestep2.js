@@ -195,6 +195,19 @@ function addMemberBadge(emp) {
 
     if (!empId || document.getElementById('badge_' + empId)) return; // 중복 방지
 
+    // ★ 총 인원 초과 체크
+    const maxInput     = document.querySelector("#step-panel-2 input[type=\"number\"]");
+    const maxCount     = maxInput ? parseInt(maxInput.value) || 0 : 0;
+    const currentCount = document.querySelectorAll("#hiddenInputContainer input[name=\"memberIds\"]").length;
+    if (maxCount > 0 && currentCount >= maxCount) {
+        alert("총 인원(" + maxCount + "명)을 초과하여 추가할 수 없습니다.");
+        return;
+    }
+
+    // ★ step3 렌더링을 위해 전역 Map에 멤버 데이터 저장
+    if (!window.__memberDataMap) window.__memberDataMap = {};
+    window.__memberDataMap[empId] = { name, dept, grade };
+
     document.getElementById('noMemberText').style.display = 'none';
 
     const badge = document.createElement('span');
@@ -242,6 +255,8 @@ function removeBadge(empId) {
     const hidden = document.getElementById('hidden_' + empId);
     if (badge)  badge.remove();
     if (hidden) hidden.remove();
+    // ★ 전역 Map에서도 삭제
+    if (window.__memberDataMap) delete window.__memberDataMap[empId];
 
     if (document.getElementById('selectedMemberList').querySelectorAll('.badge').length === 0) {
         document.getElementById('noMemberText').style.display = '';

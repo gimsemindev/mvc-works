@@ -3,7 +3,7 @@
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
 
 
-<input type="hidden" name="projectType" id="projectType" value="I">
+<input type="hidden" name="projectType" id="projectType" value="T">
 <input type="hidden" name="pmoType" id="pmoType" value="S">
 <div class="mb-5">
     <h2 class="section-title">Project type</h2>
@@ -53,12 +53,35 @@
 
 <script type="text/javascript">
 function selectOnlyOne(element, inputId, value) {
+    // 비활성화된 카드는 클릭 무시
+    if (element.classList.contains('disabled')) return;
+
     const parentSection = element.parentElement;
     parentSection.querySelectorAll('.select-card').forEach(card => {
         card.classList.remove('selected');
     });
     element.classList.add('selected');
-    
     document.getElementById(inputId).value = value;
+
+    // projectType 변경 시 pmoType 카드 비활성/활성 처리
+    if (inputId === 'projectType') {
+        const pmoSection = document.querySelectorAll('#step-panel-1 .mb-5');
+        // mb-5 섹션 중 두 번째가 pmoType 섹션
+        const pmoCards = pmoSection.length >= 2
+            ? pmoSection[1].querySelectorAll('.select-card')
+            : [];
+
+        if (value === 'I') {
+            // 개인 프로젝트: pmoType 카드 비활성화 + 선택 해제 + 값 초기화
+            pmoCards.forEach(card => {
+                card.classList.add('disabled');
+                card.classList.remove('selected');
+            });
+            document.getElementById('pmoType').value = '';
+        } else {
+            // 팀 프로젝트: pmoType 카드 다시 활성화
+            pmoCards.forEach(card => card.classList.remove('disabled'));
+        }
+    }
 }
 </script>

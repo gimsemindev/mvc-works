@@ -1,5 +1,8 @@
 package com.mvc.app.domain.dto;
 
+import java.util.List;
+import java.util.Map;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,6 +22,9 @@ public class ProjectsDto {
 	private String createdDate;
 	private String status; // project 상태(시작전(1) - 디폴트, 진행(2), 승인대기(3), 종료(4),  중단(5) 등)
 	private int progress; // project 진척도
+	
+	private List<Map<String, Object>> members; 
+	private List<Map<String, Object>> stages;
 	
 	// 프로젝트 생성 시 필요 사항
 	private int levelCode; // 권한레벨코드
@@ -42,7 +48,7 @@ public class ProjectsDto {
 	private String predecessor; // 전임자
 	private String empStartDate;
 	private String empEndDate;
-	private String isPmo; // pmo 여부
+	private String role; // 매니저 - M, 디자이너 - D, 개발자 - P
 	
 	// 업무(task)
 	private String taskId;
