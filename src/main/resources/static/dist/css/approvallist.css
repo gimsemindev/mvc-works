@@ -279,6 +279,8 @@
 .status-REJECTED { background: #ffe0e0; color: #d93025; }
 .status-CANCELED { background: #f0f0f0; color: #6b7280; }
 .status-ON_HOLD  { background: #fff3cd; color: #856404; }
+.status-MYAPPROVED { background: #e0f5ef; color: #1a9660; }
+.status-INPROGRESS { background: #e0ecff; color: #2563eb; }
 
 /* ───────────────────────────────
    페이지네이션
@@ -305,3 +307,33 @@
 .page-btn:hover { background: #f0f3ff; border-color: #4e73df; color: #4e73df; }
 .page-btn.active { background: #4e73df; border-color: #4e73df; color: #fff; font-weight: 700; }
 .page-btn:disabled { opacity: .4; cursor: default; }
+
+/* ───────────────────────────────
+   뱃지 카운트
+─────────────────────────────── */
+.badge-count {
+    background: #e74c3c;
+    color: #fff;
+    border-radius: 10px;
+    padding: 1px 7px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 6px;
+}
+
+/* 참조 결재함 읽음/안읽음 표시 */
+.row-unread { background: #f0f6ff; }
+.row-unread td { font-weight: 600; }
+.row-unread .td-title { font-weight: 700; }
+
+.read-badge {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+.read-badge.unread { background: #e0ecff; color: #2563eb; }
+.read-badge.read   { background: #f0f0f0; color: #9aa0b4; }

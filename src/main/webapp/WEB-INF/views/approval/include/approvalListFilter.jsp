@@ -6,13 +6,17 @@
     <!-- Approval Action -->
     <div class="filter-section">
         <div class="filter-label">Approval Action</div>
-        <a class="filter-link" href="#">
+        <a class="filter-link" :class="{ active: store.filterType === 'pendingInbox' }" href="#"
+           @click.prevent="store.filterType = 'pendingInbox'; store.search()">
             <span class="material-symbols-outlined">mail</span>
             미결재 문서
+            <span class="badge-count" v-if="store.pendingCount > 0">{{ store.pendingCount }}</span>
         </a>
-        <a class="filter-link" href="#">
+        <a class="filter-link" :class="{ active: store.filterType === 'unreadRef' }" href="#"
+           @click.prevent="store.filterType = 'unreadRef'; store.search()">
             <span class="material-symbols-outlined">mark_email_unread</span>
             미확인 문서
+            <span class="badge-count" v-if="store.unreadCount > 0">{{ store.unreadCount }}</span>
         </a>
     </div>
 

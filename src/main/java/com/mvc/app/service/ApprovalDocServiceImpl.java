@@ -36,15 +36,17 @@ public class ApprovalDocServiceImpl implements ApprovalDocService {
         	if (dto.getDocStatus() == null || dto.getDocStatus().isBlank()) {
         	    dto.setDocStatus("DRAFT");
         	}
-            // 편집 모드: 기존 DRAFT 삭제
+
             if (dto.getOldDocId() > 0) {
+                // 편집 모드: 결재선/참조자/파일 삭제 후 재생성, 문서는 UPDATE
                 mapper.deleteFiles(dto.getOldDocId());
                 mapper.deleteRefs(dto.getOldDocId());
                 mapper.deleteLines(dto.getOldDocId());
-                mapper.deleteDoc(dto.getOldDocId());
+                dto.setDocId(dto.getOldDocId());
+                mapper.updateDoc(dto);
+            } else {
+                mapper.insertDoc(dto);
             }
-
-            mapper.insertDoc(dto);
 
             // 2. 결재선 저장
             if (dto.getLines() != null) {
@@ -194,5 +196,34 @@ public class ApprovalDocServiceImpl implements ApprovalDocService {
         map.put("empId", empId);
         map.put("comment", comment);
         return mapper.updateRefComment(map) > 0;
-    }    
+    }
+
+    @Override
+    public Map<String, Object> listPendingInbox(Map<String, Object> map) throws Exception {
+        int totalCount = mapper.countPendingInbox(map);
+        List<ApprovalDocDto> list = mapper.listPendingInbox(map);
+        return Map.of("totalCount", totalCount, "list", list);
+    }
+
+    @Override
+    public Map<String, Object> listUnreadRef(Map<String, Object> map) throws Exception {
+        int totalCount = mapper.countUnreadRef(map);
+        List<ApprovalDocDto> list = mapper.listUnreadRef(map);
+        return Map.of("totalCount", totalCount, "list", list);
+    }
+
+    @Override
+    public Map<String, Object> getBadgeCounts(Map<String, Object> map) throws Exception {
+        int pendingCount = mapper.countPendingInbox(map);
+        int unreadCount = mapper.countUnreadRef(map);
+        return Map.of("pendingCount", pendingCount, "unreadCount", unreadCount);
+    }
+
+    @Override
+    public boolean markRefAsRead(long docId, String empId) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        map.put("docId", docId);
+        map.put("empId", empId);
+        return mapper.markRefAsRead(map) > 0;
+    }
 }

@@ -118,6 +118,15 @@
                             <span class="status-badge" :class="'status-' + line.apprStatus">
                                 {{ store.lineStatusLabel(line.apprStatus) }}
                             </span>
+                            <div v-if="line.apprComment"
+                                 style="margin-top:8px; padding-top:8px; border-top:1px solid #eee; text-align:left;">
+                                <div :style="line._expanded ? '' : 'display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;'"
+                                     style="font-size:11px; color:#667085; cursor:pointer;"
+                                     @click="line._expanded = !line._expanded">
+                                    {{ line.apprComment }}
+                                </div>
+                                <div style="color:#9aa0b4; font-size:10px; margin-top:2px;">{{ line.apprDate }}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -138,9 +147,13 @@
                             <div class="line-card-name">{{ ref.refEmpName }}</div>
                             <div class="line-card-dept">{{ ref.refDeptName }} · {{ ref.refGradeName }}</div>
                         </div>
-                        <div v-if="ref.refComment" style="padding:6px 12px; font-size:12px; color:#667085; border-top:1px solid #eee;">
-                            {{ ref.refComment }}
-                            <span style="color:#9aa0b4; margin-left:8px;">{{ ref.refCommentDate }}</span>
+                        <div v-if="ref.refComment" style="padding:6px 12px; border-top:1px solid #eee;">
+                            <div :style="ref._expanded ? '' : 'display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;'"
+                                 style="font-size:12px; color:#667085; cursor:pointer;"
+                                 @click="ref._expanded = !ref._expanded">
+                                {{ ref.refComment }}
+                            </div>
+                            <span style="color:#9aa0b4; font-size:10px;">{{ ref.refCommentDate }}</span>
                         </div>
                     </div>
                 </div>
@@ -208,6 +221,12 @@
                 <span class="material-symbols-outlined" style="font-size:15px">cancel</span>
                 결재취소
             </button>
+            <button class="btn-resubmit"
+                    v-if="store.canResubmit(currentEmpId)"
+                    @click="resubmit">
+                <span class="material-symbols-outlined" style="font-size:15px">replay</span>
+                재상신
+            </button>
             <button class="btn-back" @click="goList">
                 <span class="material-symbols-outlined" style="font-size:15px">arrow_back</span>
                 목록
@@ -246,7 +265,7 @@
 {
     "imports": {
         "http":              "/dist/util/http.js",
-        "approvalViewStore": "/dist/util/store/approvalViewStore.js",
+        "approvalViewStore": "/dist/util/store/approvalViewStore.js?v=2",
         "commonCodeStore":   "/dist/util/store/commonCodeStore.js"
     }
 }
@@ -257,6 +276,7 @@
     import { createPinia } from 'pinia';
     import { useApprovalViewStore } from 'approvalViewStore';
     import { useCommonCodeStore }   from 'commonCodeStore';
+    import http from 'http';
 
     const pinia = createPinia();
 
@@ -314,6 +334,10 @@
 
             const goList = () => { location.href = ctx + '/approval/list'; };
 
+            const resubmit = () => {
+                location.href = ctx + '/approval/create?docId=' + docId;
+            };
+
             const cancelDoc = async () => {
                 if (!confirm('결재를 취소하시겠습니까?')) return;
                 const ok = await store.cancelDoc(docId);
@@ -335,6 +359,10 @@
       				  // formCode에 따라 필요한 공통코드 로드
       				  if (store.selectedFormCode === 'FM001') {
                           await codeStore.fetchCodes('LEAVETYPE');
+                      }
+                      // 참조자인 경우 읽음 처리
+                      if (store.isReference(currentEmpId)) {
+                          try { await http.post('/approval/doc/' + docId + '/mark-read'); } catch(e) {}
                       }
             }
 
@@ -368,7 +396,7 @@
                 }
             });
 
-            return { store, codeStore, goList, download, cancelDoc, currentEmpId,
+            return { store, codeStore, goList, download, cancelDoc, resubmit, currentEmpId,
                      apprComment, modalType, modalTitle, modalBtnClass, refCommentText,
                      openApproveModal, processApproval, submitRefComment };
 

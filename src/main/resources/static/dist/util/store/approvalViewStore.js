@@ -135,9 +135,7 @@ export const useApprovalViewStore = defineStore('approvalView', {
         },
         canCancel: (state) => {
             if (!state.doc) return false;
-            const s = state.doc.docStatus;
-            if (s === 'REJECTED') return true;
-            if (s === 'PENDING' && state.doc.lines) {
+            if (state.doc.docStatus === 'PENDING' && state.doc.lines) {
                 return state.doc.lines.every(l => l.apprStatus === 'WAIT');
             }
             return false;
@@ -152,6 +150,14 @@ export const useApprovalViewStore = defineStore('approvalView', {
 		        const minStep = Math.min(...waitLines.map(l => l.stepOrder));
 		        const current = waitLines.find(l => l.stepOrder === minStep);
 		        return current && current.apprEmpId === empId;
+		    };
+		},
+
+		// 재상신 가능 여부 (반려 문서 + 기안자 본인)
+		canResubmit: (state) => {
+		    return (empId) => {
+		        if (!state.doc) return false;
+		        return state.doc.docStatus === 'REJECTED' && state.doc.writerEmpId === empId;
 		    };
 		},
 

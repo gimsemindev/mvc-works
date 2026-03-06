@@ -35,16 +35,21 @@
             <!-- 데이터 목록 -->
             <tr v-for="item in store.list" :key="item.docId"
                 @click="goDoc(item)"
+                :class="{ 'row-unread': (store.filterType === 'ref' || store.filterType === 'unreadRef') && item.readYn === 'N' }"
                 style="cursor:pointer;">
                 <td class="cb-col" @click.stop><input type="checkbox" name="chk" :value="item.docId"></td>
                 <td>{{ item.regDate }}</td>
                 <td>{{ item.typeName }}</td>
-                <td class="td-title">{{ item.title }}</td>
+                <td class="td-title">
+                    {{ item.title }}
+                    <span v-if="(store.filterType === 'ref' || store.filterType === 'unreadRef') && item.readYn === 'N'" class="read-badge unread">안읽음</span>
+                    <span v-if="store.filterType === 'ref' && item.readYn === 'Y'" class="read-badge read">읽음</span>
+                </td>
                 <td>{{ item.writerEmpName }} {{ item.writerGradeName }}</td>
                 <td>
                     <span class="status-badge"
-                          :class="'status-' + item.docStatus">
-                        {{ (codeStore.getCodes('DOCSTATUS').find(c => c.code === item.docStatus) || {}).name || item.docStatus }}
+                          :class="statusClass(item)">
+                        {{ statusText(item) }}
                     </span>
                 </td>
             </tr>

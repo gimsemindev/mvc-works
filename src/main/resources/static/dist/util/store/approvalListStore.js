@@ -11,7 +11,9 @@ export const useApprovalListStore = defineStore('approvalList', {
         endDate: '',
         pageNo: 1,
         pageSize: 20,
-        loading: false
+        loading: false,
+        pendingCount: 0,
+        unreadCount: 0
     }),
 
     getters: {
@@ -35,8 +37,10 @@ export const useApprovalListStore = defineStore('approvalList', {
 				    draft: '/approval/doc',
 				    sent:  '/approval/doc/sent',
 				    inbox: '/approval/doc/inbox',
-					ref: '/approval/doc/ref',
-					all: '/approval/doc/all',
+				    pendingInbox: '/approval/doc/inbox/pending',
+				    ref: '/approval/doc/ref',
+				    unreadRef: '/approval/doc/ref/unread',
+				    all: '/approval/doc/all',
 				};
 				const url = urlMap[this.filterType] || '/approval/doc';
 				
@@ -65,6 +69,16 @@ export const useApprovalListStore = defineStore('approvalList', {
             this.pageSize = size;
             this.pageNo = 1;
             this.fetchList();
+        },
+
+        async fetchBadgeCounts() {
+            try {
+                const res = await http.get('/approval/doc/badge-counts');
+                this.pendingCount = res.data.pendingCount || 0;
+                this.unreadCount = res.data.unreadCount || 0;
+            } catch (e) {
+                console.error('뱃지 카운트 조회 실패:', e);
+            }
         }
     }
 });

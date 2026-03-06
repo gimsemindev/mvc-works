@@ -270,6 +270,80 @@ public class ApprovalDocRestController {
             log.info("refComment : ", e);
             return ResponseEntity.internalServerError().body(Map.of("msg", "의견 등록 실패"));
         }
-    }    
-    
+    }
+
+    // 미결재 문서
+    @GetMapping("/inbox/pending")
+    public ResponseEntity<?> listPendingInbox(
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "startDate", required = false) String startDate,
+            @RequestParam(name = "endDate", required = false) String endDate,
+            @RequestParam(name = "pageNo", defaultValue = "1") int pageNo,
+            @RequestParam(name = "pageSize", defaultValue = "20") int pageSize) {
+        try {
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+            Map<String, Object> map = new HashMap<>();
+            map.put("empId", info.getEmpId());
+            map.put("keyword", keyword);
+            map.put("startDate", startDate);
+            map.put("endDate", endDate);
+            map.put("pageSize", pageSize);
+            map.put("offset", (pageNo - 1) * pageSize);
+            return ResponseEntity.ok(service.listPendingInbox(map));
+        } catch (Exception e) {
+            log.info("listPendingInbox : ", e);
+            return ResponseEntity.internalServerError().body(Map.of("msg", "목록 조회 실패"));
+        }
+    }
+
+    // 미확인 문서
+    @GetMapping("/ref/unread")
+    public ResponseEntity<?> listUnreadRef(
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "startDate", required = false) String startDate,
+            @RequestParam(name = "endDate", required = false) String endDate,
+            @RequestParam(name = "pageNo", defaultValue = "1") int pageNo,
+            @RequestParam(name = "pageSize", defaultValue = "20") int pageSize) {
+        try {
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+            Map<String, Object> map = new HashMap<>();
+            map.put("empId", info.getEmpId());
+            map.put("keyword", keyword);
+            map.put("startDate", startDate);
+            map.put("endDate", endDate);
+            map.put("pageSize", pageSize);
+            map.put("offset", (pageNo - 1) * pageSize);
+            return ResponseEntity.ok(service.listUnreadRef(map));
+        } catch (Exception e) {
+            log.info("listUnreadRef : ", e);
+            return ResponseEntity.internalServerError().body(Map.of("msg", "목록 조회 실패"));
+        }
+    }
+
+    // 뱃지 카운트 (미결재 + 미확인)
+    @GetMapping("/badge-counts")
+    public ResponseEntity<?> badgeCounts() {
+        try {
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+            Map<String, Object> map = new HashMap<>();
+            map.put("empId", info.getEmpId());
+            return ResponseEntity.ok(service.getBadgeCounts(map));
+        } catch (Exception e) {
+            log.info("badgeCounts : ", e);
+            return ResponseEntity.internalServerError().body(Map.of("msg", "건수 조회 실패"));
+        }
+    }
+
+    // 참조 읽음 처리
+    @PostMapping("/{docId}/mark-read")
+    public ResponseEntity<?> markRead(@PathVariable("docId") long docId) {
+        try {
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+            service.markRefAsRead(docId, info.getEmpId());
+            return ResponseEntity.ok(Map.of("msg", "읽음 처리 완료"));
+        } catch (Exception e) {
+            log.info("markRead : ", e);
+            return ResponseEntity.internalServerError().body(Map.of("msg", "읽음 처리 실패"));
+        }
+    }
 }

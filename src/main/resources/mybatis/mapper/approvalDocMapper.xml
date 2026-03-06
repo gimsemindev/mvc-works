@@ -143,16 +143,26 @@
       </if>
   </select>
 
-  <!-- 받은 결재함 목록 -->
+  <!-- 받은 결재함 목록 (내 차례 WAIT + 내가 승인한 APPROVED) -->
   <select id="listInbox" parameterType="map" resultType="com.mvc.app.domain.dto.ApprovalDocDto">
       SELECT d.docId, d.title, d.docStatus,
              d.writerEmpName, d.writerGradeName,
-             d.regDate, t.typeName
+             d.regDate, t.typeName,
+             l.lineStatusCode AS myLineStatus,
+             (SELECT COUNT(*) FROM approvalLine WHERE docId = d.docId AND lineStatusCode = 'APPROVED') AS approvedCount,
+             (SELECT COUNT(*) FROM approvalLine WHERE docId = d.docId) AS totalLineCount
       FROM approvalDoc d
       LEFT JOIN approvalDocType t ON d.docTypeId = t.docTypeId
       INNER JOIN approvalLine l ON d.docId = l.docId
       WHERE l.apprEmpId = #{empId}
-        AND d.docStatus != 'DRAFT'
+        AND (
+            (d.docStatus = 'PENDING' AND l.lineStatusCode = 'WAIT'
+             AND l.stepOrder = (
+                 SELECT MIN(stepOrder) FROM approvalLine
+                 WHERE docId = d.docId AND lineStatusCode = 'WAIT'))
+            OR
+            (l.lineStatusCode = 'APPROVED')
+        )
       <if test="keyword != null and keyword != ''">
           AND d.title LIKE '%' || #{keyword} || '%'
       </if>
@@ -171,7 +181,14 @@
       FROM approvalDoc d
       INNER JOIN approvalLine l ON d.docId = l.docId
       WHERE l.apprEmpId = #{empId}
-        AND d.docStatus != 'DRAFT'
+        AND (
+            (d.docStatus = 'PENDING' AND l.lineStatusCode = 'WAIT'
+             AND l.stepOrder = (
+                 SELECT MIN(stepOrder) FROM approvalLine
+                 WHERE docId = d.docId AND lineStatusCode = 'WAIT'))
+            OR
+            (l.lineStatusCode = 'APPROVED')
+        )
       <if test="keyword != null and keyword != ''">
           AND d.title LIKE '%' || #{keyword} || '%'
       </if>
@@ -183,15 +200,114 @@
       </if>
   </select>
 
+  <!-- 미결재 문서 (내 차례 WAIT만) -->
+  <select id="listPendingInbox" parameterType="map" resultType="com.mvc.app.domain.dto.ApprovalDocDto">
+      SELECT d.docId, d.title, d.docStatus,
+             d.writerEmpName, d.writerGradeName,
+             d.regDate, t.typeName
+      FROM approvalDoc d
+      LEFT JOIN approvalDocType t ON d.docTypeId = t.docTypeId
+      INNER JOIN approvalLine l ON d.docId = l.docId
+      WHERE l.apprEmpId = #{empId}
+        AND d.docStatus = 'PENDING'
+        AND l.lineStatusCode = 'WAIT'
+        AND l.stepOrder = (
+            SELECT MIN(stepOrder) FROM approvalLine
+            WHERE docId = d.docId AND lineStatusCode = 'WAIT'
+        )
+      <if test="keyword != null and keyword != ''">
+          AND d.title LIKE '%' || #{keyword} || '%'
+      </if>
+      <if test="startDate != null and startDate != ''">
+          AND d.regDate &gt;= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+      </if>
+      <if test="endDate != null and endDate != ''">
+          AND d.regDate &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+      </if>
+      ORDER BY d.docId DESC
+      OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
+  </select>
+
+  <select id="countPendingInbox" parameterType="map" resultType="int">
+      SELECT COUNT(*)
+      FROM approvalDoc d
+      INNER JOIN approvalLine l ON d.docId = l.docId
+      WHERE l.apprEmpId = #{empId}
+        AND d.docStatus = 'PENDING'
+        AND l.lineStatusCode = 'WAIT'
+        AND l.stepOrder = (
+            SELECT MIN(stepOrder) FROM approvalLine
+            WHERE docId = d.docId AND lineStatusCode = 'WAIT'
+        )
+      <if test="keyword != null and keyword != ''">
+          AND d.title LIKE '%' || #{keyword} || '%'
+      </if>
+      <if test="startDate != null and startDate != ''">
+          AND d.regDate &gt;= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+      </if>
+      <if test="endDate != null and endDate != ''">
+          AND d.regDate &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+      </if>
+  </select>
+
+  <!-- 미확인 문서 (참조 중 readYn='N') -->
+  <select id="listUnreadRef" parameterType="map" resultType="com.mvc.app.domain.dto.ApprovalDocDto">
+      SELECT d.docId, d.title, d.docStatus,
+             d.writerEmpName, d.writerGradeName,
+             d.regDate, t.typeName, r.readYn
+      FROM approvalDoc d
+      LEFT JOIN approvalDocType t ON d.docTypeId = t.docTypeId
+      INNER JOIN approvalReference r ON d.docId = r.docId
+      WHERE r.refEmpId = #{empId}
+        AND d.docStatus NOT IN ('DRAFT', 'CANCELED')
+        AND r.readYn = 'N'
+      <if test="keyword != null and keyword != ''">
+          AND d.title LIKE '%' || #{keyword} || '%'
+      </if>
+      <if test="startDate != null and startDate != ''">
+          AND d.regDate &gt;= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+      </if>
+      <if test="endDate != null and endDate != ''">
+          AND d.regDate &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+      </if>
+      ORDER BY d.docId DESC
+      OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
+  </select>
+
+  <select id="countUnreadRef" parameterType="map" resultType="int">
+      SELECT COUNT(*)
+      FROM approvalDoc d
+      INNER JOIN approvalReference r ON d.docId = r.docId
+      WHERE r.refEmpId = #{empId}
+        AND d.docStatus NOT IN ('DRAFT', 'CANCELED')
+        AND r.readYn = 'N'
+      <if test="keyword != null and keyword != ''">
+          AND d.title LIKE '%' || #{keyword} || '%'
+      </if>
+      <if test="startDate != null and startDate != ''">
+          AND d.regDate &gt;= TO_DATE(#{startDate}, 'YYYY-MM-DD')
+      </if>
+      <if test="endDate != null and endDate != ''">
+          AND d.regDate &lt; TO_DATE(#{endDate}, 'YYYY-MM-DD') + 1
+      </if>
+  </select>
+
+  <!-- 참조자 읽음 처리 -->
+  <update id="markRefAsRead" parameterType="map">
+      UPDATE approvalReference
+      SET readYn = 'Y', readDate = SYSDATE
+      WHERE docId = #{docId} AND refEmpId = #{empId} AND readYn = 'N'
+  </update>
+
   <select id="listRef" parameterType="map" resultType="com.mvc.app.domain.dto.ApprovalDocDto">
         SELECT d.docId, d.title, d.docStatus,
                d.writerEmpName, d.writerGradeName,
-               d.regDate, t.typeName
+               d.regDate, t.typeName, r.readYn
         FROM approvalDoc d
         LEFT JOIN approvalDocType t ON d.docTypeId = t.docTypeId
         INNER JOIN approvalReference r ON d.docId = r.docId
         WHERE r.refEmpId = #{empId}
-          AND d.docStatus != 'DRAFT'
+          AND d.docStatus NOT IN ('DRAFT', 'CANCELED')
         <if test="keyword != null and keyword != ''">
             AND d.title LIKE '%' || #{keyword} || '%'
         </if>
@@ -210,7 +326,7 @@
         FROM approvalDoc d
         INNER JOIN approvalReference r ON d.docId = r.docId
         WHERE r.refEmpId = #{empId}
-          AND d.docStatus != 'DRAFT'
+          AND d.docStatus NOT IN ('DRAFT', 'CANCELED')
         <if test="keyword != null and keyword != ''">
             AND d.title LIKE '%' || #{keyword} || '%'
         </if>
@@ -225,7 +341,14 @@
     <select id="listAll" parameterType="map" resultType="com.mvc.app.domain.dto.ApprovalDocDto">
         SELECT DISTINCT d.docId, d.title, d.docStatus,
                d.writerEmpName, d.writerGradeName,
-               d.regDate, t.typeName
+               d.regDate, t.typeName,
+               (SELECT lineStatusCode FROM approvalLine
+                WHERE docId = d.docId AND apprEmpId = #{empId}
+                AND ROWNUM = 1) AS myLineStatus,
+               (SELECT COUNT(*) FROM approvalLine
+                WHERE docId = d.docId AND lineStatusCode = 'APPROVED') AS approvedCount,
+               (SELECT COUNT(*) FROM approvalLine
+                WHERE docId = d.docId) AS totalLineCount
         FROM approvalDoc d
         LEFT JOIN approvalDocType t ON d.docTypeId = t.docTypeId
         LEFT JOIN approvalLine l     ON d.docId = l.docId
@@ -233,8 +356,8 @@
         WHERE d.docStatus != 'DRAFT'
           AND (
               d.writerEmpId = #{empId}
-           OR l.apprEmpId   = #{empId}
-           OR r.refEmpId    = #{empId}
+           OR (l.apprEmpId = #{empId} AND d.docStatus != 'CANCELED')
+           OR (r.refEmpId  = #{empId} AND d.docStatus != 'CANCELED')
           )
         <if test="keyword != null and keyword != ''">
             AND d.title LIKE '%' || #{keyword} || '%'
@@ -257,8 +380,8 @@
         WHERE d.docStatus != 'DRAFT'
           AND (
               d.writerEmpId = #{empId}
-           OR l.apprEmpId   = #{empId}
-           OR r.refEmpId    = #{empId}
+           OR (l.apprEmpId = #{empId} AND d.docStatus != 'CANCELED')
+           OR (r.refEmpId  = #{empId} AND d.docStatus != 'CANCELED')
           )
         <if test="keyword != null and keyword != ''">
             AND d.title LIKE '%' || #{keyword} || '%'
@@ -332,24 +455,34 @@
         DELETE FROM approvalLine WHERE docId = #{docId}
     </delete>
     <delete id="deleteDoc" parameterType="long">
-        DELETE FROM approvalDoc WHERE docId = #{docId} AND docStatus = 'DRAFT'
+        DELETE FROM approvalDoc WHERE docId = #{docId} AND docStatus IN ('DRAFT', 'REJECTED')
     </delete>
 
-    <!-- 결재취소 (기안자 본인, PENDING(1차미결재) 또는 REJECTED만) -->
+    <!-- 임시저장/재상신 수정 (문서 UPDATE) -->
+    <update id="updateDoc" parameterType="com.mvc.app.domain.dto.ApprovalDocDto">
+        UPDATE approvalDoc
+        SET title = #{title},
+            docTypeId = #{docTypeId},
+            detailData = #{detailData, jdbcType=VARCHAR},
+            content = #{content, jdbcType=VARCHAR},
+            docStatus = #{docStatus},
+            docVersion = docVersion + #{versionIncrement},
+            updateDate = SYSDATE,
+            submitDate = CASE WHEN #{docStatus} = 'PENDING' THEN SYSDATE ELSE submitDate END
+        WHERE docId = #{docId}
+    </update>
+
+    <!-- 결재취소 (기안자 본인, PENDING 상태에서 전원 WAIT일 때만) -->
     <update id="cancelDoc" parameterType="map">
         UPDATE approvalDoc
         SET docStatus = 'CANCELED'
         WHERE docId = #{docId}
           AND writerEmpId = #{empId}
-          AND (
-              (docStatus = 'REJECTED')
-              OR
-              (docStatus = 'PENDING'
-               AND NOT EXISTS (
-                   SELECT 1 FROM approvalLine
-                   WHERE docId = #{docId}
-                     AND lineStatusCode != 'WAIT'
-               ))
+          AND docStatus = 'PENDING'
+          AND NOT EXISTS (
+              SELECT 1 FROM approvalLine
+              WHERE docId = #{docId}
+                AND lineStatusCode != 'WAIT'
           )
     </update>
 

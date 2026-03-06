@@ -5,6 +5,7 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
     state: () => ({
         editMode: false,
         editDocId: null,
+        editDocStatus: null,
         // 문서유형
         docTypeList: [],
         selectedDocTypeId: null,
@@ -71,6 +72,7 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 
 		        this.editMode = true;
 		        this.editDocId = doc.docId;
+		        this.editDocStatus = doc.docStatus;
 		        this.title = doc.title;
 		        this.selectedDocTypeId = doc.docTypeId;
 
@@ -433,7 +435,12 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 		            }))
 		        };
 
-		        if (this.editMode) data.oldDocId = this.editDocId;
+		        if (this.editMode) {
+		            data.oldDocId = this.editDocId;
+		            if (this.editDocStatus === 'REJECTED') {
+		                data.versionIncrement = 1;
+		            }
+		        }
 
 		        const formData = new FormData();
 		        formData.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));

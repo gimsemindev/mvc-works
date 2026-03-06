@@ -14,6 +14,7 @@ import java.util.Map;
 @Mapper
 public interface ApprovalDocMapper {
     public void insertDoc(ApprovalDocDto dto) throws SQLException;
+    public void updateDoc(ApprovalDocDto dto) throws SQLException;
     public void insertLine(ApprovalLineDto dto) throws SQLException;
     public void insertRef(ApprovalRefDto dto) throws SQLException;
     public void insertFile(ApprovalFileDto dto) throws SQLException;
@@ -51,5 +52,16 @@ public interface ApprovalDocMapper {
     public void holdDocStatus(long docId) throws SQLException;
 
     // 참조자 코멘트
-    public int updateRefComment(Map<String, Object> map) throws SQLException;    
+    public int updateRefComment(Map<String, Object> map) throws SQLException;
+
+    // 미결재 문서
+    public List<ApprovalDocDto> listPendingInbox(Map<String, Object> map) throws SQLException;
+    public int countPendingInbox(Map<String, Object> map) throws SQLException;
+
+    // 미확인 문서
+    public List<ApprovalDocDto> listUnreadRef(Map<String, Object> map) throws SQLException;
+    public int countUnreadRef(Map<String, Object> map) throws SQLException;
+
+    // 참조 읽음 처리
+    public int markRefAsRead(Map<String, Object> map) throws SQLException;
 }

@@ -20,5 +20,10 @@ public interface ApprovalDocService {
     public boolean rejectDoc(long docId, String empId, String comment) throws Exception;
     public boolean holdDoc(long docId, String empId, String comment) throws Exception;
     public boolean updateRefComment(long docId, String empId, String comment) throws Exception;
+
+    public Map<String, Object> listPendingInbox(Map<String, Object> map) throws Exception;
+    public Map<String, Object> listUnreadRef(Map<String, Object> map) throws Exception;
+    public Map<String, Object> getBadgeCounts(Map<String, Object> map) throws Exception;
+    public boolean markRefAsRead(long docId, String empId) throws Exception;
 }
 
