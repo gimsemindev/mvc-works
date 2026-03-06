@@ -32,4 +32,20 @@ document.addEventListener('DOMContentLoaded', function () {
             arrow.classList.toggle('open', !isOpen);
         });
     }
+
+	    const approvalToggle = document.getElementById('approvalToggle');
+
+	    if (approvalToggle) {
+	        approvalToggle.addEventListener('click', function (e) {
+	            e.preventDefault();
+
+	            const subMenu = document.getElementById('approvalSubMenu');
+	            const arrow = document.getElementById('approvalArrow');
+
+	            const isOpen = subMenu.style.display === 'block';
+
+	            subMenu.style.display = isOpen ? 'none' : 'block';
+	            arrow.classList.toggle('open', !isOpen);
+	        });
+	    }
 });

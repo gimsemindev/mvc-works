@@ -66,7 +66,7 @@
     		onMounted(async () => {
       						await codeStore.fetchCodes('DOCSTATUS');
       						const params = new URLSearchParams(location.search);
-      						store.filterType = params.get('type') || 'draft';
+      						store.filterType = params.get('type') || 'all';
       						store.fetchList();
       						});
 
