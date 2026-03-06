@@ -1,6 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core"%>
-<%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -17,26 +16,26 @@
 <jsp:include page="/WEB-INF/views/layout/sidebar.jsp"/>
 
 <div class="rp-content">
-
     <header>
         <jsp:include page="/WEB-INF/views/layout/header.jsp"/>
     </header>
 
     <div class="rp-main">
 
-        <!-- 페이지 타이틀 -->
         <div class="rp-page-title">
             <i class="bi bi-pencil-square rp-title-icon"></i>
             <h2>주간보고서 작성</h2>
         </div>
 
-        <!-- 작성 카드 -->
+        <c:if test="${param.error == '1'}">
+        <div class="rp-alert rp-alert-danger">
+            <i class="bi bi-exclamation-triangle"></i> 저장 중 오류가 발생했습니다. 다시 시도해 주세요.
+        </div>
+        </c:if>
+
         <div class="rp-section-card">
             <div class="rp-section-header">
-                <h5>
-                    <i class="bi bi-pencil-square"></i>
-                    보고서 작성
-                </h5>
+                <h5><i class="bi bi-pencil-square"></i> 보고서 작성</h5>
                 <span style="font-size:0.78rem; color:#94a3b8;">
                     <i class="bi bi-info-circle"></i>&nbsp;
                     <span style="color:#dc3545;">*</span> 표시는 필수 입력 항목입니다.
@@ -48,7 +47,6 @@
                       action="${pageContext.request.contextPath}/report/write"
                       method="post" enctype="multipart/form-data">
 
-                    <!-- 기본 정보 -->
                     <table class="rp-form-table">
                         <colgroup>
                             <col style="width:120px;">
@@ -62,14 +60,12 @@
                                 <td colspan="3">
                                     <input type="text" name="subject" id="subject"
                                            placeholder="보고서 제목을 입력하세요"
-                                           maxlength="255" required
-                                           style="max-width:100%;">
+                                           maxlength="255" required style="max-width:100%;">
                                 </td>
                             </tr>
                             <tr>
                                 <th>작성자</th>
                                 <td>
-                                    <%-- 로그인 세션에서 자동 세팅 --%>
                                     <input type="text" value="${sessionScope.member.name}" readonly>
                                 </td>
                                 <th>사원번호</th>
@@ -98,7 +94,7 @@
                             <i class="bi bi-align-start"></i>
                             보고 내용<span class="rp-required">*</span>
                         </div>
-                        <div id="editor-report">${dto.content}</div>
+                        <div id="editor-report"></div>
                         <input type="hidden" name="content" id="hiddenContent">
                     </div>
 
@@ -108,7 +104,7 @@
                             <i class="bi bi-paperclip"></i> 파일 첨부
                         </div>
                         <input type="file" name="files" id="fileInput" multiple
-                               style="font-size:0.85rem;">
+                               style="font-size:0.85rem;" onchange="rpCheckFileCount(this)">
                         <div class="rp-attach-hint">
                             <i class="bi bi-info-circle"></i>
                             파일은 최대 10MB, 최대 5개까지 첨부 가능합니다.
@@ -128,22 +124,16 @@
                     </div>
 
                 </form>
-
-            </div><%-- /rp-section-body --%>
-        </div><%-- /rp-section-card --%>
-
-    </div><%-- /rp-main --%>
-</div><%-- /rp-content --%>
+            </div>
+        </div>
+    </div>
+</div>
 
 <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
 
-<%-- Quill Rich Text Editor --%>
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
-<%-- Quill Editor Image Resize JS --%>
 <script src="https://cdn.jsdelivr.net/npm/quill-resize-module@2.0.4/dist/resize.js"></script>
-<%-- Quill Editor 적용 JS --%>
 <script src="${pageContext.request.contextPath}/dist/posts/qeditor.js"></script>
-
 <script>
 var quillReport = new Quill('#editor-report', {
     theme: 'snow',
@@ -162,11 +152,36 @@ var quillReport = new Quill('#editor-report', {
     placeholder: '이번 주 업무 내용을 작성해 주세요.\n(주요 업무 / 진행 현황 / 다음 주 계획 / 이슈 사항 등)'
 });
 
+function rpCheckFileCount(input) {
+    if (input.files.length > 5) {
+        alert('파일은 최대 5개까지 첨부 가능합니다.');
+        input.value = '';
+        return;
+    }
+    for (var i = 0; i < input.files.length; i++) {
+        if (input.files[i].size > 10 * 1024 * 1024) {
+            alert('파일 크기는 최대 10MB까지 가능합니다.\n(' + input.files[i].name + ')');
+            input.value = '';
+            return;
+        }
+    }
+}
+
 function rpSubmitWrite() {
     var subject = document.getElementById('subject').value.trim();
     if (!subject) {
         alert('제목을 입력해 주세요.');
         document.getElementById('subject').focus();
+        return;
+    }
+    var periodStart = document.getElementById('periodStart').value;
+    var periodEnd   = document.getElementById('periodEnd').value;
+    if (!periodStart || !periodEnd) {
+        alert('보고 기간을 입력해 주세요.');
+        return;
+    }
+    if (periodStart > periodEnd) {
+        alert('보고 기간 시작일이 종료일보다 늦을 수 없습니다.');
         return;
     }
     var content = quillReport.root.innerHTML;
@@ -178,6 +193,5 @@ function rpSubmitWrite() {
     document.getElementById('reportWriteForm').submit();
 }
 </script>
-
 </body>
 </html>

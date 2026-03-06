@@ -1,5 +1,7 @@
 package com.mvc.app.domain.dto;
 
+import java.io.Serializable;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,7 +14,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SessionInfo {
+public class SessionInfo implements Serializable{
+	
+	private static final long serialVersionUID = 1L;
+	
 	private String empId;       // 사원번호 (로그인 ID)
 	private String password;
 	private String name;

@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ taglib prefix="c" uri="jakarta.tags.core"%>
+<%@ taglib prefix="c"   uri="jakarta.tags.core"%>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
 <!DOCTYPE html>
 <html>
@@ -16,18 +16,14 @@
 <jsp:include page="/WEB-INF/views/layout/sidebar.jsp"/>
 
 <div class="rp-content">
-
     <header>
         <jsp:include page="/WEB-INF/views/layout/header.jsp"/>
     </header>
-
     <div class="rp-main">
         <jsp:include page="/WEB-INF/views/report/reportList.jsp"/>
     </div>
-
 </div>
 
 <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
-
 </body>
 </html>

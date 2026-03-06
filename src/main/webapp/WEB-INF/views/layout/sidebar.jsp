@@ -17,7 +17,7 @@
     </a>
     <ul class="sub-menu" id="groupSubMenu">
         <li><a href="${pageContext.request.contextPath}/">공지사항 - 미구현</a></li>
-        <li><a href="${pageContext.request.contextPath}/report/main">주간보고서 - 구현 중</a></li>
+        <li><a href="${pageContext.request.contextPath}/report/list">주간보고서 - 구현 중</a></li>
         <li><a href="${pageContext.request.contextPath}/">채팅 - 미구현</a></li>
     </ul>
     <a href="${pageContext.request.contextPath}/" class="nav-link"><i class="fas fa-th-large"></i> Applications</a>

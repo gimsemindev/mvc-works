@@ -1,11 +1,12 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
-<%@ taglib prefix="c" uri="jakarta.tags.core"%>
+<%@ taglib prefix="c"   uri="jakarta.tags.core"%>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>피드백 작성</title>
+<title>피드백 수정</title>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/report.css" type="text/css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">
 <style>
@@ -35,7 +36,7 @@
 
         <div class="rp-page-title">
             <i class="bi bi-chat-left-dots rp-title-icon" style="color:#198754;"></i>
-            <h2>관리자 피드백 작성</h2>
+            <h2>관리자 피드백 수정</h2>
         </div>
 
         <c:if test="${param.error == '1'}">
@@ -67,12 +68,12 @@
             </div>
         </div>
 
-        <!-- 피드백 작성 카드 -->
+        <!-- 피드백 수정 카드 -->
         <div class="rp-section-card">
             <div class="rp-section-header">
                 <h5>
                     <i class="bi bi-chat-left-dots" style="color:#198754;"></i>
-                    피드백 작성
+                    피드백 수정
                 </h5>
                 <span style="font-size:0.78rem; color:#94a3b8;">
                     <i class="bi bi-info-circle"></i>&nbsp;
@@ -81,11 +82,12 @@
             </div>
             <div class="rp-section-body">
 
-                <form id="feedbackWriteForm"
-                      action="${pageContext.request.contextPath}/report/feedback/write"
+                <form id="feedbackEditForm"
+                      action="${pageContext.request.contextPath}/report/feedback/edit"
                       method="post" enctype="multipart/form-data">
 
-                    <input type="hidden" name="parent" value="${refDto.filenum}">
+                    <input type="hidden" name="filenum" value="${dto.filenum}">
+                    <input type="hidden" name="parent"  value="${dto.parent}">
 
                     <table class="rp-form-table">
                         <colgroup>
@@ -99,6 +101,7 @@
                                 <th>피드백 제목<span class="rp-required">*</span></th>
                                 <td colspan="3">
                                     <input type="text" name="subject" id="feedbackSubject"
+                                           value="${dto.subject}"
                                            placeholder="피드백 제목을 입력하세요"
                                            maxlength="255" required>
                                 </td>
@@ -127,9 +130,9 @@
                                     <select name="evaluation" id="evaluation" required
                                             style="width:200px;" onchange="rpUpdateEvalBadge(this.value)">
                                         <option value="">-- 평가 선택 --</option>
-                                        <option value="POSITIVE">긍정 (우수)</option>
-                                        <option value="NORMAL">평범 (보통)</option>
-                                        <option value="NEGATIVE">부정 (미흡)</option>
+                                        <option value="POSITIVE" <c:if test="${dto.evaluation == 'POSITIVE'}">selected</c:if>>긍정 (우수)</option>
+                                        <option value="NORMAL"   <c:if test="${dto.evaluation == 'NORMAL'}">selected</c:if>>평범 (보통)</option>
+                                        <option value="NEGATIVE" <c:if test="${dto.evaluation == 'NEGATIVE'}">selected</c:if>>부정 (미흡)</option>
                                     </select>
                                     <span id="evalBadge" style="margin-left:10px;"></span>
                                 </td>
@@ -147,12 +150,40 @@
                         <input type="hidden" name="content" id="hiddenFeedbackContent">
                     </div>
 
-                    <!-- 파일 첨부 -->
+                    <!-- 기존 첨부파일 -->
+                    <c:if test="${not empty dto.fileList}">
                     <div class="rp-attach-area">
                         <div class="rp-attach-label">
-                            <i class="bi bi-paperclip"></i> 파일 첨부 (선택)
+                            <i class="bi bi-paperclip"></i> 기존 첨부파일
                         </div>
-                        <input type="file" name="files" multiple style="font-size:0.85rem;"
+                        <ul class="rp-attach-list">
+                            <c:forEach var="f" items="${dto.fileList}">
+                            <li id="file_${f.filenum}">
+                                <i class="bi bi-file-earmark"></i>
+                                <a href="${pageContext.request.contextPath}/report/file/download?filenum=${f.filenum}">
+                                    ${f.originalfilename}
+                                </a>
+                                <span class="rp-attach-size">
+                                    (<fmt:formatNumber value="${f.filesize / 1024}" maxFractionDigits="1"/> KB)
+                                </span>
+                                <button type="button" class="rp-btn rp-btn-danger rp-btn-sm"
+                                        style="margin-left:8px;"
+                                        onclick="rpRemoveFile(this, ${f.filenum})">
+                                    <i class="bi bi-x"></i> 삭제
+                                </button>
+                                <input type="hidden" name="deleteFilenum" value="" class="del-fnum">
+                            </li>
+                            </c:forEach>
+                        </ul>
+                    </div>
+                    </c:if>
+
+                    <!-- 새 파일 추가 -->
+                    <div class="rp-attach-area">
+                        <div class="rp-attach-label">
+                            <i class="bi bi-plus-circle"></i> 파일 추가 첨부
+                        </div>
+                        <input type="file" name="newFiles" multiple style="font-size:0.85rem;"
                                onchange="rpCheckFileCount(this)">
                         <div class="rp-attach-hint">
                             <i class="bi bi-info-circle"></i>
@@ -162,13 +193,13 @@
 
                     <!-- 하단 버튼 -->
                     <div class="rp-form-actions">
-                        <a href="${pageContext.request.contextPath}/report/detail?filenum=${refDto.filenum}"
+                        <a href="${pageContext.request.contextPath}/report/feedback/detail?filenum=${dto.filenum}"
                            class="rp-btn rp-btn-secondary">
                             <i class="bi bi-x-lg"></i> 취소
                         </a>
                         <button type="button" class="rp-btn rp-btn-success"
-                                onclick="rpSubmitFeedback()">
-                            <i class="bi bi-send"></i> 피드백 등록
+                                onclick="rpSubmitFeedbackEdit()">
+                            <i class="bi bi-check-lg"></i> 수정 완료
                         </button>
                     </div>
 
@@ -197,9 +228,14 @@ var quillFeedback = new Quill('#editor-feedback', {
             ['clean']
         ],
         resize: {}
-    },
-    placeholder: '직원의 보고서에 대한 피드백을 작성해 주세요.\n(잘된 점 / 개선 제안 / 다음 주 방향 등)'
+    }
 });
+
+// 기존 본문 세팅
+quillFeedback.root.innerHTML = '<c:out value="${dto.content}" escapeXml="false"/>';
+
+// 기존 인사평가 배지 초기 표시
+rpUpdateEvalBadge('${dto.evaluation}');
 
 function rpUpdateEvalBadge(value) {
     var badge = document.getElementById('evalBadge');
@@ -211,17 +247,26 @@ function rpUpdateEvalBadge(value) {
     badge.innerHTML = map[value] || '';
 }
 
+function rpRemoveFile(btn, fileid) {
+    if (confirm('첨부파일을 삭제하시겠습니까?')) {
+        var li = btn.closest('li');
+        li.querySelector('.del-fnum').value = fileid;
+        li.style.textDecoration = 'line-through';
+        li.style.opacity = '0.4';
+        btn.disabled = true;
+    }
+}
+
 function rpCheckFileCount(input) {
     if (input.files.length > 5) { alert('파일은 최대 5개까지 첨부 가능합니다.'); input.value = ''; return; }
     for (var i = 0; i < input.files.length; i++) {
         if (input.files[i].size > 10 * 1024 * 1024) {
-            alert('파일 크기는 최대 10MB까지 가능합니다.\n(' + input.files[i].name + ')');
-            input.value = ''; return;
+            alert('파일 크기는 최대 10MB까지 가능합니다.\n(' + input.files[i].name + ')'); input.value = ''; return;
         }
     }
 }
 
-function rpSubmitFeedback() {
+function rpSubmitFeedbackEdit() {
     var subject = document.getElementById('feedbackSubject').value.trim();
     if (!subject) { alert('피드백 제목을 입력해 주세요.'); document.getElementById('feedbackSubject').focus(); return; }
 
@@ -232,7 +277,7 @@ function rpSubmitFeedback() {
     if (!content || content === '<p><br></p>') { alert('피드백 내용을 입력해 주세요.'); return; }
 
     document.getElementById('hiddenFeedbackContent').value = content;
-    document.getElementById('feedbackWriteForm').submit();
+    document.getElementById('feedbackEditForm').submit();
 }
 </script>
 </body>

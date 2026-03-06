@@ -2,7 +2,9 @@
 <%@ taglib prefix="c"   uri="jakarta.tags.core"%>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
 
-<%-- 주간보고서 목록 (직원 보고서 + 관리자 피드백 탭) --%>
+<%-- 현재 로그인 사용자 권한 --%>
+<c:set var="userLevel"    value="${userLevel}"/>
+<c:set var="sessionEmpId" value="${sessionEmpId}"/>
 
 <!-- 페이지 타이틀 -->
 <div class="rp-page-title">
@@ -12,10 +14,15 @@
 
 <!-- 탭 네비게이션 -->
 <div class="rp-tab-nav">
-    <button class="rp-tab-item active" id="tabReport" onclick="rpSwitchTab('tabReport','tabContentReport')">
+    <button class="rp-tab-item <c:if test="${activeTab != 'feedback'}">active</c:if>"
+            id="tabReport"
+            onclick="rpSwitchTab('tabReport','tabContentReport')">
         <i class="bi bi-file-earmark-text"></i> 직원 보고서
     </button>
-    <button class="rp-tab-item" id="tabFeedback" onclick="rpSwitchTab('tabFeedback','tabContentFeedback')">
+    <%-- 피드백 탭: 일반 사원은 자기 보고서에 달린 피드백만 조회 가능하므로 탭 자체는 노출 --%>
+    <button class="rp-tab-item <c:if test="${activeTab == 'feedback'}">active</c:if>"
+            id="tabFeedback"
+            onclick="rpSwitchTab('tabFeedback','tabContentFeedback')">
         <i class="bi bi-chat-left-dots"></i> 관리자 피드백
     </button>
 </div>
@@ -23,55 +30,66 @@
 <%-- ===================================================
      직원 보고서 탭
 =================================================== --%>
-<div id="tabContentReport" class="rp-tab-content active">
+<div id="tabContentReport" class="rp-tab-content <c:if test="${activeTab != 'feedback'}">active</c:if>">
 
     <!-- 검색 필터 -->
-    <div class="rp-filter-card">
-        <div class="rp-filter-row">
-            <div class="rp-filter-group">
-                <label>작성자</label>
-                <input type="text" name="writerName" placeholder="이름 입력">
-            </div>
-            <div class="rp-filter-group">
-                <label>보고 기간(시작)</label>
-                <input type="date" name="periodStart">
-            </div>
-            <div class="rp-filter-group">
-                <label>보고 기간(종료)</label>
-                <input type="date" name="periodEnd">
-            </div>
-            <div class="rp-filter-group">
-                <label>피드백 여부</label>
-                <select name="feedbackYn">
-                    <option value="">전체</option>
-                    <option value="Y">완료</option>
-                    <option value="N">미작성</option>
-                </select>
-            </div>
-            <div class="rp-filter-group">
-                <label>제목 검색</label>
-                <input type="text" name="subject" placeholder="제목 입력">
-            </div>
-            <div class="rp-filter-btns">
-                <button class="rp-btn rp-btn-primary">
-                    <i class="bi bi-search"></i> 검색
-                </button>
-                <button class="rp-btn rp-btn-secondary">
-                    <i class="bi bi-arrow-counterclockwise"></i> 초기화
-                </button>
+    <form id="reportSearchForm" action="${pageContext.request.contextPath}/report/list" method="get">
+        <input type="hidden" name="tab" value="report">
+        <div class="rp-filter-card">
+            <div class="rp-filter-row">
+                <%-- 관리자·피드백 작성자만 작성자 검색 노출 --%>
+                <c:if test="${userLevel >= 51}">
+                <div class="rp-filter-group">
+                    <label>작성자</label>
+                    <input type="text" name="writerName" value="${writerName}" placeholder="이름 입력">
+                </div>
+                </c:if>
+                <div class="rp-filter-group">
+                    <label>보고 기간(시작)</label>
+                    <input type="date" name="periodStart" value="${periodStart}">
+                </div>
+                <div class="rp-filter-group">
+                    <label>보고 기간(종료)</label>
+                    <input type="date" name="periodEnd" value="${periodEnd}">
+                </div>
+                <c:if test="${userLevel >= 51}">
+                <div class="rp-filter-group">
+                    <label>피드백 여부</label>
+                    <select name="feedbackYn">
+                        <option value="">전체</option>
+                        <option value="Y" <c:if test="${feedbackYn == 'Y'}">selected</c:if>>완료</option>
+                        <option value="N" <c:if test="${feedbackYn == 'N'}">selected</c:if>>미작성</option>
+                    </select>
+                </div>
+                </c:if>
+                <div class="rp-filter-group">
+                    <label>제목 검색</label>
+                    <input type="text" name="subject" value="${subject}" placeholder="제목 입력">
+                </div>
+                <div class="rp-filter-btns">
+                    <button type="submit" class="rp-btn rp-btn-primary">
+                        <i class="bi bi-search"></i> 검색
+                    </button>
+                    <button type="button" class="rp-btn rp-btn-secondary" onclick="rpResetForm('reportSearchForm')">
+                        <i class="bi bi-arrow-counterclockwise"></i> 초기화
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
+    </form>
 
     <!-- 툴바 -->
     <div class="rp-toolbar">
         <div class="rp-toolbar-left">
-            전체 <strong class="mx-1">5</strong>건
+            전체 <strong class="mx-1">${reportTotal}</strong>건
         </div>
         <div class="rp-toolbar-right">
+            <%-- 일반 사원(51 미만)만 보고서 작성 가능 --%>
+            <c:if test="${userLevel < 51}">
             <a href="${pageContext.request.contextPath}/report/write" class="rp-btn rp-btn-primary">
                 <i class="bi bi-pencil-square"></i> 보고서 작성
             </a>
+            </c:if>
         </div>
     </div>
 
@@ -83,109 +101,114 @@
                     <tr>
                         <th style="width:55px;">번호</th>
                         <th>제목</th>
+                        <c:if test="${userLevel >= 51}">
                         <th style="width:100px;">작성자</th>
+                        </c:if>
                         <th style="width:130px;">보고 기간</th>
                         <th style="width:105px;">작성일</th>
+                        <c:if test="${userLevel >= 51}">
                         <th style="width:85px;">피드백</th>
+                        </c:if>
                         <th style="width:70px;">조회수</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <%-- 실제 구현 시 c:forEach 치환 --%>
-                    <tr>
-                        <td class="td-center">10</td>
-                        <td class="td-subject">
-                            <a href="${pageContext.request.contextPath}/report/detail?filenum=10">
-                                2025년 1분기 마케팅 주간보고서
-                            </a>
-                        </td>
-                        <td class="td-center">홍길동</td>
-                        <td class="td-center">03/03 ~ 03/07</td>
-                        <td class="td-center">2025.03.07</td>
-                        <td class="td-center">
-                            <span class="rp-result-badge rp-badge-done">
-                                <span class="rp-dot"></span> 완료
-                            </span>
-                        </td>
-                        <td class="td-center">24</td>
-                    </tr>
-                    <tr>
-                        <td class="td-center">9</td>
-                        <td class="td-subject">
-                            <a href="${pageContext.request.contextPath}/report/detail?filenum=9">
-                                신제품 런칭 준비 주간 업무보고
-                            </a>
-                        </td>
-                        <td class="td-center">김영희</td>
-                        <td class="td-center">02/24 ~ 02/28</td>
-                        <td class="td-center">2025.02.28</td>
-                        <td class="td-center">
-                            <span class="rp-badge rp-badge-pending">미작성</span>
-                        </td>
-                        <td class="td-center">17</td>
-                    </tr>
-                    <tr>
-                        <td class="td-center">8</td>
-                        <td class="td-subject">
-                            <a href="${pageContext.request.contextPath}/report/detail?filenum=8">
-                                개발팀 스프린트 주간보고 (백엔드)
-                            </a>
-                        </td>
-                        <td class="td-center">이철수</td>
-                        <td class="td-center">02/17 ~ 02/21</td>
-                        <td class="td-center">2025.02.21</td>
-                        <td class="td-center">
-                            <span class="rp-result-badge rp-badge-done">
-                                <span class="rp-dot"></span> 완료
-                            </span>
-                        </td>
-                        <td class="td-center">31</td>
-                    </tr>
-                    <tr>
-                        <td class="td-center">7</td>
-                        <td class="td-subject">
-                            <a href="${pageContext.request.contextPath}/report/detail?filenum=7">
-                                고객지원팀 2월 3주차 주간보고
-                            </a>
-                        </td>
-                        <td class="td-center">박지수</td>
-                        <td class="td-center">02/17 ~ 02/21</td>
-                        <td class="td-center">2025.02.21</td>
-                        <td class="td-center">
-                            <span class="rp-badge rp-badge-pending">미작성</span>
-                        </td>
-                        <td class="td-center">9</td>
-                    </tr>
-                    <tr>
-                        <td class="td-center">6</td>
-                        <td class="td-subject">
-                            <a href="${pageContext.request.contextPath}/report/detail?filenum=6">
-                                영업팀 주간보고 - 2월 2주
-                            </a>
-                        </td>
-                        <td class="td-center">최민준</td>
-                        <td class="td-center">02/10 ~ 02/14</td>
-                        <td class="td-center">2025.02.14</td>
-                        <td class="td-center">
-                            <span class="rp-result-badge rp-badge-done">
-                                <span class="rp-dot"></span> 완료
-                            </span>
-                        </td>
-                        <td class="td-center">45</td>
-                    </tr>
+                    <c:choose>
+                    <c:when test="${empty reportList}">
+                        <tr>
+                            <td colspan="7" class="td-center" style="padding:30px; color:#94a3b8;">
+                                조회된 보고서가 없습니다.
+                            </td>
+                        </tr>
+                    </c:when>
+                    <c:otherwise>
+                    <c:forEach var="rpt" items="${reportList}" varStatus="vs">
+                        <tr>
+                            <td class="td-center">${reportTotal - ((page-1)*10) - vs.index}</td>
+                            <td class="td-subject">
+                                <a href="${pageContext.request.contextPath}/report/detail?filenum=${rpt.filenum}">
+                                    ${rpt.subject}
+                                </a>
+                            </td>
+                            <c:if test="${userLevel >= 51}">
+                            <td class="td-center">${rpt.writerName}</td>
+                            </c:if>
+                            <td class="td-center">
+                                <c:if test="${not empty rpt.periodStart and not empty rpt.periodEnd}">
+                                    <fmt:parseDate value="${rpt.periodStart}" pattern="yyyy-MM-dd" var="ps"/>
+                                    <fmt:parseDate value="${rpt.periodEnd}"   pattern="yyyy-MM-dd" var="pe"/>
+                                    <fmt:formatDate value="${ps}" pattern="MM/dd"/> ~
+                                    <fmt:formatDate value="${pe}" pattern="MM/dd"/>
+                                </c:if>
+                            </td>
+                            <td class="td-center">${rpt.regdate}</td>
+                            <c:if test="${userLevel >= 51}">
+                            <td class="td-center">
+                                <c:choose>
+                                    <c:when test="${rpt.feedbackCount > 0}">
+                                        <span class="rp-result-badge rp-badge-done">
+                                            <span class="rp-dot"></span> 완료
+                                        </span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="rp-badge rp-badge-pending">미작성</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+                            </c:if>
+                            <td class="td-center">${rpt.hitcount}</td>
+                        </tr>
+                    </c:forEach>
+                    </c:otherwise>
+                    </c:choose>
                 </tbody>
             </table>
         </div>
 
         <!-- 페이지네이션 -->
         <div class="rp-pagination">
-            <div>총 <strong>5</strong>건 / 1 페이지</div>
+            <div>총 <strong>${reportTotal}</strong>건 / ${reportTotalPage} 페이지</div>
             <div class="rp-pagination-pages">
-                <a class="rp-page-btn disabled"><i class="bi bi-chevron-double-left"></i></a>
-                <a class="rp-page-btn disabled"><i class="bi bi-chevron-left"></i></a>
-                <a class="rp-page-btn active">1</a>
-                <a class="rp-page-btn disabled"><i class="bi bi-chevron-right"></i></a>
-                <a class="rp-page-btn disabled"><i class="bi bi-chevron-double-right"></i></a>
+                <%-- 이전 블록 --%>
+                <c:set var="reportBlock"     value="${(page-1)/10}"/>
+                <c:set var="reportBlockStart" value="${reportBlock * 10 + 1}"/>
+                <c:set var="reportBlockEnd"   value="${reportBlockStart + 9}"/>
+                <c:if test="${reportBlockEnd > reportTotalPage}">
+                    <c:set var="reportBlockEnd" value="${reportTotalPage}"/>
+                </c:if>
+
+                <c:choose>
+                    <c:when test="${reportBlockStart > 1}">
+                        <a class="rp-page-btn" href="?tab=report&page=1&writerName=${writerName}&subject=${subject}&periodStart=${periodStart}&periodEnd=${periodEnd}&feedbackYn=${feedbackYn}">
+                            <i class="bi bi-chevron-double-left"></i></a>
+                        <a class="rp-page-btn" href="?tab=report&page=${reportBlockStart-1}&writerName=${writerName}&subject=${subject}&periodStart=${periodStart}&periodEnd=${periodEnd}&feedbackYn=${feedbackYn}">
+                            <i class="bi bi-chevron-left"></i></a>
+                    </c:when>
+                    <c:otherwise>
+                        <a class="rp-page-btn disabled"><i class="bi bi-chevron-double-left"></i></a>
+                        <a class="rp-page-btn disabled"><i class="bi bi-chevron-left"></i></a>
+                    </c:otherwise>
+                </c:choose>
+
+                <c:forEach begin="${reportBlockStart}" end="${reportBlockEnd}" var="p">
+                    <a class="rp-page-btn <c:if test="${p == page}">active</c:if>"
+                       href="?tab=report&page=${p}&writerName=${writerName}&subject=${subject}&periodStart=${periodStart}&periodEnd=${periodEnd}&feedbackYn=${feedbackYn}">
+                        ${p}
+                    </a>
+                </c:forEach>
+
+                <c:choose>
+                    <c:when test="${reportBlockEnd < reportTotalPage}">
+                        <a class="rp-page-btn" href="?tab=report&page=${reportBlockEnd+1}&writerName=${writerName}&subject=${subject}&periodStart=${periodStart}&periodEnd=${periodEnd}&feedbackYn=${feedbackYn}">
+                            <i class="bi bi-chevron-right"></i></a>
+                        <a class="rp-page-btn" href="?tab=report&page=${reportTotalPage}&writerName=${writerName}&subject=${subject}&periodStart=${periodStart}&periodEnd=${periodEnd}&feedbackYn=${feedbackYn}">
+                            <i class="bi bi-chevron-double-right"></i></a>
+                    </c:when>
+                    <c:otherwise>
+                        <a class="rp-page-btn disabled"><i class="bi bi-chevron-right"></i></a>
+                        <a class="rp-page-btn disabled"><i class="bi bi-chevron-double-right"></i></a>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </div>
     </div>
@@ -195,42 +218,48 @@
 <%-- ===================================================
      관리자 피드백 탭
 =================================================== --%>
-<div id="tabContentFeedback" class="rp-tab-content">
+<div id="tabContentFeedback" class="rp-tab-content <c:if test="${activeTab == 'feedback'}">active</c:if>">
 
     <!-- 검색 필터 -->
-    <div class="rp-filter-card">
-        <div class="rp-filter-row">
-            <div class="rp-filter-group">
-                <label>대상 직원</label>
-                <input type="text" name="targetName" placeholder="이름 입력">
-            </div>
-            <div class="rp-filter-group">
-                <label>작성일(시작)</label>
-                <input type="date" name="startDate">
-            </div>
-            <div class="rp-filter-group">
-                <label>작성일(종료)</label>
-                <input type="date" name="endDate">
-            </div>
-            <div class="rp-filter-group">
-                <label>제목 검색</label>
-                <input type="text" name="subject" placeholder="제목 입력">
-            </div>
-            <div class="rp-filter-btns">
-                <button class="rp-btn rp-btn-primary">
-                    <i class="bi bi-search"></i> 검색
-                </button>
-                <button class="rp-btn rp-btn-secondary">
-                    <i class="bi bi-arrow-counterclockwise"></i> 초기화
-                </button>
+    <form id="feedbackSearchForm" action="${pageContext.request.contextPath}/report/list" method="get">
+        <input type="hidden" name="tab" value="feedback">
+        <div class="rp-filter-card">
+            <div class="rp-filter-row">
+                <%-- 관리자·피드백 작성자만 대상 직원 검색 노출 --%>
+                <c:if test="${userLevel >= 51}">
+                <div class="rp-filter-group">
+                    <label>대상 직원</label>
+                    <input type="text" name="targetName" value="${targetName}" placeholder="이름 입력">
+                </div>
+                </c:if>
+                <div class="rp-filter-group">
+                    <label>작성일(시작)</label>
+                    <input type="date" name="startDate" value="${startDate}">
+                </div>
+                <div class="rp-filter-group">
+                    <label>작성일(종료)</label>
+                    <input type="date" name="endDate" value="${endDate}">
+                </div>
+                <div class="rp-filter-group">
+                    <label>제목 검색</label>
+                    <input type="text" name="subject" value="${subject}" placeholder="제목 입력">
+                </div>
+                <div class="rp-filter-btns">
+                    <button type="submit" class="rp-btn rp-btn-primary">
+                        <i class="bi bi-search"></i> 검색
+                    </button>
+                    <button type="button" class="rp-btn rp-btn-secondary" onclick="rpResetForm('feedbackSearchForm')">
+                        <i class="bi bi-arrow-counterclockwise"></i> 초기화
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
+    </form>
 
     <!-- 툴바 -->
     <div class="rp-toolbar">
         <div class="rp-toolbar-left">
-            전체 <strong class="mx-1">3</strong>건
+            전체 <strong class="mx-1">${feedbackTotal}</strong>건
         </div>
         <div class="rp-toolbar-right"></div>
     </div>
@@ -244,82 +273,96 @@
                         <th style="width:55px;">번호</th>
                         <th>원본 보고서 제목</th>
                         <th>피드백 제목</th>
+                        <c:if test="${userLevel >= 51}">
                         <th style="width:100px;">작성자</th>
+                        </c:if>
                         <th style="width:105px;">작성일</th>
                         <th style="width:70px;">조회수</th>
                         <th style="width:60px;">상세</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td class="td-center">3</td>
-                        <td style="color:#64748b; font-size:0.8rem;">2025년 1분기 마케팅 주간보고서</td>
-                        <td class="td-subject">
-                            <a href="${pageContext.request.contextPath}/report/feedback/detail?filenum=3">
-                                홍길동 3/1주차 보고서 피드백
-                            </a>
-                        </td>
-                        <td class="td-center">관리자</td>
-                        <td class="td-center">2025.03.08</td>
-                        <td class="td-center">12</td>
-                        <td class="td-center">
-                            <button class="rp-btn-icon"
-                                    onclick="location.href='${pageContext.request.contextPath}/report/feedback/detail?filenum=3'"
-                                    title="상세보기">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="td-center">2</td>
-                        <td style="color:#64748b; font-size:0.8rem;">개발팀 스프린트 주간보고 (백엔드)</td>
-                        <td class="td-subject">
-                            <a href="${pageContext.request.contextPath}/report/feedback/detail?filenum=2">
-                                이철수 2/3주차 보고서 피드백
-                            </a>
-                        </td>
-                        <td class="td-center">관리자</td>
-                        <td class="td-center">2025.02.22</td>
-                        <td class="td-center">8</td>
-                        <td class="td-center">
-                            <button class="rp-btn-icon"
-                                    onclick="location.href='${pageContext.request.contextPath}/report/feedback/detail?filenum=2'"
-                                    title="상세보기">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="td-center">1</td>
-                        <td style="color:#64748b; font-size:0.8rem;">영업팀 주간보고 - 2월 2주</td>
-                        <td class="td-subject">
-                            <a href="${pageContext.request.contextPath}/report/feedback/detail?filenum=1">
-                                최민준 2/2주차 보고서 피드백
-                            </a>
-                        </td>
-                        <td class="td-center">관리자</td>
-                        <td class="td-center">2025.02.15</td>
-                        <td class="td-center">19</td>
-                        <td class="td-center">
-                            <button class="rp-btn-icon"
-                                    onclick="location.href='${pageContext.request.contextPath}/report/feedback/detail?filenum=1'"
-                                    title="상세보기">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                        </td>
-                    </tr>
+                    <c:choose>
+                    <c:when test="${empty feedbackList}">
+                        <tr>
+                            <td colspan="7" class="td-center" style="padding:30px; color:#94a3b8;">
+                                조회된 피드백이 없습니다.
+                            </td>
+                        </tr>
+                    </c:when>
+                    <c:otherwise>
+                    <c:forEach var="fb" items="${feedbackList}" varStatus="vs">
+                        <tr>
+                            <td class="td-center">${feedbackTotal - ((fbPage-1)*10) - vs.index}</td>
+                            <td style="color:#64748b; font-size:0.8rem;">${fb.refSubject}</td>
+                            <td class="td-subject">
+                                <a href="${pageContext.request.contextPath}/report/feedback/detail?filenum=${fb.filenum}">
+                                    ${fb.subject}
+                                </a>
+                            </td>
+                            <c:if test="${userLevel >= 51}">
+                            <td class="td-center">${fb.writerName}</td>
+                            </c:if>
+                            <td class="td-center">${fb.regdate}</td>
+                            <td class="td-center">${fb.hitcount}</td>
+                            <td class="td-center">
+                                <button class="rp-btn-icon"
+                                        onclick="location.href='${pageContext.request.contextPath}/report/feedback/detail?filenum=${fb.filenum}'"
+                                        title="상세보기">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                    </c:otherwise>
+                    </c:choose>
                 </tbody>
             </table>
         </div>
 
+        <!-- 피드백 페이지네이션 -->
         <div class="rp-pagination">
-            <div>총 <strong>3</strong>건 / 1 페이지</div>
+            <div>총 <strong>${feedbackTotal}</strong>건 / ${feedbackTotalPage} 페이지</div>
             <div class="rp-pagination-pages">
-                <a class="rp-page-btn disabled"><i class="bi bi-chevron-double-left"></i></a>
-                <a class="rp-page-btn disabled"><i class="bi bi-chevron-left"></i></a>
-                <a class="rp-page-btn active">1</a>
-                <a class="rp-page-btn disabled"><i class="bi bi-chevron-right"></i></a>
-                <a class="rp-page-btn disabled"><i class="bi bi-chevron-double-right"></i></a>
+                <c:set var="fbBlock"      value="${(fbPage-1)/10}"/>
+                <c:set var="fbBlockStart" value="${fbBlock * 10 + 1}"/>
+                <c:set var="fbBlockEnd"   value="${fbBlockStart + 9}"/>
+                <c:if test="${fbBlockEnd > feedbackTotalPage}">
+                    <c:set var="fbBlockEnd" value="${feedbackTotalPage}"/>
+                </c:if>
+
+                <c:choose>
+                    <c:when test="${fbBlockStart > 1}">
+                        <a class="rp-page-btn" href="?tab=feedback&fbPage=1&targetName=${targetName}&startDate=${startDate}&endDate=${endDate}&subject=${subject}">
+                            <i class="bi bi-chevron-double-left"></i></a>
+                        <a class="rp-page-btn" href="?tab=feedback&fbPage=${fbBlockStart-1}&targetName=${targetName}&startDate=${startDate}&endDate=${endDate}&subject=${subject}">
+                            <i class="bi bi-chevron-left"></i></a>
+                    </c:when>
+                    <c:otherwise>
+                        <a class="rp-page-btn disabled"><i class="bi bi-chevron-double-left"></i></a>
+                        <a class="rp-page-btn disabled"><i class="bi bi-chevron-left"></i></a>
+                    </c:otherwise>
+                </c:choose>
+
+                <c:forEach begin="${fbBlockStart}" end="${fbBlockEnd}" var="p">
+                    <a class="rp-page-btn <c:if test="${p == fbPage}">active</c:if>"
+                       href="?tab=feedback&fbPage=${p}&targetName=${targetName}&startDate=${startDate}&endDate=${endDate}&subject=${subject}">
+                        ${p}
+                    </a>
+                </c:forEach>
+
+                <c:choose>
+                    <c:when test="${fbBlockEnd < feedbackTotalPage}">
+                        <a class="rp-page-btn" href="?tab=feedback&fbPage=${fbBlockEnd+1}&targetName=${targetName}&startDate=${startDate}&endDate=${endDate}&subject=${subject}">
+                            <i class="bi bi-chevron-right"></i></a>
+                        <a class="rp-page-btn" href="?tab=feedback&fbPage=${feedbackTotalPage}&targetName=${targetName}&startDate=${startDate}&endDate=${endDate}&subject=${subject}">
+                            <i class="bi bi-chevron-double-right"></i></a>
+                    </c:when>
+                    <c:otherwise>
+                        <a class="rp-page-btn disabled"><i class="bi bi-chevron-right"></i></a>
+                        <a class="rp-page-btn disabled"><i class="bi bi-chevron-double-right"></i></a>
+                    </c:otherwise>
+                </c:choose>
             </div>
         </div>
     </div>
@@ -336,5 +379,13 @@ function rpSwitchTab(activeTabId, activeContentId) {
     });
     document.getElementById(activeTabId).classList.add('active');
     document.getElementById(activeContentId).classList.add('active');
+}
+
+function rpResetForm(formId) {
+    var form = document.getElementById(formId);
+    var tab  = form.querySelector('input[name="tab"]').value;
+    var inputs = form.querySelectorAll('input:not([type="hidden"]), select');
+    inputs.forEach(function(el) { el.value = ''; });
+    form.submit();
 }
 </script>
