@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.HashMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -203,4 +204,72 @@ public class ApprovalDocRestController {
         }
     }
 
+    // 승인
+    @PostMapping("/{docId}/approve")
+    public ResponseEntity<?> approveDoc(
+            @PathVariable("docId") long docId,
+            @RequestBody Map<String, String> body) {
+        try {
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+            boolean ok = service.approveDoc(docId, info.getEmpId(), body.get("comment"));
+            if (ok) return ResponseEntity.ok(Map.of("msg", "승인되었습니다."));
+            return ResponseEntity.badRequest().body(Map.of("msg", "승인 권한이 없거나 이미 처리된 문서입니다."));
+        } catch (Exception e) {
+            log.info("approveDoc : ", e);
+            return ResponseEntity.internalServerError().body(Map.of("msg", "승인 처리 실패"));
+        }
+    }
+
+    // 반려
+    @PostMapping("/{docId}/reject")
+    public ResponseEntity<?> rejectDoc(
+            @PathVariable("docId") long docId,
+            @RequestBody Map<String, String> body) {
+        try {
+            String comment = body.get("comment");
+            if (comment == null || comment.isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of("msg", "반려 사유를 입력해주세요."));
+            }
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+            boolean ok = service.rejectDoc(docId, info.getEmpId(), comment);
+            if (ok) return ResponseEntity.ok(Map.of("msg", "반려되었습니다."));
+            return ResponseEntity.badRequest().body(Map.of("msg", "반려 권한이 없거나 이미 처리된 문서입니다."));
+        } catch (Exception e) {
+            log.info("rejectDoc : ", e);
+            return ResponseEntity.internalServerError().body(Map.of("msg", "반려 처리 실패"));
+        }
+    }
+
+    // 보류
+    @PostMapping("/{docId}/hold")
+    public ResponseEntity<?> holdDoc(
+            @PathVariable("docId") long docId,
+            @RequestBody Map<String, String> body) {
+        try {
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+            boolean ok = service.holdDoc(docId, info.getEmpId(), body.get("comment"));
+            if (ok) return ResponseEntity.ok(Map.of("msg", "보류 처리되었습니다."));
+            return ResponseEntity.badRequest().body(Map.of("msg", "보류 권한이 없거나 이미 처리된 문서입니다."));
+        } catch (Exception e) {
+            log.info("holdDoc : ", e);
+            return ResponseEntity.internalServerError().body(Map.of("msg", "보류 처리 실패"));
+        }
+    }
+
+    // 참조자 코멘트
+    @PostMapping("/{docId}/ref-comment")
+    public ResponseEntity<?> refComment(
+            @PathVariable("docId") long docId,
+            @RequestBody Map<String, String> body) {
+        try {
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+            boolean ok = service.updateRefComment(docId, info.getEmpId(), body.get("comment"));
+            if (ok) return ResponseEntity.ok(Map.of("msg", "의견이 등록되었습니다."));
+            return ResponseEntity.badRequest().body(Map.of("msg", "참조자가 아닙니다."));
+        } catch (Exception e) {
+            log.info("refComment : ", e);
+            return ResponseEntity.internalServerError().body(Map.of("msg", "의견 등록 실패"));
+        }
+    }    
+    
 }

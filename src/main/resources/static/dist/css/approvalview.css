@@ -78,6 +78,8 @@
 .status-PENDING  { background: #fff4e0; color: #d97706; }
 .status-APPROVED { background: #e0f5ef; color: #1a9660; }
 .status-REJECTED { background: #fde8e8; color: #e53e3e; }
+.status-CANCELED { background: #f0f0f0; color: #6b7280; }
+.status-ON_HOLD  { background: #fff3cd; color: #856404; }
 
 /* ── 결재선 ── */
 .line-grid {
@@ -194,7 +196,7 @@
 }
 .btn-back:hover { background: #e2e6f0; }
 .btn-approve {
-    background: #1bbfb0;
+    background: #12b76a;
     color: #fff;
     border: none;
     border-radius: 6px;
@@ -207,7 +209,7 @@
     gap: 5px;
     transition: background .15s;
 }
-.btn-approve:hover { background: #17ada0; }
+.btn-approve:hover { background: #0e9a5a; }
 .btn-reject {
     background: #e53e3e;
     color: #fff;
@@ -223,3 +225,18 @@
     transition: background .15s;
 }
 .btn-reject:hover { background: #c53030; }
+.btn-hold {
+    background: #f79009;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 20px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: background .15s;
+}
+.btn-hold:hover { background: #dc6803; }

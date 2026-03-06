@@ -78,7 +78,55 @@ export const useApprovalViewStore = defineStore('approvalView', {
                 alert(msg);
                 return false;
             }
-        }
+        },
+
+		// 승인
+		async approveDoc(docId, comment) {
+		    try {
+		        await http.post('/approval/doc/' + docId + '/approve', { comment });
+		        alert('승인되었습니다.');
+		        return true;
+		    } catch (e) {
+		        alert(e.response?.data?.msg || '승인 처리 실패');
+		        return false;
+		    }
+		},
+
+		// 반려
+		async rejectDoc(docId, comment) {
+		    try {
+		        await http.post('/approval/doc/' + docId + '/reject', { comment });
+		        alert('반려되었습니다.');
+		        return true;
+		    } catch (e) {
+		        alert(e.response?.data?.msg || '반려 처리 실패');
+		        return false;
+		    }
+		},
+
+		// 보류
+		async holdDoc(docId, comment) {
+		    try {
+		        await http.post('/approval/doc/' + docId + '/hold', { comment });
+		        alert('보류 처리되었습니다.');
+		        return true;
+		    } catch (e) {
+		        alert(e.response?.data?.msg || '보류 처리 실패');
+		        return false;
+		    }
+		},
+
+		// 참조자 코멘트
+		async saveRefComment(docId, comment) {
+		    try {
+		        await http.post('/approval/doc/' + docId + '/ref-comment', { comment });
+		        alert('의견이 등록되었습니다.');
+		        return true;
+		    } catch (e) {
+		        alert(e.response?.data?.msg || '의견 등록 실패');
+		        return false;
+		    }
+		}		
     },
 
     getters: {
@@ -93,6 +141,26 @@ export const useApprovalViewStore = defineStore('approvalView', {
                 return state.doc.lines.every(l => l.apprStatus === 'WAIT');
             }
             return false;
-        }
+        },
+		// 현재 결재 순서인 결재자인지
+		isCurrentApprover: (state) => {
+		    return (empId) => {
+		        if (!state.doc || state.doc.docStatus !== 'PENDING') return false;
+		        const lines = state.doc.lines || [];
+		        const waitLines = lines.filter(l => l.apprStatus === 'WAIT');
+		        if (waitLines.length === 0) return false;
+		        const minStep = Math.min(...waitLines.map(l => l.stepOrder));
+		        const current = waitLines.find(l => l.stepOrder === minStep);
+		        return current && current.apprEmpId === empId;
+		    };
+		},
+
+		// 참조자인지
+		isReference: (state) => {
+		    return (empId) => {
+		        if (!state.doc) return false;
+		        return (state.doc.refs || []).some(r => r.refEmpId === empId);
+		    };
+		}
     }
 });

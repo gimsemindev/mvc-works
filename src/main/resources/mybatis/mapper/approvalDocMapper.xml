@@ -183,7 +183,7 @@
       </if>
   </select>
 
-<select id="listRef" parameterType="map" resultType="com.mvc.app.domain.dto.ApprovalDocDto">
+  <select id="listRef" parameterType="map" resultType="com.mvc.app.domain.dto.ApprovalDocDto">
         SELECT d.docId, d.title, d.docStatus,
                d.writerEmpName, d.writerGradeName,
                d.regDate, t.typeName
@@ -222,10 +222,6 @@
         </if>
     </select>
 
-    <!-- ────────────────────────────────────────────────
-         전체 결재함 목록 / 건수
-         (내가 기안 OR 결재선에 포함 OR 참조자로 포함)
-    ──────────────────────────────────────────────── -->
     <select id="listAll" parameterType="map" resultType="com.mvc.app.domain.dto.ApprovalDocDto">
         SELECT DISTINCT d.docId, d.title, d.docStatus,
                d.writerEmpName, d.writerGradeName,
@@ -275,7 +271,7 @@
         </if>
     </select>
 
-<!-- 문서 상세 조회 -->
+    <!-- 문서 상세 조회 -->
     <select id="getDoc" parameterType="long" resultType="com.mvc.app.domain.dto.ApprovalDocDto">
         SELECT d.docId, d.docTypeId, d.title, d.content, d.detailData,
                d.docStatus, d.writerEmpId, d.writerEmpName,
@@ -355,6 +351,87 @@
                      AND lineStatusCode != 'WAIT'
                ))
           )
+    </update>
+
+    <!-- 승인 처리 (현재 순위 결재자만) -->
+    <update id="approveDoc" parameterType="map">
+        UPDATE approvalLine
+        SET lineStatusCode = 'APPROVED',
+            apprDate = SYSDATE,
+            apprComment = #{comment, jdbcType=VARCHAR}
+        WHERE docId = #{docId}
+          AND apprEmpId = #{empId}
+          AND lineStatusCode = 'WAIT'
+          AND stepOrder = (
+              SELECT MIN(stepOrder) FROM approvalLine
+              WHERE docId = #{docId} AND lineStatusCode = 'WAIT'
+          )
+    </update>
+
+    <!-- 남은 WAIT 수 확인 -->
+    <select id="countRemainingWait" parameterType="long" resultType="int">
+        SELECT COUNT(*) FROM approvalLine
+        WHERE docId = #{docId} AND lineStatusCode = 'WAIT'
+    </select>
+
+    <!-- 문서 최종 승인 -->
+    <update id="completeDoc" parameterType="long">
+        UPDATE approvalDoc
+        SET docStatus = 'APPROVED', completeDate = SYSDATE
+        WHERE docId = #{docId}
+    </update>
+
+    <!-- 반려 처리 -->
+    <update id="rejectDoc" parameterType="map">
+        UPDATE approvalLine
+        SET lineStatusCode = 'REJECTED',
+            apprDate = SYSDATE,
+            apprComment = #{comment}
+        WHERE docId = #{docId}
+          AND apprEmpId = #{empId}
+          AND lineStatusCode = 'WAIT'
+          AND stepOrder = (
+              SELECT MIN(stepOrder) FROM approvalLine
+              WHERE docId = #{docId} AND lineStatusCode = 'WAIT'
+          )
+    </update>
+
+    <!-- 문서 반려 상태 변경 -->
+    <update id="rejectDocStatus" parameterType="long">
+        UPDATE approvalDoc
+        SET docStatus = 'REJECTED'
+        WHERE docId = #{docId}
+    </update>
+
+    <!-- 보류 처리 -->
+    <update id="holdDoc" parameterType="map">
+        UPDATE approvalLine
+        SET lineStatusCode = 'HOLD',
+            apprDate = SYSDATE,
+            apprComment = #{comment, jdbcType=VARCHAR}
+        WHERE docId = #{docId}
+          AND apprEmpId = #{empId}
+          AND lineStatusCode = 'WAIT'
+          AND stepOrder = (
+              SELECT MIN(stepOrder) FROM approvalLine
+              WHERE docId = #{docId} AND lineStatusCode = 'WAIT'
+          )
+    </update>
+
+    <!-- 문서 보류 상태 변경 -->
+    <update id="holdDocStatus" parameterType="long">
+        UPDATE approvalDoc
+        SET docStatus = 'ON_HOLD'
+        WHERE docId = #{docId}
+    </update>
+
+    <!-- 참조자 코멘트 저장 -->
+    <update id="updateRefComment" parameterType="map">
+        UPDATE approvalReference
+        SET refComment = #{comment},
+            refCommentDate = SYSDATE
+        WHERE docId = #{docId}
+          AND refEmpId = #{empId}
     </update>
 
 </mapper>

@@ -137,4 +137,62 @@ public class ApprovalDocServiceImpl implements ApprovalDocService {
         int cnt = mapper.cancelDoc(map);
         return cnt > 0;
     }
+    
+    @Override
+    @Transactional
+    public boolean approveDoc(long docId, String empId, String comment) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        map.put("docId", docId);
+        map.put("empId", empId);
+        map.put("comment", comment);
+
+        int cnt = mapper.approveDoc(map);
+        if (cnt == 0) return false;
+
+        // 남은 WAIT가 0이면 최종 승인
+        int remaining = mapper.countRemainingWait(docId);
+        if (remaining == 0) {
+            mapper.completeDoc(docId);
+        }
+        return true;
+    }
+
+    @Override
+    @Transactional
+    public boolean rejectDoc(long docId, String empId, String comment) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        map.put("docId", docId);
+        map.put("empId", empId);
+        map.put("comment", comment);
+
+        int cnt = mapper.rejectDoc(map);
+        if (cnt == 0) return false;
+
+        mapper.rejectDocStatus(docId);
+        return true;
+    }
+
+    @Override
+    @Transactional
+    public boolean holdDoc(long docId, String empId, String comment) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        map.put("docId", docId);
+        map.put("empId", empId);
+        map.put("comment", comment);
+
+        int cnt = mapper.holdDoc(map);
+        if (cnt == 0) return false;
+
+        mapper.holdDocStatus(docId);
+        return true;
+    }
+
+    @Override
+    public boolean updateRefComment(long docId, String empId, String comment) throws Exception {
+        Map<String, Object> map = new HashMap<>();
+        map.put("docId", docId);
+        map.put("empId", empId);
+        map.put("comment", comment);
+        return mapper.updateRefComment(map) > 0;
+    }    
 }

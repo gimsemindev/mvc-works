@@ -138,7 +138,19 @@
                             <div class="line-card-name">{{ ref.refEmpName }}</div>
                             <div class="line-card-dept">{{ ref.refDeptName }} · {{ ref.refGradeName }}</div>
                         </div>
+                        <div v-if="ref.refComment" style="padding:6px 12px; font-size:12px; color:#667085; border-top:1px solid #eee;">
+                            {{ ref.refComment }}
+                            <span style="color:#9aa0b4; margin-left:8px;">{{ ref.refCommentDate }}</span>
+                        </div>
                     </div>
+                </div>
+                <!-- 참조자 의견 입력 (내가 참조자일 때) -->
+                <div v-if="store.isReference(currentEmpId)" style="margin-top:12px; display:flex; gap:8px;">
+                    <input type="text" class="form-control" v-model="refCommentText"
+                           placeholder="참조 의견을 입력하세요"
+                           style="pointer-events:auto; background:#fff;">
+                    <button class="btn btn-sm btn-outline-primary" @click="submitRefComment"
+                            style="white-space:nowrap;">등록</button>
                 </div>
             </div>
         </div>
@@ -174,6 +186,22 @@
 
         
         <div class="view-footer">
+            <!-- 결재자 버튼 (현재 내 순서일 때만) -->
+            <template v-if="store.isCurrentApprover(currentEmpId)">
+                <button class="btn-approve" @click="openApproveModal('approve')">
+                    <span class="material-symbols-outlined" style="font-size:15px">check_circle</span>
+                    승인
+                </button>
+                <button class="btn-reject" @click="openApproveModal('reject')">
+                    <span class="material-symbols-outlined" style="font-size:15px">cancel</span>
+                    반려
+                </button>
+                <button class="btn-hold" @click="openApproveModal('hold')">
+                    <span class="material-symbols-outlined" style="font-size:15px">pause_circle</span>
+                    보류
+                </button>
+            </template>
+        
             <button class="btn-cancel"
                     v-if="store.doc.writerEmpId === currentEmpId && store.canCancel"
                     @click="cancelDoc">
@@ -185,7 +213,28 @@
                 목록
             </button>
         </div>
-
+        <!-- 결재 처리 모달 -->
+        <div class="modal fade" id="approveModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">{{ modalTitle }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label class="form-label">의견 <span v-if="modalType === 'reject'" style="color:red">*필수</span></label>
+                        <textarea class="form-control" v-model="apprComment" rows="4"
+                                  style="pointer-events:auto; background:#fff;"
+                                  :placeholder="modalType === 'reject' ? '반려 사유를 입력해주세요 (필수)' : '의견을 입력해주세요 (선택)'">
+                        </textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                        <button type="button" class="btn" :class="modalBtnClass" @click="processApproval">확인</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </template>
 
 </div>
@@ -204,7 +253,7 @@
 </script>
 
 <script type="module">
-    import { createApp, onMounted } from 'vue';
+    import { createApp, onMounted, ref } from 'vue';
     import { createPinia } from 'pinia';
     import { useApprovalViewStore } from 'approvalViewStore';
     import { useCommonCodeStore }   from 'commonCodeStore';
@@ -219,6 +268,49 @@
             const docId = document.querySelector('meta[name="docId"]').content;
 
             const currentEmpId = '${sessionScope.member.empId}';
+
+            const apprComment = ref('');
+            const modalType = ref('');
+            const modalTitle = ref('');
+            const modalBtnClass = ref('');
+            const refCommentText = ref('');
+          
+            const openApproveModal = (type) => {
+                modalType.value = type;
+                if (type === 'approve') { modalTitle.value = '승인'; modalBtnClass.value = 'btn-success'; }
+                else if (type === 'reject') { modalTitle.value = '반려'; modalBtnClass.value = 'btn-danger'; }
+                else { modalTitle.value = '보류'; modalBtnClass.value = 'btn-warning'; }
+                apprComment.value = '';
+                new bootstrap.Modal(document.getElementById('approveModal')).show();
+            };
+          
+            const processApproval = async () => {
+                let ok = false;
+                if (modalType.value === 'approve') {
+                    if (!confirm('승인하시겠습니까?')) return;
+                    ok = await store.approveDoc(docId, apprComment.value);
+                } else if (modalType.value === 'reject') {
+                    if (!apprComment.value.trim()) { alert('반려 사유를 입력해주세요.'); return; }
+                    if (!confirm('반려하시겠습니까?')) return;
+                    ok = await store.rejectDoc(docId, apprComment.value);
+                } else {
+                    if (!confirm('보류하시겠습니까?')) return;
+                    ok = await store.holdDoc(docId, apprComment.value);
+                }
+                if (ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('approveModal')).hide();
+                    await store.fetchDoc(docId);
+                }
+            };
+          
+            const submitRefComment = async () => {
+                if (!refCommentText.value.trim()) { alert('의견을 입력해주세요.'); return; }
+                const ok = await store.saveRefComment(docId, refCommentText.value);
+                if (ok) {
+                    refCommentText.value = '';
+                    await store.fetchDoc(docId);
+                }
+            };
 
             const goList = () => { location.href = ctx + '/approval/list'; };
 
@@ -276,7 +368,10 @@
                 }
             });
 
-            return { store, codeStore, goList, download, cancelDoc, currentEmpId };
+            return { store, codeStore, goList, download, cancelDoc, currentEmpId,
+                     apprComment, modalType, modalTitle, modalBtnClass, refCommentText,
+                     openApproveModal, processApproval, submitRefComment };
+
         }
     });
 
