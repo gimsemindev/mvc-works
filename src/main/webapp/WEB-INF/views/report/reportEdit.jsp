@@ -125,6 +125,7 @@
                                         onclick="rpRemoveFile(this, ${f.filenum})">
                                     <i class="bi bi-x"></i> 삭제
                                 </button>
+                                <%-- 삭제 대상 filenum을 담는 히든 필드 (rpRemoveFile에서 값 세팅) --%>
                                 <input type="hidden" name="deleteFilenum" value="" class="del-fnum">
                             </li>
                             </c:forEach>
@@ -168,7 +169,9 @@
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/quill-resize-module@2.0.4/dist/resize.js"></script>
 <script src="${pageContext.request.contextPath}/dist/posts/qeditor.js"></script>
+<script src="${pageContext.request.contextPath}/dist/js/reportForm.js"></script>
 <script>
+/* Quill 에디터 초기화 (전역 변수로 reportForm.js에서 참조) */
 var quillReport = new Quill('#editor-report', {
     theme: 'snow',
     modules: {
@@ -185,59 +188,8 @@ var quillReport = new Quill('#editor-report', {
     }
 });
 
-// 기존 본문 세팅
+/* 기존 본문 세팅 (JSP EL 주입) */
 quillReport.root.innerHTML = '<c:out value="${dto.content}" escapeXml="false"/>';
-
-function rpRemoveFile(btn, fileid) {
-    if (confirm('첨부파일을 삭제하시겠습니까?')) {
-        var li = btn.closest('li');
-        li.querySelector('.del-fnum').value = fileid;
-        li.style.textDecoration = 'line-through';
-        li.style.opacity = '0.4';
-        btn.disabled = true;
-    }
-}
-
-function rpCheckFileCount(input) {
-    if (input.files.length > 5) {
-        alert('파일은 최대 5개까지 첨부 가능합니다.');
-        input.value = '';
-        return;
-    }
-    for (var i = 0; i < input.files.length; i++) {
-        if (input.files[i].size > 10 * 1024 * 1024) {
-            alert('파일 크기는 최대 10MB까지 가능합니다.\n(' + input.files[i].name + ')');
-            input.value = '';
-            return;
-        }
-    }
-}
-
-function rpSubmitEdit() {
-    var subject = document.getElementById('subject').value.trim();
-    if (!subject) {
-        alert('제목을 입력해 주세요.');
-        document.getElementById('subject').focus();
-        return;
-    }
-    var periodStart = document.getElementById('periodStart').value;
-    var periodEnd   = document.getElementById('periodEnd').value;
-    if (!periodStart || !periodEnd) {
-        alert('보고 기간을 입력해 주세요.');
-        return;
-    }
-    if (periodStart > periodEnd) {
-        alert('보고 기간 시작일이 종료일보다 늦을 수 없습니다.');
-        return;
-    }
-    var content = quillReport.root.innerHTML;
-    if (!content || content === '<p><br></p>') {
-        alert('보고 내용을 입력해 주세요.');
-        return;
-    }
-    document.getElementById('hiddenContent').value = content;
-    document.getElementById('reportEditForm').submit();
-}
 </script>
 </body>
 </html>

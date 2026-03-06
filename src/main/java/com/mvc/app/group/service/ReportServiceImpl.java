@@ -64,7 +64,7 @@ public class ReportServiceImpl implements ReportService {
         reportMapper.incrementHitcount(filenum);
         ReportDto dto = reportMapper.findReportById(filenum);
         if (dto != null) {
-            dto.setFileList(null);
+            dto.setFileList(reportMapper.listFilesByReport(filenum));
             // 인라인 피드백 조회
             ReportDto feedback = reportMapper.findFeedbackByParent(filenum);
             // 보고서 DTO에 직접 담지 않고 Controller에서 model에 별도 추가하므로 여기서는 반환값으로 사용
@@ -81,7 +81,7 @@ public class ReportServiceImpl implements ReportService {
         reportMapper.incrementHitcount(filenum);
         ReportDto dto = reportMapper.findFeedbackById(filenum);
         if (dto != null) {
-            dto.setFileList(null);
+            dto.setFileList(reportMapper.listFilesByReport(filenum));
         }
         return dto;
     }
@@ -91,7 +91,11 @@ public class ReportServiceImpl implements ReportService {
     // ============================================================
     @Override
     public ReportDto getReportForRef(Long filenum) {
-        return reportMapper.findReportById(filenum);
+        ReportDto dto = reportMapper.findReportById(filenum);
+        if (dto != null) {
+            dto.setFileList(reportMapper.listFilesByReport(filenum));
+        }
+        return dto;
     }
 
     // ============================================================
@@ -230,7 +234,11 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public ReportDto getInlineFeedback(Long reportFilenum) {
-        return reportMapper.findFeedbackByParent(reportFilenum);
+        ReportDto dto = reportMapper.findFeedbackByParent(reportFilenum);
+        if (dto != null) {
+            dto.setFileList(reportMapper.listFilesByReport(dto.getFilenum()));
+        }
+        return dto;
     }
 
     // ============================================================

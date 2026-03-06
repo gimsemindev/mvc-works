@@ -200,11 +200,11 @@
 }
 
 .rp-btn-danger {
-    background: #dc3545;
+    background: #ff5c5c;
     color: #fff;
 }
 .rp-btn-danger:hover {
-    background: color-mix(in srgb, #dc3545 85%, black 15%);
+    background: color-mix(in srgb, #ff5c5c 85%, black 15%);
     color: #fff;
 }
 
@@ -733,6 +733,111 @@
     font-size: 0.78rem;
     color: #64748b;
 }
+
+/* -----------------------------------------------
+   인사평가 배지
+----------------------------------------------- */
+.rp-eval-badge    { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: 600; }
+.rp-eval-positive { background: #dbeafe; color: #1d4ed8; }
+.rp-eval-normal   { background: #f1f5f9; color: #475569; }
+.rp-eval-negative { background: #fee2e2; color: #dc2626; }
+
+/* -----------------------------------------------
+   피드백 섹션 카드 강조 (feedbackDetail)
+----------------------------------------------- */
+.rp-section-card.feedback                         { border-left: 4px solid #198754; }
+.rp-section-card.feedback .rp-section-header      { background: #f0fdf4; border-bottom-color: #bbf7d0; }
+.rp-section-card.feedback .rp-section-header h5 i { color: #198754; }
+
+/* -----------------------------------------------
+   보고서 상세 - 제목+첨부 가로 배치 (reportDetail)
+----------------------------------------------- */
+.rp-detail-title-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+}
+.rp-detail-title-row .rp-detail-title {
+    margin-bottom: 0;
+    border-bottom: none;
+    padding-bottom: 0;
+    flex: 1;
+}
+
+/* -----------------------------------------------
+   첨부파일 드롭다운 (reportDetail)
+----------------------------------------------- */
+.rp-attach-dropdown-wrap { position: relative; flex-shrink: 0; padding-bottom: 2px; }
+
+.rp-attach-toggle {
+    display: flex; align-items: center; gap: 4px;
+    padding: 5px 10px;
+    border: 1px solid #cbd5e1; border-radius: 8px;
+    background: #f8fafc; color: #475569;
+    font-size: 0.82rem; cursor: pointer;
+    transition: background 0.15s; white-space: nowrap;
+}
+.rp-attach-toggle:hover { background: #e2e8f0; }
+
+.rp-attach-count {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 18px; height: 18px;
+    background: #3b82f6; color: #fff;
+    border-radius: 9px; font-size: 0.72rem; font-weight: 700; padding: 0 4px;
+}
+
+.rp-attach-dropdown {
+    position: absolute; top: calc(100% + 6px); right: 0;
+    min-width: 280px; max-width: 380px;
+    background: #fff; border: 1px solid #e2e8f0;
+    border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 100;
+}
+.rp-attach-dropdown-title {
+    padding: 10px 14px 8px; font-size: 0.8rem; font-weight: 600;
+    color: #64748b; border-bottom: 1px solid #f1f5f9;
+}
+.rp-attach-dropdown-list { list-style: none; margin: 0; padding: 6px 0; }
+.rp-attach-dropdown-list li {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 14px; font-size: 0.83rem;
+}
+.rp-attach-dropdown-list li:hover { background: #f8fafc; }
+.rp-attach-dropdown-list li i { color: #94a3b8; flex-shrink: 0; }
+.rp-attach-dropdown-list li a {
+    color: #1e40af; text-decoration: none; flex: 1;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.rp-attach-dropdown-list li a:hover { text-decoration: underline; }
+
+/* -----------------------------------------------
+   피드백 인라인 푸터 레이아웃 (reportDetail)
+----------------------------------------------- */
+.rp-feedback-inline-footer {
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+.rp-feedback-footer-left {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 0.8rem; color: #64748b;
+}
+.rp-feedback-footer-files {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+}
+.rp-feedback-file-link {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 9px;
+    border: 1px solid #bfdbfe; border-radius: 6px;
+    background: #eff6ff; color: #1d4ed8;
+    font-size: 0.76rem; text-decoration: none;
+    max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    transition: background 0.15s;
+}
+.rp-feedback-file-link:hover { background: #dbeafe; }
+.rp-feedback-file-link i { font-size: 0.8rem; flex-shrink: 0; }
 
 /* -----------------------------------------------
    반응형

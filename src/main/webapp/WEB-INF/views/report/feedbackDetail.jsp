@@ -9,18 +9,6 @@
 <title>피드백 상세보기</title>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/report.css" type="text/css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">
-<style>
-    .rp-detail-body .ql-container.ql-snow { border: none; }
-    .rp-detail-body .ql-editor { padding: 0; min-height: unset; }
-    .rp-section-card.feedback { border-left: 4px solid #198754; }
-    .rp-section-card.feedback .rp-section-header { background: #f0fdf4; border-bottom-color: #bbf7d0; }
-    .rp-section-card.feedback .rp-section-header h5 i { color: #198754; }
-    /* 인사평가 배지 */
-    .rp-eval-badge { display:inline-block; padding:3px 12px; border-radius:12px; font-size:0.82rem; font-weight:600; }
-    .rp-eval-positive { background:#dbeafe; color:#1d4ed8; }
-    .rp-eval-normal   { background:#f1f5f9; color:#475569; }
-    .rp-eval-negative { background:#fee2e2; color:#dc2626; }
-</style>
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp"/>
 </head>
@@ -170,7 +158,7 @@
                             <i class="bi bi-pencil"></i> 수정
                         </a>
                         <button type="button" class="rp-btn rp-btn-danger"
-                                onclick="rpConfirmFeedbackDelete(${feedbackDto.filenum})">
+                                onclick="rpConfirmFeedbackDelete(${feedbackDto.filenum}, _ctxPath)">
                             <i class="bi bi-trash3"></i> 삭제
                         </button>
                         </c:if>
@@ -186,15 +174,14 @@
 <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
 
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script src="${pageContext.request.contextPath}/dist/js/feedbackDetail.js"></script>
 <script>
+/* Quill 뷰어 초기화 (JSP EL 값 주입이 필요하므로 인라인 유지) */
 var viewer = new Quill('#viewer', { theme: 'snow', readOnly: true, modules: { toolbar: false } });
 viewer.root.innerHTML = '<c:out value="${feedbackDto.content}" escapeXml="false"/>';
 
-function rpConfirmFeedbackDelete(filenum) {
-    if (confirm('이 피드백을 삭제하시겠습니까?\n삭제 후 복구가 불가능합니다.')) {
-        location.href = '${pageContext.request.contextPath}/report/feedback/delete?filenum=' + filenum;
-    }
-}
+/* contextPath를 변수로 넘겨 외부 함수에서 사용 */
+var _ctxPath = '${pageContext.request.contextPath}';
 </script>
 </body>
 </html>

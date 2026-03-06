@@ -12,11 +12,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Controller
@@ -211,9 +209,9 @@ public class ReportController {
         if (!dto.getEmpId().equals(si.getEmpId()) && si.getUserLevel() < 99) {
             return "redirect:/report/detail?filenum=" + filenum;
         }
-        dto.setFileList(reportService.getReport(filenum) != null
-                ? reportService.getReport(filenum).getFileList()
-                : new ArrayList<>());
+        // 첨부파일 목록 세팅 (조회수 증가 없는 getReportForRef 재활용)
+        ReportDto withFiles = reportService.getReportForRef(filenum);
+        dto.setFileList(withFiles != null ? withFiles.getFileList() : new ArrayList<>());
 
         model.addAttribute("dto",       dto);
         model.addAttribute("userLevel", si.getUserLevel());

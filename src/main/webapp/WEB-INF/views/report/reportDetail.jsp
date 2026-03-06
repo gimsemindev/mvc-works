@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ taglib prefix="c"   uri="jakarta.tags.core"%>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt"%>
+<%@ taglib prefix="fn"  uri="jakarta.tags.functions"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,10 +10,6 @@
 <title>주간보고서 상세</title>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/report.css" type="text/css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">
-<style>
-    .rp-detail-body .ql-container.ql-snow { border: none; }
-    .rp-detail-body .ql-editor { padding: 0; min-height: unset; }
-</style>
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp"/>
 </head>
@@ -51,8 +48,37 @@
             </div>
             <div class="rp-section-body">
 
-                <!-- 제목 -->
-                <div class="rp-detail-title">${dto.subject}</div>
+                <!-- 제목 + 첨부파일 -->
+                <div class="rp-detail-title-row">
+                    <div class="rp-detail-title">${dto.subject}</div>
+                    <c:if test="${not empty dto.fileList}">
+                    <div class="rp-attach-dropdown-wrap">
+                        <button type="button" class="rp-attach-toggle" onclick="rpToggleAttach(this)"
+                                title="첨부파일 ${fn:length(dto.fileList)}개">
+                            <i class="bi bi-paperclip"></i>
+                            <span class="rp-attach-count">${fn:length(dto.fileList)}</span>
+                        </button>
+                        <div class="rp-attach-dropdown" style="display:none;">
+                            <div class="rp-attach-dropdown-title">
+                                <i class="bi bi-paperclip"></i> 첨부파일
+                            </div>
+                            <ul class="rp-attach-dropdown-list">
+                                <c:forEach var="f" items="${dto.fileList}">
+                                <li>
+                                    <i class="bi bi-file-earmark"></i>
+                                    <a href="${pageContext.request.contextPath}/report/file/download?filenum=${f.filenum}">
+                                        ${f.originalfilename}
+                                    </a>
+                                    <span class="rp-attach-size">
+                                        (<fmt:formatNumber value="${f.filesize / 1024}" maxFractionDigits="1"/> KB)
+                                    </span>
+                                </li>
+                                </c:forEach>
+                            </ul>
+                        </div>
+                    </div>
+                    </c:if>
+                </div>
 
                 <!-- 메타 정보 -->
                 <table class="rp-meta-table">
@@ -95,28 +121,6 @@
                     <div id="viewer"></div>
                 </div>
 
-                <!-- 첨부파일 -->
-                <c:if test="${not empty dto.fileList}">
-                <div class="rp-attach-area" style="margin-top:14px;">
-                    <div class="rp-attach-label">
-                        <i class="bi bi-paperclip"></i> 첨부파일
-                    </div>
-                    <ul class="rp-attach-list">
-                        <c:forEach var="f" items="${dto.fileList}">
-                        <li>
-                            <i class="bi bi-file-earmark"></i>
-                            <a href="${pageContext.request.contextPath}/report/file/download?filenum=${f.filenum}">
-                                ${f.originalfilename}
-                            </a>
-                            <span class="rp-attach-size">
-                                (<fmt:formatNumber value="${f.filesize / 1024}" maxFractionDigits="1"/> KB)
-                            </span>
-                        </li>
-                        </c:forEach>
-                    </ul>
-                </div>
-                </c:if>
-
                 <!-- 관리자 피드백 인라인 -->
                 <c:if test="${dto.feedbackCount > 0 and not empty inlineFeedback}">
                 <div class="rp-feedback-inline">
@@ -134,8 +138,21 @@
                         <div id="inlineViewer"></div>
                     </div>
                     <div class="rp-feedback-inline-footer">
-                        <span><i class="bi bi-person" style="margin-right:3px;"></i>${inlineFeedback.writerName}</span>
-                        <span><i class="bi bi-clock"  style="margin-right:3px;"></i>${inlineFeedback.regdate}</span>
+                        <div class="rp-feedback-footer-left">
+                            <span><i class="bi bi-person" style="margin-right:3px;"></i>${inlineFeedback.writerName}</span>
+                            <span><i class="bi bi-clock"  style="margin-right:3px;"></i>${inlineFeedback.regdate}</span>
+                        </div>
+                        <c:if test="${not empty inlineFeedback.fileList}">
+                        <div class="rp-feedback-footer-files">
+                            <c:forEach var="ff" items="${inlineFeedback.fileList}">
+                            <a href="${pageContext.request.contextPath}/report/file/download?filenum=${ff.filenum}"
+                               class="rp-feedback-file-link" title="${ff.originalfilename}">
+                                <i class="bi bi-file-earmark-arrow-down"></i>
+                                ${ff.originalfilename}
+                            </a>
+                            </c:forEach>
+                        </div>
+                        </c:if>
                     </div>
                 </div>
                 </c:if>
@@ -163,7 +180,7 @@
                             <i class="bi bi-pencil"></i> 수정
                         </a>
                         <button type="button" class="rp-btn rp-btn-danger"
-                                onclick="rpConfirmDelete(${dto.filenum})">
+                                onclick="rpConfirmDelete(${dto.filenum}, _ctxPath)">
                             <i class="bi bi-trash3"></i> 삭제
                         </button>
                         </c:if>
@@ -179,26 +196,20 @@
 <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>
 
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
+<script src="${pageContext.request.contextPath}/dist/js/reportDetail.js"></script>
 <script>
-// Quill readOnly로 본문 렌더링
-var viewer = new Quill('#viewer', { theme: 'snow', readOnly: true,
-    modules: { toolbar: false } });
-var content = '<c:out value="${dto.content}" escapeXml="false"/>';
-viewer.root.innerHTML = content;
+/* Quill 뷰어 초기화 (JSP EL 주입이 필요하므로 인라인 유지) */
+var viewer = new Quill('#viewer', { theme: 'snow', readOnly: true, modules: { toolbar: false } });
+viewer.root.innerHTML = '<c:out value="${dto.content}" escapeXml="false"/>';
 
-// 인라인 피드백 본문 렌더링
+/* 인라인 피드백 뷰어 */
 <c:if test="${dto.feedbackCount > 0 and not empty inlineFeedback}">
-var inlineViewer = new Quill('#inlineViewer', { theme: 'snow', readOnly: true,
-    modules: { toolbar: false } });
-var inlineContent = '<c:out value="${inlineFeedback.content}" escapeXml="false"/>';
-inlineViewer.root.innerHTML = inlineContent;
+var inlineViewer = new Quill('#inlineViewer', { theme: 'snow', readOnly: true, modules: { toolbar: false } });
+inlineViewer.root.innerHTML = '<c:out value="${inlineFeedback.content}" escapeXml="false"/>';
 </c:if>
 
-function rpConfirmDelete(filenum) {
-    if (confirm('이 보고서를 삭제하시겠습니까?\n삭제 후 복구가 불가능합니다.')) {
-        location.href = '${pageContext.request.contextPath}/report/delete?filenum=' + filenum;
-    }
-}
+/* contextPath를 변수로 넘겨 외부 함수에서 사용 */
+var _ctxPath = '${pageContext.request.contextPath}';
 </script>
 
 </body>

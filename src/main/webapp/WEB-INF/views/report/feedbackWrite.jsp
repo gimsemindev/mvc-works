@@ -8,17 +8,6 @@
 <title>피드백 작성</title>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/report.css" type="text/css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css">
-<style>
-    #editor-feedback { height: 340px; }
-    .rp-editor-wrap.feedback .rp-editor-label {
-        background: #f0fdf4; color: #166534; border-bottom-color: #bbf7d0;
-    }
-    .rp-editor-wrap.feedback .rp-editor-label i { color: #198754; }
-    .rp-eval-badge { display:inline-block; padding:2px 10px; border-radius:12px; font-size:0.8rem; font-weight:600; }
-    .rp-eval-positive { background:#dbeafe; color:#1d4ed8; }
-    .rp-eval-normal   { background:#f1f5f9; color:#475569; }
-    .rp-eval-negative { background:#fee2e2; color:#dc2626; }
-</style>
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp"/>
 </head>
@@ -183,7 +172,9 @@
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/quill-resize-module@2.0.4/dist/resize.js"></script>
 <script src="${pageContext.request.contextPath}/dist/posts/qeditor.js"></script>
+<script src="${pageContext.request.contextPath}/dist/js/feedbackForm.js"></script>
 <script>
+/* Quill 에디터 초기화 (전역 변수로 feedbackForm.js에서 참조) */
 var quillFeedback = new Quill('#editor-feedback', {
     theme: 'snow',
     modules: {
@@ -200,40 +191,6 @@ var quillFeedback = new Quill('#editor-feedback', {
     },
     placeholder: '직원의 보고서에 대한 피드백을 작성해 주세요.\n(잘된 점 / 개선 제안 / 다음 주 방향 등)'
 });
-
-function rpUpdateEvalBadge(value) {
-    var badge = document.getElementById('evalBadge');
-    var map = {
-        'POSITIVE': '<span class="rp-eval-badge rp-eval-positive">긍정 (우수)</span>',
-        'NORMAL':   '<span class="rp-eval-badge rp-eval-normal">평범 (보통)</span>',
-        'NEGATIVE': '<span class="rp-eval-badge rp-eval-negative">부정 (미흡)</span>'
-    };
-    badge.innerHTML = map[value] || '';
-}
-
-function rpCheckFileCount(input) {
-    if (input.files.length > 5) { alert('파일은 최대 5개까지 첨부 가능합니다.'); input.value = ''; return; }
-    for (var i = 0; i < input.files.length; i++) {
-        if (input.files[i].size > 10 * 1024 * 1024) {
-            alert('파일 크기는 최대 10MB까지 가능합니다.\n(' + input.files[i].name + ')');
-            input.value = ''; return;
-        }
-    }
-}
-
-function rpSubmitFeedback() {
-    var subject = document.getElementById('feedbackSubject').value.trim();
-    if (!subject) { alert('피드백 제목을 입력해 주세요.'); document.getElementById('feedbackSubject').focus(); return; }
-
-    var evaluation = document.getElementById('evaluation').value;
-    if (!evaluation) { alert('인사평가 항목을 선택해 주세요.'); document.getElementById('evaluation').focus(); return; }
-
-    var content = quillFeedback.root.innerHTML;
-    if (!content || content === '<p><br></p>') { alert('피드백 내용을 입력해 주세요.'); return; }
-
-    document.getElementById('hiddenFeedbackContent').value = content;
-    document.getElementById('feedbackWriteForm').submit();
-}
 </script>
 </body>
 </html>

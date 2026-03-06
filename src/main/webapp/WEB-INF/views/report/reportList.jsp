@@ -369,23 +369,4 @@
 
 </div><%-- /tabContentFeedback --%>
 
-<script>
-function rpSwitchTab(activeTabId, activeContentId) {
-    document.querySelectorAll('.rp-tab-item').forEach(function(btn) {
-        btn.classList.remove('active');
-    });
-    document.querySelectorAll('.rp-tab-content').forEach(function(content) {
-        content.classList.remove('active');
-    });
-    document.getElementById(activeTabId).classList.add('active');
-    document.getElementById(activeContentId).classList.add('active');
-}
-
-function rpResetForm(formId) {
-    var form = document.getElementById(formId);
-    var tab  = form.querySelector('input[name="tab"]').value;
-    var inputs = form.querySelectorAll('input:not([type="hidden"]), select');
-    inputs.forEach(function(el) { el.value = ''; });
-    form.submit();
-}
-</script>
+<script src="${pageContext.request.contextPath}/dist/js/reportList.js"></script>
