@@ -43,7 +43,7 @@
         <li><a href="${pageContext.request.contextPath}/approval/manage/doctype">문서유형 관리</a></li>
         <li><a href="${pageContext.request.contextPath}/approval/create">결재 상신</a></li>
         <li><a href="${pageContext.request.contextPath}/approval/list">결재 리스트</a></li>
-    	<li><a href="#">부재 등록</a></li>
+    	<li><a href="${pageContext.request.contextPath}/approval/absence">부재 등록</a></li>
     </ul>    
     <div class="nav-section">Projects</div>
     <a class="nav-link active"><i class="fas fa-briefcase"></i> Projects</a>

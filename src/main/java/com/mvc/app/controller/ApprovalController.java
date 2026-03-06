@@ -32,4 +32,9 @@ public class ApprovalController {
     public String approvalView() {
         return "approval/view";
     }
+
+    @GetMapping("absence")
+    public String approvalAbsence() {
+        return "approval/approvalAbsence";
+    }
 }
