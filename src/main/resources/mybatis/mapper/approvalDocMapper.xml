@@ -296,7 +296,9 @@
                apprEmpId, apprEmpName,
                apprDeptCode, apprDeptName,
                apprGradeCode, apprGradeName,
-               apprTypeCode, lineStatusCode AS apprStatus
+               apprTypeCode, lineStatusCode AS apprStatus,
+        	   apprComment,
+               TO_CHAR(apprDate, 'YYYY-MM-DD HH24:MI') AS apprDate
         FROM approvalLine
         WHERE docId = #{docId}
         ORDER BY stepOrder ASC
@@ -315,7 +317,9 @@
     <select id="getRefs" parameterType="long"
             resultType="com.mvc.app.domain.dto.ApprovalRefDto">
         SELECT refId, docId, refEmpId, refEmpName,
-               refDeptCode, refDeptName, refGradeCode, refGradeName
+               refDeptCode, refDeptName, refGradeCode, refGradeName,
+               readYn, TO_CHAR(readDate, 'YYYY-MM-DD HH24:MI') AS readDate,
+               refComment, TO_CHAR(refCommentDate, 'YYYY-MM-DD HH24:MI') AS refCommentDate
         FROM approvalReference
         WHERE docId = #{docId}
         ORDER BY refId ASC

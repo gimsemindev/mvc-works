@@ -273,11 +273,12 @@
     font-weight: 700;
     white-space: nowrap;
 }
-.status-반려  { background: #ffe0e0; color: #d93025; }
-.status-승인  { background: #e0f5ef; color: #1a9660; }
-.status-진행  { background: #fff4e0; color: #d97706; }
-.status-임시  { background: #f0f3ff; color: #4e73df; }
-.status-완료  { background: #e8f5e9; color: #388e3c; }
+.status-DRAFT    { background: #f0f3ff; color: #4e73df; }
+.status-PENDING  { background: #fff4e0; color: #d97706; }
+.status-APPROVED { background: #e0f5ef; color: #1a9660; }
+.status-REJECTED { background: #ffe0e0; color: #d93025; }
+.status-CANCELED { background: #f0f0f0; color: #6b7280; }
+.status-ON_HOLD  { background: #fff3cd; color: #856404; }
 
 /* ───────────────────────────────
    페이지네이션

@@ -43,11 +43,7 @@
                 <td>{{ item.writerEmpName }} {{ item.writerGradeName }}</td>
                 <td>
                     <span class="status-badge"
-                          :class="{'status-임시': item.docStatus === 'DRAFT',
-                                   'status-진행': item.docStatus === 'PENDING',
-                                   'status-승인': item.docStatus === 'APPROVED',
-                                   'status-반려': item.docStatus === 'REJECTED',
-                                   'status-취소': item.docStatus === 'CANCELED'}">
+                          :class="'status-' + item.docStatus">
                         {{ (codeStore.getCodes('DOCSTATUS').find(c => c.code === item.docStatus) || {}).name || item.docStatus }}
                     </span>
                 </td>

@@ -19,4 +19,6 @@ public class ApprovalLineDto {
     private String apprGradeName;
     private String apprTypeCode;    // APPROVER
     private String apprStatus;      // PENDING, APPROVED, REJECTED
+    private String apprComment;     // 결재의견
+    private String apprDate;        // 결재처리일
 }

@@ -16,4 +16,8 @@ public class ApprovalRefDto {
     private String refDeptName;
     private String refGradeCode;
     private String refGradeName;
+    private String readYn;
+    private String readDate;
+    private String refComment;
+    private String refCommentDate;
 }
