@@ -7,7 +7,7 @@
 <nav class="navbar-custom">
 	<div class="navbar-left"></div>
 	<div class="navbar-right">
-		<span> ${sessionScope.member.name}님 환영합니다. </span>
+		<span> ${sessionScope.member.name} ${sessionScope.member.gradeName }님 환영합니다. </span>
 		<%-- 알림 버튼 --%>
 		<button class="nav-icon-btn position-relative">
 			<i class="far fa-bell"></i> <span
