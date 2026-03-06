@@ -1,4 +1,3 @@
-/* 인사관리 사이드바 토글 스타일 */
 .nav-toggle {
     display: flex;
     align-items: center;
@@ -24,6 +23,20 @@
     display: none;
 }
 
-#approvalSubMenu{
-	display: none;
+#approvalSubMenu {
+    display: none;
+}
+
+#projectSubMenu {
+    display: none;
+}
+
+/* 활성 서브메뉴 링크 - 하늘색 강조 */
+.sub-menu a.active {
+    color: #5a5b5b;
+    font-weight: 200;
+    background-color: #dff2ff;
+    border-radius: 6px;
+    padding-left: 8px;
+    margin-right: 16px;
 }
