@@ -1,15 +1,34 @@
 (function () {
+	
+	// 공통 알림 함수 (추가)
+	const toast = (msg, icon = 'warning') => {
+		Swal.fire({
+			title: '알림',
+			html: `<div style="font-size: 0.95rem; font-weight: 500; margin-top: 10px;">${msg}</div>`,
+			// position: 'top',
+			showConfirmButton: false,
+			timer: 700,
+			timerProgressBar: false,
+			text: msg,
+			icon: icon,
+			iconColor: '#4e73df',
+			width: '320px', // 전체 너비 조절 (기본보다 작게)
+			padding: '1rem', // 내부 여백 조절
+			confirmButtonColor: '#4f86c6', // 프로젝트 메인 컬러에 맞춤
+			confirmButtonText: '확인'
+		});
+	};
+	
     const TOTAL_STEPS = 4;
     let currentStep = 1;
 
-    // ─── 개인 프로젝트 여부 ─────────────────────────────────────────────────
+    // 개인 프로젝트 여부
     function isPersonal() {
         const el = document.getElementById('projectType');
         return el && el.value === 'I';
     }
 
-    // ─── 개인일 때 step2 멤버 영역 숨김/표시 ───────────────────────────────
-    // step2의 .form-section 순서: [0]총인원, [1]팀멤버, [2]시작일, [3]제목/설명, [4]종료일
+    // 개인일 때 step2 멤버 영역 숨김/표시
     function applyPersonalModeToStep2() {
         const sections = document.querySelectorAll('#step-panel-2 .form-section');
         if (sections.length >= 2) {
@@ -18,7 +37,7 @@
         }
     }
 
-    // ─── 다음/이전 스텝 계산 (개인이면 step3 스킵) ─────────────────────────
+    // 다음/이전 스텝 계산 (개인이면 step3 스킵)
     function getNextStep(from) {
         if (from === 2 && isPersonal()) return 4;
         return from < TOTAL_STEPS ? from + 1 : from;
@@ -27,13 +46,67 @@
         if (from === 4 && isPersonal()) return 2;
         return from > 1 ? from - 1 : from;
     }
+	
+	// 단계별 유효성 검사 
+	function validateStep(step) {
+	    // Step1: 프로젝트 타입 선택 여부
+	    if (step === 1) {
+	        const projectType = document.getElementById('projectType').value;
+	        const pmoType     = document.getElementById('pmoType').value;
+	        if (!projectType) {
+	            toast('프로젝트 타입을 선택해 주세요.');
+	            return false;
+	        }
+	        if (!isPersonal() && !pmoType) {
+	            toast('프로젝트 관리 권한을 선택해 주세요.');
+	            return false;
+	        }
+	        return true;
+	    }
 
-    // ─── Step3 멤버 리스트 렌더링 ───────────────────────────────────────────
+	    // Step2: 제목, 날짜, 팀 멤버
+	    if (step === 2) {
+	        const title = document.querySelector('[name="title"]').value.trim();
+	        const startDate = document.querySelector('[name="startDate"]').value;
+	        const endDate = document.querySelector('[name="endDate"]').value;
+
+	        if (!title) { toast('프로젝트 제목을 입력하세요.'); return false; }
+	        if (!startDate) { toast('시작일을 입력하세요.'); return false; }
+	        if (!endDate) { toast('종료일을 입력하세요.'); return false; }
+	        const today = new Date().toISOString().slice(0, 10);
+	        if (startDate < today) { toast('시작일은 오늘 날짜 이후여야 합니다.'); return false; }
+	        if (startDate > endDate) { toast('종료일이 시작일보다 빠를 수 없습니다.'); return false; }
+
+	        if (!isPersonal()) {
+	            const memberIds = document.querySelectorAll('#hiddenInputContainer input[name="memberIds"]');
+	            if (memberIds.length === 0) {
+	                toast('팀 멤버를 추가하세요.');
+	                return false;
+	            }
+	        }
+	        return true;
+	    }
+		
+		    // Step3: 역할 미선택 멤버 검사
+		    if (step === 3) {
+		        const roleInputs = [...document.querySelectorAll('input.role-input')];
+		        const unassigned = roleInputs.filter(r => !r.value);
+		        if (unassigned.length > 0) {
+		            toast('모든 멤버의 역할을 선택해 주세요.');
+		            return false;
+		        }
+		        return true;
+		    }
+
+		    return true;
+		}
+
+    // Step3 멤버 리스트 렌더링
     function renderStep3MemberList() {
         const container = document.getElementById('step3MemberList');
         if (!container) return;
 
-        const dataMap      = window.__memberDataMap || {};
+        const dataMap = window.__memberDataMap || {};
         const hiddenInputs = document.querySelectorAll('#hiddenInputContainer input[name="memberIds"]');
 
         if (hiddenInputs.length === 0) {
@@ -45,17 +118,17 @@
 
         hiddenInputs.forEach((input, idx) => {
             const empId = input.value;
-            const data  = dataMap[empId] || {};
-            const name  = data.name  || empId;
-            const dept  = data.dept  || '';
+            const data = dataMap[empId] || {};
+            const name = data.name  || empId;
+            const dept = data.dept  || '';
             const grade = data.grade || '';
 
             // 이름 첫 글자 이니셜 (한글은 첫 글자, 영문은 첫 글자 대문자)
             const initial = name ? name.charAt(0) : '?';
             // 이니셜 배경색: empId 기반으로 고정 색상 부여
-            const colors  = ['#4f86c6','#e07b54','#6abf69','#9b6db5','#e5a823','#3ab0b0','#d95f7f'];
+            const colors = ['#4f86c6','#e07b54','#6abf69','#9b6db5','#e5a823','#3ab0b0','#d95f7f'];
             const colorIdx = empId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % colors.length;
-            const bgColor  = colors[colorIdx];
+            const bgColor = colors[colorIdx];
             const avatarHtml = '<div class="avatar" style="background:' + bgColor + ';color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;flex-shrink:0;">' + initial + '</div>';
 
             const row = document.createElement('div');
@@ -64,7 +137,7 @@
                 '<div class="member-info">' +
                     avatarHtml +
                     '<div class="d-flex align-items-center gap-2 flex-wrap">' +
-                        '<div class="member-name fw-bold">' + name + '</div>' +
+                        '<div class="member-name fw-bold text-dark">' + name + '</div>' +
                         '<div class="text-muted small">' +
                             '<span class="member-dept">' + dept + '</span>' +
                             '<span class="mx-1">/</span>' +
@@ -86,7 +159,7 @@
         });
     }
 
-    // ─── 단계 이동 ──────────────────────────────────────────────────────────
+    // 단계 이동
     function goToStep(step) {
         if (step < 1 || step > TOTAL_STEPS) return;
 
@@ -105,10 +178,10 @@
             if (s === step) item.classList.add('active');
 
             if (s === 3 && isPersonal()) {
-                item.style.opacity       = '0.35';
+                item.style.opacity = '0.35';
                 item.style.pointerEvents = 'none';
             } else {
-                item.style.opacity       = '';
+                item.style.opacity = '';
                 item.style.pointerEvents = '';
             }
         });
@@ -116,20 +189,22 @@
         document.getElementById('btnPrev').style.visibility = (step === 1) ? 'hidden' : 'visible';
 
         if (step === TOTAL_STEPS) {
-            document.getElementById('btnNext').style.display     = 'none';
+            document.getElementById('btnNext').style.display = 'none';
             document.getElementById('btnComplete').style.display = 'inline-block';
         } else {
-            document.getElementById('btnNext').style.display     = 'inline-block';
+            document.getElementById('btnNext').style.display = 'inline-block';
             document.getElementById('btnComplete').style.display = 'none';
         }
 
         currentStep = step;
     }
 
-    // ─── 버튼 이벤트 ────────────────────────────────────────────────────────
+    // 버튼 이벤트
     document.getElementById('btnNext').addEventListener('click', function () {
+		if (!validateStep(currentStep)) return;
         goToStep(getNextStep(currentStep));
     });
+	
     document.getElementById('btnPrev').addEventListener('click', function () {
         goToStep(getPrevStep(currentStep));
     });
@@ -138,19 +213,14 @@
 
         // Step1
         const projectType = document.getElementById('projectType').value;
-        const pmoType     = document.getElementById('pmoType').value;
-        const personal    = (projectType === 'I');
+        const pmoType = document.getElementById('pmoType').value;
+        const personal = (projectType === 'I');
 
         // Step2
-        const title       = document.querySelector('[name="title"]').value;
+        const title = document.querySelector('[name="title"]').value;
         const description = document.querySelector('[name="description"]').value;
-        const startDate   = document.querySelector('[name="startDate"]').value;
-        const endDate     = document.querySelector('[name="endDate"]').value;
-
-        // 유효성 검사 (공통)
-        if (!title)     { alert('프로젝트 제목을 입력하세요.'); return; }
-        if (!startDate) { alert('시작일을 입력하세요.'); return; }
-        if (!endDate)   { alert('종료일을 입력하세요.'); return; }
+        const startDate = document.querySelector('[name="startDate"]').value;
+        const endDate = document.querySelector('[name="endDate"]').value;
 
         // Step3 - 팀 프로젝트일 때만 멤버/역할 수집
         let members = [];
@@ -158,10 +228,10 @@
             const memberIds  = [...document.querySelectorAll('input[name="memberIds"]')].map(i => i.value);
             const roleInputs = [...document.querySelectorAll('input.role-input')];
 
-            if (memberIds.length === 0) { alert('팀 멤버를 추가하세요.'); return; }
+            if (memberIds.length === 0) { toast('팀 멤버를 추가하세요.'); return; }
 
             const unassigned = roleInputs.filter(r => !r.value);
-            if (unassigned.length > 0) { alert('모든 멤버의 역할을 선택해 주세요.'); return; }
+            if (unassigned.length > 0) { toast('모든 멤버의 역할을 선택해 주세요.'); return; }
 
             members = memberIds.map(empId => {
                 const roleInput = document.querySelector('.role-input[data-emp-id="' + empId + '"]');
@@ -169,8 +239,20 @@
             });
         }
 
-        // Step4 - 단계
-        const stages = [...document.querySelectorAll('#phaseContainer .phase-card')].map((card, i) => {
+        // Step4 - 단계 수집 + 유효성 검사
+        const phaseCards = [...document.querySelectorAll('#phaseContainer .phase-card')];
+
+        // 단계가 하나도 없으면 막기
+        if (phaseCards.length === 0) { toast('단계를 1개 이상 입력하세요.'); return; }
+
+        // 완료(체크) 안 된 카드 검사
+        const undoneCards = phaseCards.filter(card => !card.classList.contains('done-card'));
+        if (undoneCards.length > 0) {
+            toast('단계의 세부 계획을 입력하고 완료(✓) 체크를 해주세요.');
+            return;
+        }
+
+        const stages = phaseCards.map((card, i) => {
             const titleInput = card.querySelector('.phase-title-input');
             const titleText  = card.querySelector('.phase-title');
             const stgTitle   = titleInput
@@ -184,25 +266,25 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 projectType: projectType,
-                pmoType:     pmoType,
-                title:       title,
+                pmoType: pmoType,
+                title: title,
                 description: description,
-                startDate:   startDate,
-                endDate:     endDate,
-                members:     members,
-                stages:      stages
+                startDate: startDate,
+                endDate: endDate,
+                members: members,
+                stages: stages
             })
         })
         .then(res => {
             if (res.ok) {
                 location.href = '/projects/list';
             } else {
-                alert('생성 실패');
+                toast('생성 실패');
             }
         })
         .catch(err => {
             console.error(err);
-            alert('서버 오류가 발생했습니다.');
+            toast('서버 오류가 발생했습니다.');
         });
     });
 

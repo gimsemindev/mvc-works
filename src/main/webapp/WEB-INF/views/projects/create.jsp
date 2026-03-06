@@ -9,10 +9,12 @@
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp"/>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/projectcreate.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/paginate.css" type="text/css">
 
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=arrow_forward_ios" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=arrow_forward_ios"/>
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/layout/header.jsp"/>
@@ -66,6 +68,7 @@
 <script src="${pageContext.request.contextPath}/dist/js/projectEnter.js"></script>
 <script src="${pageContext.request.contextPath}/dist/js/projectCreate.js"></script>
 <script src="${pageContext.request.contextPath}/dist/js/projectCreatestep2.js"></script>
+<script src="${pageContext.request.contextPath}/dist/js/projectCreatestep4.js"></script>
 
 
 </body>
