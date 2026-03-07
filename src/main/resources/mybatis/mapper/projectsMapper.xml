@@ -10,10 +10,15 @@
 			order="BEFORE">
 			SELECT PROJECTS_SEQ .NEXTVAL FROM DUAL
 		</selectKey>
-		INSERT INTO project (projectId, projectType, pmoType, title,
-		description, startDate, endDate, createdDate, status, progress)
-		VALUES(#{projectId}, #{projectType}, #{pmoType}, #{title},
-		#{description}, #{startDate}, #{endDate}, SYSDATE, 1, 0)
+		    INSERT INTO project (projectId, projectType, pmoType, title,
+		    description, startDate, endDate, createdDate, status, progress)
+		    VALUES(#{projectId}, #{projectType}, #{pmoType}, #{title},
+		    #{description}, #{startDate}, #{endDate}, SYSDATE,
+		    CASE
+		        WHEN #{endDate} &lt; TRUNC(SYSDATE) THEN 4
+		        WHEN #{startDate} &lt;= TRUNC(SYSDATE) AND #{endDate} &gt;= TRUNC(SYSDATE) THEN 2
+		        ELSE 1
+		    END, 0)
 	</insert>
 
 	<!-- 프로젝트 구성원 조성 및 역할 부여 -->
@@ -24,8 +29,7 @@
 		<foreach collection="members" item="member"
 			separator="UNION ALL">
 			SELECT
-			#{member.empId}, #{projectId}, NVL(#{member.role},
-			'P')
+			#{member.empId}, #{projectId}, NVL(#{member.role}, 'P')
 			FROM DUAL
 		</foreach>
 		) A
@@ -50,9 +54,111 @@
 		) B
 	</insert>
 
+		<sql id="where-project">
+		    <choose>
+		        <when test="schType == 'title'">
+		            INSTR(p.TITLE, #{kwd}) &gt; 0
+		        </when>
+		        <when test="schType == 'manager'">
+		            INSTR(e.NAME, #{kwd}) &gt; 0
+		        </when>
+		        <when test="schType == 'startDate'">
+				    (INSTR(TO_CHAR(p.STARTDATE, 'YYYY/MM/DD'), #{kwd}) &gt; 0
+				    OR INSTR(TO_CHAR(p.STARTDATE, 'YYYY-MM-DD'), #{kwd}) &gt; 0
+				    OR INSTR(TO_CHAR(p.STARTDATE, 'YYYYMMDD'), #{kwd}) &gt; 0)
+				</when>
+		        <when test="schType == 'endDate'">
+				    (INSTR(TO_CHAR(p.ENDDATE, 'YYYY/MM/DD'), #{kwd}) &gt; 0
+				    OR INSTR(TO_CHAR(p.ENDDATE, 'YYYY-MM-DD'), #{kwd}) &gt; 0
+				    OR INSTR(TO_CHAR(p.ENDDATE, 'YYYYMMDD'), #{kwd}) &gt; 0)
+				</when>
+		        <otherwise>
+		            INSTR(${schType}, #{kwd}) &gt; 0
+		        </otherwise>
+		    </choose>
+		</sql>
+	
+	
 	<!-- 프로젝트 리스트 -->
-	<select id="projectslist">
+	<select id="projectslist" parameterType="map" resultType="com.mvc.app.domain.dto.ProjectsDto">
+		 SELECT 
+		        p.PROJECTID,
+		        p.TITLE,
+		        p.PROJECTTYPE,
+		        e.NAME AS managerName,
+		        TO_CHAR(p.STARTDATE, 'YYYY/MM/DD') AS startDate,
+		        TO_CHAR(p.ENDDATE, 'YYYY/MM/DD') AS endDate,
+		        TRUNC(p.ENDDATE - SYSDATE) AS remainDays,
+		        p.PROGRESS,
+			        CASE
+			            WHEN p.ENDDATE &lt; TRUNC(SYSDATE) THEN '4'
+			            WHEN p.STARTDATE &lt;= TRUNC(SYSDATE) AND p.ENDDATE &gt;= TRUNC(SYSDATE) THEN '2'
+			            ELSE p.STATUS
+			        END AS status
+		    FROM PROJECT p
+		    JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
+		    JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
+		    WHERE ep.ROLE = 'M'
+				<if test="kwd != null and kwd != ''">
+				    AND <include refid="where-project"/>
+				</if>
+			ORDER BY PROJECTID DESC
+			OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+	</select>
+	
+	
+	<select id="dataCount" parameterType="map" resultType="Integer">
+	    SELECT NVL(COUNT(*), 0)
+	    FROM PROJECT p
+	    JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
+	    JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
+	    WHERE ep.ROLE = 'M'
+			<if test="kwd != null and kwd != ''">
+		 		AND <include refid="where-project"/>
+			</if>
+	</select>
 
+	<!-- 프로젝트 단건 조회 -->
+	<select id="projectarticle" parameterType="long" resultType="com.mvc.app.domain.dto.ProjectsDto">
+	    SELECT 
+	        p.PROJECTID, p.TITLE, p.PROJECTTYPE, p.PMOTYPE,
+	        p.DESCRIPTION,
+	        TO_CHAR(p.STARTDATE, 'YYYY/MM/DD') AS startDate,
+	        TO_CHAR(p.ENDDATE, 'YYYY/MM/DD') AS endDate,
+	        TRUNC(p.ENDDATE - SYSDATE) AS remainDays,
+	        p.PROGRESS, p.STATUS,
+	        e.NAME AS managerName
+	    FROM PROJECT p
+	    JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
+	    JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
+	    WHERE p.PROJECTID = #{projectId}
+	    AND ep.ROLE = 'M'
+	</select>
+	
+	<!-- 프로젝트 구성원 조회 -->
+	<select id="projectMembers" parameterType="long" resultType="map">
+	    SELECT 
+	        ep.EMPID, 
+	        e.NAME,
+	        ep.ROLE
+	    FROM EMPPROJECT ep
+	    JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
+	    WHERE ep.PROJECTID = #{projectId}
+	</select>
+
+	<select id="findById" parameterType="long" resultType="com.mvc.app.domain.dto.ProjectsDto">
+	    SELECT 
+	        p.PROJECTID, p.TITLE,
+	        p.DESCRIPTION,
+	        TO_CHAR(p.STARTDATE, 'YYYY/MM/DD') AS startDate,
+	        TO_CHAR(p.ENDDATE, 'YYYY/MM/DD') AS endDate,
+	        p.PROGRESS,
+	        e.NAME
+	    FROM PROJECT p
+	    JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
+	    JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
+	    WHERE p.PROJECTID = #{projectId}
+	    AND ep.ROLE = 'M'
 	</select>
 
 	<select id="findProjectsByEmpId" parameterType="string"
@@ -63,6 +169,5 @@
 		JOIN EMPPROJECT ep
 		ON p.projectId = ep.projectId
 		WHERE ep.empId = #{empId}
-
 	</select>
 </mapper>

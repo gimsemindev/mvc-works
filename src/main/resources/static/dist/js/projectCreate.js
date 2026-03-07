@@ -52,7 +52,7 @@
 	    // Step1: 프로젝트 타입 선택 여부
 	    if (step === 1) {
 	        const projectType = document.getElementById('projectType').value;
-	        const pmoType     = document.getElementById('pmoType').value;
+	        const pmoType = document.getElementById('pmoType').value;
 	        if (!projectType) {
 	            toast('프로젝트 타입을 선택해 주세요.');
 	            return false;
@@ -213,7 +213,7 @@
 
         // Step1
         const projectType = document.getElementById('projectType').value;
-        const pmoType = document.getElementById('pmoType').value;
+        const pmoType = isPersonal() ? 'S' : document.getElementById('pmoType').value;
         const personal = (projectType === 'I');
 
         // Step2
@@ -237,7 +237,11 @@
                 const roleInput = document.querySelector('.role-input[data-emp-id="' + empId + '"]');
                 return { empId: empId, role: roleInput ? roleInput.value : 'P' };
             });
-        }
+        } else {
+			// 개인일 때 → 본인 empId 가져와서 role: 'm' 강제 세팅
+			const myEmpId = document.getElementById('myEmpId').value; // 본인 empId hidden input
+			members = [{ empId: myEmpId, role: 'M' }];
+		}
 
         // Step4 - 단계 수집 + 유효성 검사
         const phaseCards = [...document.querySelectorAll('#phaseContainer .phase-card')];

@@ -1,6 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -29,49 +30,40 @@
             </ol>
         </div>
         <div class="card-header-project">
-            <h1 class="project-title">Duralux || CRM Applications & Admin Dashboard</h1>
-            
-            <div class="team-section">
-                <div class="team-label">
-                    <i class="fas fa-palette"></i> Design Team
-                </div>
-                <div class="member-list">
-                    <div class="member-chip">
-                        <img src="https://i.pravatar.cc/150?u=a" class="member-avatar"> Alice Cooper
-                    </div>
-                    <div class="member-chip">
-                        <img src="https://i.pravatar.cc/150?u=b" class="member-avatar"> Bob Dylan
-                    </div>
-                </div>
-            </div>
+            <h1 class="project-title">${dto.title}</h1>
 
             <div class="team-section">
                 <div class="team-label">
-                    <i class="fas fa-code"></i> Development Team
+                    <i class="fas fa-code"></i>Team Member
                 </div>
-                <div class="member-list">
-                    <div class="member-chip">
-                        <img src="https://i.pravatar.cc/150?u=c" class="member-avatar"> Sarah Jenkins
-                    </div>
-                    <div class="member-chip">
-                        <img src="https://i.pravatar.cc/150?u=d" class="member-avatar"> Mike Ross
-                    </div>
-                </div>
+				<div class="member-list">
+				    <c:forEach var="m" items="${members}">
+				            <div class="member-chip">
+				                <div class="member-avatar-text" data-empid="${m.EMPID}">
+				                    ${fn:substring(m.NAME, 0, 1)}
+				                </div>
+				                <span class="member-name text-dark">
+				                ${m.NAME}
+				                <c:if test="${m.ROLE eq 'M'}"></c:if>
+				                </span>
+				            </div>
+				    </c:forEach>
+				</div>
             </div>
         </div>
 
         <div class="card-progress">
             <div class="progress-header">
-                <div class="progress-label">Projects in Progress 
+                <div class="progress-label">Projects 진척률
                 	
                 </div>
-                <div class="progress-stats text-muted">16/25 Tasks Completed <span class="text-dark">(78%)</span></div>
+                <div class="progress-stats text-muted">16(진행완)/25(전체task) Tasks Completed <span class="text-dark">(${dto.progress}%)</span></div>
             </div>
 		    <div class="progress" style="cursor: pointer;" onclick="location.href='${pageContext.request.contextPath}/projects/ganttarticle'">
 		        <div class="progress-bar" role="progressbar" 
-		             style="width: 78%;" 
-		             aria-valuenow="78" aria-valuemin="0" aria-valuemax="100">
-		            78%
+		             style="width: ${dto.progress}%;" 
+		             aria-valuenow="${dto.progress}" aria-valuemin="0" aria-valuemax="100">
+		            ${dto.progress}%
 		        </div>
 		    </div>
 		</div>
@@ -81,24 +73,27 @@
                 <div class="details-title text-primary">
                     <i class="fas fa-info-circle"></i> Project Details
                 </div>
-                
-                <div class="info-group">
-                    <span class="info-label">Project Manager</span>
-                    <div class="manager-info">
-                        <img src="https://i.pravatar.cc/150?u=mgr" class="manager-avatar">
-                        <div>
-                            <div class="manager-name">Alex Rivers</div>
-                            <div class="manager-email">alex.rivers@duralux.com</div>
-                        </div>
-                    </div>
-                </div>
+
+				<div class="info-group">
+				    <span class="info-label">Project Manager</span>
+				    <div class="manager-info">
+				        <c:forEach var="m" items="${members}">
+				            <c:if test="${m.ROLE eq 'M'}"> <%-- ROLE이 M인 사람만 출력 --%>
+				                <div class="member-avatar-text" data-empid="${m.EMPID}">
+				                    ${fn:substring(m.NAME, 0, 1)}
+				                </div>
+				                <div>
+				                    <div class="manager-name">${m.NAME}</div>
+				                </div>
+				            </c:if>
+				        </c:forEach>
+				    </div>
+				</div>
 
                 <div class="info-group mb-0">
-                    <span class="info-label">Project Description</span>
+                    <span class="info-label">Project 설명</span>
                     <p class="description-text">
-                        This project focuses on building a modern CRM application integrated with a comprehensive admin dashboard. 
-                        Key features include client management, automated reporting, task scheduling, and real-time activity tracking. 
-                        The design priority is high usability for non-technical administrators while maintaining robust backend performance for data-heavy operations.
+                        ${dto.description}
                     </p>
                 </div>
             </div>
@@ -107,12 +102,12 @@
                 <div class="action-card">
                     <div class="action-icon"><i class="far fa-calendar-alt"></i></div>
                     <span class="action-label">Start Date</span>
-                    <span class="action-value">2023-02-25</span>
+                    <span class="action-value">${dto.startDate}</span>
                 </div>
                 <div class="action-card">
                     <div class="action-icon text-warning"><i class="far fa-calendar-check"></i></div>
                     <span class="action-label">End Date</span>
-                    <span class="action-value">2023-03-20</span>
+                    <span class="action-value">${dto.endDate}</span>
                 </div>
                 <div class="action-card">
                     <div class="action-icon text-success"><i class="fas fa-calendar-day"></i></div>
@@ -129,6 +124,19 @@
     </main>
 
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script type="text/javascript">
+document.querySelectorAll('.member-avatar-text').forEach(el => {
+    const empId = el.dataset.empid || '';
+    const colors = ['#4f86c6','#e07b54','#6abf69','#9b6db5','#e5a823','#3ab0b0','#d95f7f'];
+    const idx = empId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % colors.length;
+    el.style.background = colors[idx];
+    el.style.color = '#fff';
+    el.style.display = 'flex';
+    el.style.alignItems = 'center';
+    el.style.justifyContent = 'center';
+    el.style.fontWeight = '700';
+});
+</script>
+
 </body>
 </html>

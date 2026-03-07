@@ -330,6 +330,10 @@ body {
     background: #999;
 }
 
+
+.swal-over-modal {
+    z-index: 99999 !important;
+}
 /* 2단계 부서 섹션 */
 .dept-dropdown {
     display: none;

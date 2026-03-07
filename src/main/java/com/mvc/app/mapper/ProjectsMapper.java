@@ -16,14 +16,16 @@ public interface ProjectsMapper {
 
 	// 프로젝트 생성 시 구성원 조성 및 역할부여
 	public void insertProjectMembers(Map<String, Object> member) throws SQLException;
-
-	// 프로젝트 단계 설정
 	public void insertProjectStep(Map<String, Object> stage) throws SQLException;
-
 	public void insertProjectTask(ProjectsDto dto) throws SQLException;
-
-	public List<ProjectsDto> projectlist(Map<String, Object> map);
+	
+	public List<ProjectsDto> projectslist(Map<String, Object> map);
+	public int dataCount(Map<String, Object> map);	
+	public ProjectsDto findById(Long projectId);
+	public ProjectsDto projectarticle(long projectId);
+	public List<ProjectsDto> projectMembers(long projectId);
 
 	// 내가 참여한 프로젝트 조회
 	List<ProjectsDto> findProjectsByEmpId(@Param("empId") String empId);
+
 }

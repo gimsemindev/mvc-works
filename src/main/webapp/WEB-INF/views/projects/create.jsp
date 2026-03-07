@@ -63,6 +63,10 @@
 
             </div>
         </div>
+        <input type="hidden" id="myEmpId" value="${empId}">
+        <input type="hidden" id="myName" value="${empName}">
+        <input type="hidden" id="myDept" value="${empDept}">
+        <input type="hidden" id="myGrade" value="${empGrade}">
     </main>
 
 <script src="${pageContext.request.contextPath}/dist/js/projectEnter.js"></script>

@@ -55,8 +55,66 @@ public class ProjectServiceImpl implements ProjectService {
 
 	@Override
 	public List<ProjectsDto> projectslist(Map<String, Object> map) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		// 프로젝트 리스트
+		List<ProjectsDto> list = null;
+		try {
+			list = mapper.projectslist(map);
+			
+		} catch (Exception e) {
+			log.info("projectslist : ", e);
+		}
+		return list;
+	}
+	
+	@Override
+	public int dataCount(Map<String, Object> map) {
+		int result = 0;
+		
+		try {
+			result = mapper.dataCount(map);
+		} catch (Exception e) {
+			log.info("dataCount : ", e);
+		}
+		return result;
+	}
+	
+	@Override
+	public ProjectsDto projectarticle(long projectId) {
+		ProjectsDto dto = null;
+		
+		try {
+			dto = mapper.findById(projectId);
+		} catch (Exception e) {
+			log.info("projectarticle : ", e);
+		}
+		
+		return dto;
+	}
+	
+	
+	@Override
+	public List<ProjectsDto> projectMembers(long projectId) throws Exception {
+		List<ProjectsDto> list = null;
+		
+		try {
+			list = mapper.projectMembers(projectId);
+		} catch (Exception e) {
+			log.info("projectMembers : ", e);
+		}
+		return list;
+	}
+	
+	
+	@Override
+	public ProjectsDto findById(Long projectId) {
+		ProjectsDto dto = null;
+		
+		try {
+			dto = mapper.findById(projectId);
+		} catch (Exception e) {
+			log.info("findById : ", e);
+		}
+		return dto;
 	}
 	
 	@Override
@@ -68,4 +126,9 @@ public class ProjectServiceImpl implements ProjectService {
 			throw e;
 		}
 	}
+
+
+
+
+
 }

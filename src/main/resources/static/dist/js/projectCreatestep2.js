@@ -222,14 +222,17 @@ function toast (msg, icon = 'warning'){
 	    const grade = emp.grade || emp.GRADE || '';
 
 	    if (!empId) return;
+		
+		if (!window.__memberDataMap) window.__memberDataMap = {};
+		window.__memberDataMap[empId] = { name, dept, grade };
 
-	    // ★ 이미 추가된 멤버 재클릭 시 → 토글 제거
+	    // 이미 추가된 멤버 재클릭 시 → 토글 제거
 	    if (document.getElementById('badge_' + empId)) {
 	        removeBadge(empId);
 	        return;
 	    }
 
-	    // ★ 총 인원 초과 체크 + toast 알림
+	    // 총 인원 초과 체크 + toast 알림
 	    const maxInput     = document.querySelector('#step-panel-2 input[type="number"]');
 	    const maxCount     = maxInput ? parseInt(maxInput.value) || 0 : 0;
 	    const currentCount = document.querySelectorAll('#hiddenInputContainer input[name="memberIds"]').length;
@@ -309,3 +312,14 @@ function toast (msg, icon = 'warning'){
 	function confirmSelection() {
 	    bootstrap.Modal.getInstance(document.getElementById('memberSearchModal')).hide();
 	}
+	
+	// 생성자 자동 추가
+	document.addEventListener('DOMContentLoaded', function() {
+	    const myEmpId = document.getElementById('myEmpId').value;
+	    const myName  = document.getElementById('myName').value;
+	    const myDept  = document.getElementById('myDept').value;
+	    const myGrade = document.getElementById('myGrade').value;
+	    if (myEmpId) {
+	        addMemberBadge({ empId: myEmpId, name: myName, dept: myDept, grade: myGrade });
+	    }
+	});
