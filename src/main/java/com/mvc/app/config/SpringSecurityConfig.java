@@ -61,17 +61,19 @@ public class SpringSecurityConfig {
 
 		String[] excludeUri = { "/", "/member/login", "/member/logout",
 				"/member/expired", "/member/noAuthorized", "/dist/**",
-				"/favicon.ico", "/WEB-INF/views/**" };
+				"/favicon.ico", "/WEB-INF/views/**",
+				"/api/notifications/connect"};
 
 		http.cors(Customizer.withDefaults()) // CORS 설정 : 기본값 사용
 			.csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화
 			.requestCache(request -> request.requestCache(requestCache)); // 요청 캐시 설정, ?continue 제거
 
 		http.authorizeHttpRequests(authorize -> authorize
+			.dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ASYNC).permitAll()
 			.requestMatchers(excludeUri).permitAll()
 			.requestMatchers("/admin", "/admin/**").hasAnyRole("ADMIN")
-			.requestMatchers("/**").hasAnyRole("EMP", "ADMIN") // configurer 에서 ROLE_ 붙여줌
 			.requestMatchers("/api/notifications/**").authenticated()// 알림 처리 허용
+			.requestMatchers("/**").hasAnyRole("EMP", "ADMIN") // configurer 에서 ROLE_ 붙여줌
 			.anyRequest().authenticated() // 설정 외 모든 요청은 권한과 무관하고 로그인 유저만 사용
 		)
 		.formLogin(login -> login

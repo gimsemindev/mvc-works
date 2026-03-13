@@ -23,6 +23,11 @@ public class AjaxSessionTimeoutFilter implements Filter {
 		HttpServletRequest req = (HttpServletRequest) request;
 		HttpServletResponse resp = (HttpServletResponse) response;
 		
+		if (req.getDispatcherType() == jakarta.servlet.DispatcherType.ASYNC) {
+	        chain.doFilter(req, resp);
+	        return;
+	    }
+		
 		if(isAjaxRequest(req)) {
 			// AJAX  요청인 경우
 			try {
