@@ -50,6 +50,7 @@ public interface ApprovalDocMapper {
     // 보류
     public int holdDoc(Map<String, Object> map) throws SQLException;
     public void holdDocStatus(long docId) throws SQLException;
+    public void resumeDocStatus(long docId) throws SQLException;
 
     // 참조자 코멘트
     public int updateRefComment(Map<String, Object> map) throws SQLException;

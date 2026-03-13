@@ -857,3 +857,57 @@
 }
 .text-center { text-align: center; }
 .text-right { text-align: right; }
+
+/* ── 동행자 (FM002) ── */
+.btn-companion-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #f0f4ff;
+    color: #4e73df;
+    border: 1px dashed #4e73df;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+}
+.btn-companion-add:hover { background: #dde5ff; }
+
+.companion-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.companion-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #eef2ff;
+    color: #3b4f9e;
+    border: 1px solid #c7d2fe;
+    border-radius: 16px;
+    padding: 4px 10px 4px 12px;
+    font-size: 12px;
+    font-weight: 500;
+}
+.companion-tag small {
+    color: #6b7bb5;
+    font-weight: 400;
+}
+
+.companion-remove {
+    background: none;
+    border: none;
+    color: #9aa0b4;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 2px;
+    margin-left: 2px;
+    transition: color .12s;
+}
+.companion-remove:hover { color: #d93025; }

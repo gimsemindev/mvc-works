@@ -24,7 +24,8 @@
     background-color: #f9fafb;
     color: #344054;
 }
-.btn-expense-add, .btn-expense-remove {
+.btn-expense-add, .btn-expense-remove,
+.btn-companion-add, .companion-remove {
     display: none;
 }
 .ql-toolbar { display: none; }
@@ -54,14 +55,18 @@
     
     <template v-else-if="store.doc">
 
-        
-        <div class="page-header">
-            <span class="material-symbols-outlined">forward_to_inbox</span>
-            <span class="page-header-label">전자결재</span>
-            <span class="page-header-divider">›</span>
-            <span class="page-header-doc">{{ store.doc.typeName }}</span>
-        </div>
-
+	    <div class="page-header">
+	        <span class="material-symbols-outlined">forward_to_inbox</span>
+	        <span class="page-header-label">전자결재</span>
+	        <span class="page-header-divider">›</span>
+	        <span class="page-header-doc">{{ store.doc.typeName }}</span>
+	        <button class="btn-pdf"
+	                v-if="store.doc.docStatus !== 'DRAFT'"
+	                @click="openPdf">
+	            <span class="material-symbols-outlined" style="font-size:15px">picture_as_pdf</span>
+	            PDF 저장
+	        </button>
+	    </div>
         
         <div class="view-section">
             <div class="view-section-header">
@@ -225,7 +230,7 @@
                     <span class="material-symbols-outlined" style="font-size:15px">cancel</span>
                     반려
                 </button>
-                <button class="btn-hold" @click="openApproveModal('hold')">
+                <button v-if="store.doc.docStatus !== 'ON_HOLD'" class="btn-hold" @click="openApproveModal('hold')">
                     <span class="material-symbols-outlined" style="font-size:15px">pause_circle</span>
                     보류
                 </button>
@@ -281,7 +286,7 @@
 {
     "imports": {
         "http":              "/dist/util/http.js",
-        "approvalViewStore": "/dist/util/store/approvalViewStore.js?v=5",
+        "approvalViewStore": "/dist/util/store/approvalViewStore.js?v=7",
         "commonCodeStore":   "/dist/util/store/commonCodeStore.js"
     }
 }
@@ -350,6 +355,11 @@
 
             const goList = () => { location.href = ctx + '/approval/list'; };
 
+            const openPdf = () => {
+                window.open(ctx + '/approval/pdf?docId=' + docId, '_blank',
+                    'width=900,height=800,scrollbars=yes');
+            };
+
             const resubmit = () => {
                 location.href = ctx + '/approval/create?docId=' + docId;
             };
@@ -412,7 +422,7 @@
                 }
             });
 
-            return { store, codeStore, goList, download, cancelDoc, resubmit, currentEmpId,
+            return { store, codeStore, goList, download, cancelDoc, resubmit, openPdf, currentEmpId,
                      apprComment, modalType, modalTitle, modalBtnClass, refCommentText,
                      openApproveModal, processApproval, submitRefComment };
 

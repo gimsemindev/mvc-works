@@ -42,5 +42,9 @@ public class ApprovalController {
 	public String approvalNotice() {
 	    return "approval/notice";
 	}	    
-    
+
+	@GetMapping("pdf")
+	public String approvalPdf() {
+	    return "approval/approvalPdf";
+	}
 }

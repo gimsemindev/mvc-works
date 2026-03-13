@@ -8,18 +8,48 @@
                 <th class="cb-col">
                     <input type="checkbox" id="chkAll" title="전체선택">
                 </th>
-                <th>
+                <th @click="toggleSort('regDate')"
+                    :class="{ 'sort-active': store.sortField === 'regDate' }">
                     <span class="th-inner">
                         작성일
-                        <span class="material-symbols-outlined">unfold_more</span>
+                        <span class="material-symbols-outlined sort-icon">{{
+                            store.sortField === 'regDate'
+                                ? (store.sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward')
+                                : 'unfold_more'
+                        }}</span>
                     </span>
                 </th>
-                <th>결재 분류</th>
-                <th>제목</th>
-                <th>
+                <th @click="toggleSort('typeName')"
+                    :class="{ 'sort-active': store.sortField === 'typeName' }">
+                    <span class="th-inner">
+                        결재 분류
+                        <span class="material-symbols-outlined sort-icon">{{
+                            store.sortField === 'typeName'
+                                ? (store.sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward')
+                                : 'unfold_more'
+                        }}</span>
+                    </span>
+                </th>
+                <th @click="toggleSort('title')"
+                    :class="{ 'sort-active': store.sortField === 'title' }">
+                    <span class="th-inner">
+                        제목
+                        <span class="material-symbols-outlined sort-icon">{{
+                            store.sortField === 'title'
+                                ? (store.sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward')
+                                : 'unfold_more'
+                        }}</span>
+                    </span>
+                </th>
+                <th @click="toggleSort('writerEmpName')"
+                    :class="{ 'sort-active': store.sortField === 'writerEmpName' }">
                     <span class="th-inner">
                         작성자
-                        <span class="material-symbols-outlined">unfold_more</span>
+                        <span class="material-symbols-outlined sort-icon">{{
+                            store.sortField === 'writerEmpName'
+                                ? (store.sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward')
+                                : 'unfold_more'
+                        }}</span>
                     </span>
                 </th>
                 <th>결재 상태</th>

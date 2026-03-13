@@ -90,6 +90,14 @@
             @add="store.addReference($event)">
         </org-search-modal>
 
+        <!-- 동행자 검색 모달 (FM002 출장신청서용) -->
+        <org-search-modal
+            v-model:visible="companionModalVisible"
+            title="동행자 검색"
+            :added-emp-ids="companionEmpIds"
+            @add="store.addCompanion($event)">
+        </org-search-modal>
+
         <!-- 결재 작성 폼 -->
         <div class="approval-form-wrap" :class="{ active: store.formVisible }">
 
@@ -156,7 +164,7 @@
 {
 	"imports": {
 		"http": "/dist/util/http.js",
-		"approvalCreateStore": "/dist/util/store/approvalCreateStore.js",
+		"approvalCreateStore": "/dist/util/store/approvalCreateStore.js?v=3",
 		"OrgSearchModal": "/dist/util/component/OrgSearchModal.js",
         "commonCodeStore": "/dist/util/store/commonCodeStore.js"
 	}
@@ -190,6 +198,8 @@
             const referenceModalVisible = ref(false);
             const approverEmpIds = computed(() => store.approvers.map(a => a.empId));
             const referenceEmpIds = computed(() => store.references.map(r => r.empId));
+            const companionModalVisible = ref(false);
+            const companionEmpIds = computed(() => (store.detailData.companions || []).map(c => c.empId));
 
             // 템플릿 불러오기 모달
             const templateLoadModalVisible = ref(false);
@@ -256,6 +266,7 @@
       				store, codeStore, todayDate,
     				approverModalVisible, referenceModalVisible,
       				approverEmpIds, referenceEmpIds,
+                    companionModalVisible, companionEmpIds,
                     goList, saveTemplate,
                     templateLoadModalVisible, templateList,
                     openTemplateLoad, onLoadTemplate, onDeleteTemplate,

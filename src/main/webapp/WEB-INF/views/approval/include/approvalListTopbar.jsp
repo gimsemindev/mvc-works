@@ -37,9 +37,4 @@
         </button>
     </div>
 
-    <!-- 옵션 버튼 -->
-    <button class="btn-options">
-        <span class="material-symbols-outlined">tune</span>
-        옵션
-    </button>
 </div>

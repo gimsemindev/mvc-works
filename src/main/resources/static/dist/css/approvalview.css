@@ -294,3 +294,19 @@
     background: #e0ecff;
     color: #2563eb;
 }
+
+.btn-pdf {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #6c757d;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-pdf:hover { background: #5a6268; }

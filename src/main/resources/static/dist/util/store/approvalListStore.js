@@ -13,7 +13,10 @@ export const useApprovalListStore = defineStore('approvalList', {
         pageSize: 20,
         loading: false,
         pendingCount: 0,
-        unreadCount: 0
+        unreadCount: 0,
+        sortField: 'regDate',
+        sortOrder: 'desc',
+        statusFilter: ''
     }),
 
     getters: {
@@ -32,6 +35,9 @@ export const useApprovalListStore = defineStore('approvalList', {
                 if (this.endDate) params.append('endDate', this.endDate);
                 params.append('pageNo', this.pageNo);
                 params.append('pageSize', this.pageSize);
+                if (this.sortField) params.append('sortField', this.sortField);
+                if (this.sortOrder) params.append('sortOrder', this.sortOrder);
+                if (this.statusFilter) params.append('statusFilter', this.statusFilter);
 
 				const urlMap = {
 				    draft: '/approval/doc',
@@ -67,6 +73,17 @@ export const useApprovalListStore = defineStore('approvalList', {
 
         changePageSize(size) {
             this.pageSize = size;
+            this.pageNo = 1;
+            this.fetchList();
+        },
+
+        toggleSort(field) {
+            if (this.sortField === field) {
+                this.sortOrder = this.sortOrder === 'asc' ? 'desc' : 'asc';
+            } else {
+                this.sortField = field;
+                this.sortOrder = 'desc';
+            }
             this.pageNo = 1;
             this.fetchList();
         },

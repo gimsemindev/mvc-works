@@ -234,6 +234,10 @@
 }
 .approval-table thead th.cb-col { width: 40px; text-align: center; }
 
+/* 정렬 활성 헤더 */
+.approval-table thead th.sort-active { color: #4e73df; }
+.approval-table thead th.sort-active .sort-icon { color: #4e73df; }
+
 .approval-table tbody tr {
     border-bottom: 1px solid #f0f2f9;
     transition: background .12s;

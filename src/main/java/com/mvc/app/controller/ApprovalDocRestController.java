@@ -60,6 +60,9 @@ public class ApprovalDocRestController {
             @RequestParam(name = "keyword", required = false) String keyword,
             @RequestParam(name = "startDate", required = false) String startDate,
             @RequestParam(name = "endDate", required = false) String endDate,
+            @RequestParam(name = "sortField", required = false) String sortField,
+            @RequestParam(name = "sortOrder", required = false) String sortOrder,
+            @RequestParam(name = "statusFilter", required = false) String statusFilter,
             @RequestParam(name = "pageNo", defaultValue = "1") int pageNo,
             @RequestParam(name = "pageSize", defaultValue = "20") int pageSize) {
         try {
@@ -69,6 +72,9 @@ public class ApprovalDocRestController {
             map.put("keyword", keyword);
             map.put("startDate", startDate);
             map.put("endDate", endDate);
+            map.put("sortField", sortField);
+            map.put("sortOrder", sortOrder);
+            map.put("statusFilter", statusFilter);
             map.put("pageSize", pageSize);
             map.put("offset", (pageNo - 1) * pageSize);
 
@@ -86,6 +92,9 @@ public class ApprovalDocRestController {
             @RequestParam(name = "keyword", required = false) String keyword,
             @RequestParam(name = "startDate", required = false) String startDate,
             @RequestParam(name = "endDate", required = false) String endDate,
+            @RequestParam(name = "sortField", required = false) String sortField,
+            @RequestParam(name = "sortOrder", required = false) String sortOrder,
+            @RequestParam(name = "statusFilter", required = false) String statusFilter,
             @RequestParam(name = "pageNo", defaultValue = "1") int pageNo,
             @RequestParam(name = "pageSize", defaultValue = "20") int pageSize) {
         try {
@@ -95,6 +104,9 @@ public class ApprovalDocRestController {
             map.put("keyword", keyword);
             map.put("startDate", startDate);
             map.put("endDate", endDate);
+            map.put("sortField", sortField);
+            map.put("sortOrder", sortOrder);
+            map.put("statusFilter", statusFilter);
             map.put("pageSize", pageSize);
             map.put("offset", (pageNo - 1) * pageSize);
             return ResponseEntity.ok(service.listSent(map));
@@ -110,6 +122,9 @@ public class ApprovalDocRestController {
             @RequestParam(name = "keyword", required = false) String keyword,
             @RequestParam(name = "startDate", required = false) String startDate,
             @RequestParam(name = "endDate", required = false) String endDate,
+            @RequestParam(name = "sortField", required = false) String sortField,
+            @RequestParam(name = "sortOrder", required = false) String sortOrder,
+            @RequestParam(name = "statusFilter", required = false) String statusFilter,
             @RequestParam(name = "pageNo", defaultValue = "1") int pageNo,
             @RequestParam(name = "pageSize", defaultValue = "20") int pageSize) {
         try {
@@ -119,6 +134,9 @@ public class ApprovalDocRestController {
             map.put("keyword", keyword);
             map.put("startDate", startDate);
             map.put("endDate", endDate);
+            map.put("sortField", sortField);
+            map.put("sortOrder", sortOrder);
+            map.put("statusFilter", statusFilter);
             map.put("pageSize", pageSize);
             map.put("offset", (pageNo - 1) * pageSize);
             return ResponseEntity.ok(service.listInbox(map));
@@ -133,6 +151,9 @@ public class ApprovalDocRestController {
             @RequestParam(name = "keyword",   required = false) String keyword,
             @RequestParam(name = "startDate", required = false) String startDate,
             @RequestParam(name = "endDate",   required = false) String endDate,
+            @RequestParam(name = "sortField", required = false) String sortField,
+            @RequestParam(name = "sortOrder", required = false) String sortOrder,
+            @RequestParam(name = "statusFilter", required = false) String statusFilter,
             @RequestParam(name = "pageNo",    defaultValue = "1")  int pageNo,
             @RequestParam(name = "pageSize",  defaultValue = "20") int pageSize) {
         try {
@@ -142,6 +163,9 @@ public class ApprovalDocRestController {
             map.put("keyword",   keyword);
             map.put("startDate", startDate);
             map.put("endDate",   endDate);
+            map.put("sortField", sortField);
+            map.put("sortOrder", sortOrder);
+            map.put("statusFilter", statusFilter);
             map.put("pageSize",  pageSize);
             map.put("offset",    (pageNo - 1) * pageSize);
             return ResponseEntity.ok(service.listRef(map));
@@ -156,6 +180,9 @@ public class ApprovalDocRestController {
             @RequestParam(name = "keyword",   required = false) String keyword,
             @RequestParam(name = "startDate", required = false) String startDate,
             @RequestParam(name = "endDate",   required = false) String endDate,
+            @RequestParam(name = "sortField", required = false) String sortField,
+            @RequestParam(name = "sortOrder", required = false) String sortOrder,
+            @RequestParam(name = "statusFilter", required = false) String statusFilter,
             @RequestParam(name = "pageNo",    defaultValue = "1")  int pageNo,
             @RequestParam(name = "pageSize",  defaultValue = "20") int pageSize) {
         try {
@@ -165,6 +192,9 @@ public class ApprovalDocRestController {
             map.put("keyword",   keyword);
             map.put("startDate", startDate);
             map.put("endDate",   endDate);
+            map.put("sortField", sortField);
+            map.put("sortOrder", sortOrder);
+            map.put("statusFilter", statusFilter);
             map.put("pageSize",  pageSize);
             map.put("offset",    (pageNo - 1) * pageSize);
             return ResponseEntity.ok(service.listAll(map));
@@ -278,6 +308,9 @@ public class ApprovalDocRestController {
             @RequestParam(name = "keyword", required = false) String keyword,
             @RequestParam(name = "startDate", required = false) String startDate,
             @RequestParam(name = "endDate", required = false) String endDate,
+            @RequestParam(name = "sortField", required = false) String sortField,
+            @RequestParam(name = "sortOrder", required = false) String sortOrder,
+            @RequestParam(name = "statusFilter", required = false) String statusFilter,
             @RequestParam(name = "pageNo", defaultValue = "1") int pageNo,
             @RequestParam(name = "pageSize", defaultValue = "20") int pageSize) {
         try {
@@ -287,6 +320,9 @@ public class ApprovalDocRestController {
             map.put("keyword", keyword);
             map.put("startDate", startDate);
             map.put("endDate", endDate);
+            map.put("sortField", sortField);
+            map.put("sortOrder", sortOrder);
+            map.put("statusFilter", statusFilter);
             map.put("pageSize", pageSize);
             map.put("offset", (pageNo - 1) * pageSize);
             return ResponseEntity.ok(service.listPendingInbox(map));
@@ -302,6 +338,9 @@ public class ApprovalDocRestController {
             @RequestParam(name = "keyword", required = false) String keyword,
             @RequestParam(name = "startDate", required = false) String startDate,
             @RequestParam(name = "endDate", required = false) String endDate,
+            @RequestParam(name = "sortField", required = false) String sortField,
+            @RequestParam(name = "sortOrder", required = false) String sortOrder,
+            @RequestParam(name = "statusFilter", required = false) String statusFilter,
             @RequestParam(name = "pageNo", defaultValue = "1") int pageNo,
             @RequestParam(name = "pageSize", defaultValue = "20") int pageSize) {
         try {
@@ -311,6 +350,9 @@ public class ApprovalDocRestController {
             map.put("keyword", keyword);
             map.put("startDate", startDate);
             map.put("endDate", endDate);
+            map.put("sortField", sortField);
+            map.put("sortOrder", sortOrder);
+            map.put("statusFilter", statusFilter);
             map.put("pageSize", pageSize);
             map.put("offset", (pageNo - 1) * pageSize);
             return ResponseEntity.ok(service.listUnreadRef(map));

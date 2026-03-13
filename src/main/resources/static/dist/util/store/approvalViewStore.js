@@ -32,6 +32,7 @@ export const useApprovalViewStore = defineStore('approvalView', {
                     try {
                         const parsed = JSON.parse(this.doc.detailData);
                         this.detailData  = parsed.detailData  || parsed || {};
+                        this.detailData.companions = this.detailData.companions || [];
                         this.expenseRows = parsed.expenseRows || [];
                     } catch(e) {
                         console.warn('detailData 파싱 실패:', e);
@@ -190,8 +191,21 @@ export const useApprovalViewStore = defineStore('approvalView', {
 		// 현재 결재 순서인 결재자인지 (대결자 포함)
 		isCurrentApprover: (state) => {
 		    return (empId) => {
-		        if (!state.doc || state.doc.docStatus !== 'PENDING') return false;
+		        if (!state.doc) return false;
 		        const lines = state.doc.lines || [];
+
+		        // ON_HOLD: 보류 처리한 본인만 처리 가능
+		        if (state.doc.docStatus === 'ON_HOLD') {
+		            const holdLine = lines.find(l => l.apprStatus === 'HOLD');
+		            if (!holdLine) return false;
+		            if (holdLine.apprEmpId === empId) return true;
+		            // 대결자가 보류했을 경우
+		            if (holdLine.isDeputy === 'Y' && holdLine.deputyEmpId === empId) return true;
+		            return false;
+		        }
+
+		        // PENDING: 기존 로직
+		        if (state.doc.docStatus !== 'PENDING') return false;
 		        const waitLines = lines.filter(l => l.apprStatus === 'WAIT');
 		        if (waitLines.length === 0) return false;
 		        const minStep = Math.min(...waitLines.map(l => l.stepOrder));

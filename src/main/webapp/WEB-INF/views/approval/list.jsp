@@ -9,7 +9,7 @@
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/approvallist.css?v=2" type="text/css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/approvallist.css?v=3" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/paginate.css" type="text/css">
 <meta name="ctx" content="${pageContext.request.contextPath}">
 <style>[v-cloak] { display: none; }</style>
@@ -38,7 +38,7 @@
 {
     "imports": {
         "http": "/dist/util/http.js?v=2",
-        "approvalListStore": "/dist/util/store/approvalListStore.js?v=2",
+        "approvalListStore": "/dist/util/store/approvalListStore.js?v=4",
         "commonCodeStore": "/dist/util/store/commonCodeStore.js"
     }
 }
@@ -92,11 +92,20 @@
       						await codeStore.fetchCodes('DOCSTATUS');
       						const params = new URLSearchParams(location.search);
       						store.filterType = params.get('type') || 'all';
+
+      						// 기간 검색 기본값: 오늘 ~ 1개월 전
+      						const today = new Date();
+      						const monthAgo = new Date();
+      						monthAgo.setMonth(monthAgo.getMonth() - 1);
+      						store.endDate = today.toISOString().slice(0, 10);
+      						store.startDate = monthAgo.toISOString().slice(0, 10);
+
       						store.fetchList();
       						store.fetchBadgeCounts();
       						});
 
-            return { store, codeStore, ctx, goCreate, goDoc, statusClass, statusText };
+            const toggleSort = (field) => store.toggleSort(field);
+            return { store, codeStore, ctx, goCreate, goDoc, statusClass, statusText, toggleSort };
         }
     });
 

@@ -14,10 +14,17 @@
                 <input type="text" placeholder="출장 목적을 입력하세요." v-model="store.detailData.biztripPurpose">
             </div>
             <div class="form-field">
-                <label>출장 동행 <span style="font-size:10px;color:#9aa0b4;">ⓘ</span></label>
-				<select v-model="store.detailData.biztripCompanion">
-      				<option value="">선택</option>
-				</select>
+                <label>동행자</label>
+                <button v-if="typeof companionModalVisible !== 'undefined'" type="button" class="btn-companion-add" @click="companionModalVisible = true">
+                    <span class="material-symbols-outlined" style="font-size:16px;">person_add</span> 동행자 추가
+                </button>
+                <div class="companion-tags" v-if="store.detailData.companions && store.detailData.companions.length > 0">
+                    <span class="companion-tag" v-for="(c, idx) in store.detailData.companions" :key="c.empId">
+                        {{ c.name }} <small>({{ c.dept }} {{ c.grade }})</small>
+                        <button type="button" class="companion-remove" @click="store.removeCompanion(idx)">&times;</button>
+                    </span>
+                </div>
+                <div v-else style="font-size:13px; color:#9aa0b4; margin-top:4px;">동행자 없음</div>
             </div>
             <div class="form-field">
                 <label>출장 시작일</label>

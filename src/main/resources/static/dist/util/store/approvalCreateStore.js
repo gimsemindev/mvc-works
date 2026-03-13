@@ -31,9 +31,9 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 		leaveTotalDays: 0,
 		// FM002 출장
 		biztripPurpose: '',
-		biztripCompanion: '',
 		biztripStartDate: '',
 		biztripEndDate: '',
+		companions: [],
 		// FM003 지출
 		expensePurpose: '',
 		expensePayMethod: '',
@@ -148,6 +148,20 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
             if (fromIdx === toIdx) return;
             const [moved] = this.approvers.splice(fromIdx, 1);
             this.approvers.splice(toIdx, 0, moved);
+        },
+
+        // ── 동행자 (FM002) ──
+        addCompanion(emp) {
+            if (!this.detailData.companions.some(c => c.empId === emp.empId)) {
+                this.detailData.companions.push({
+                    empId: emp.empId, name: emp.name,
+                    dept: emp.dept || '', grade: emp.grade || ''
+                });
+            }
+        },
+
+        removeCompanion(idx) {
+            this.detailData.companions.splice(idx, 1);
         },
 
         // ── 참조자 ──
@@ -296,7 +310,7 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 				    detail.description = this.detailData.description;
 				} else if (this.selectedFormCode === 'FM002') {
 				    detail.biztripPurpose = this.detailData.biztripPurpose;
-				    detail.biztripCompanion = this.detailData.biztripCompanion;
+				    detail.companions = this.detailData.companions || [];
 				    detail.biztripStartDate = this.detailData.biztripStartDate;
 				    detail.biztripEndDate = this.detailData.biztripEndDate;
 				    detail.description = this.detailData.description;
@@ -376,6 +390,20 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 		        alert('결재자를 1명 이상 추가해 주세요.');
 		        return false;
 		    }
+		    if (this.selectedFormCode === 'FM002') {
+		        if (!this.detailData.biztripStartDate) {
+		            alert('출장 시작일을 입력해 주세요.');
+		            return false;
+		        }
+		        if (!this.detailData.biztripEndDate) {
+		            alert('출장 종료일을 입력해 주세요.');
+		            return false;
+		        }
+		        if (this.detailData.biztripStartDate > this.detailData.biztripEndDate) {
+		            alert('출장 시작일이 종료일보다 클 수 없습니다.');
+		            return false;
+		        }
+		    }
 		    if (!confirm('결재를 상신하시겠습니까?')) return false;
 
 		    try {
@@ -391,7 +419,7 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 		            detail.description = this.detailData.description;
 		        } else if (this.selectedFormCode === 'FM002') {
 		            detail.biztripPurpose = this.detailData.biztripPurpose;
-		            detail.biztripCompanion = this.detailData.biztripCompanion;
+		            detail.companions = this.detailData.companions || [];
 		            detail.biztripStartDate = this.detailData.biztripStartDate;
 		            detail.biztripEndDate = this.detailData.biztripEndDate;
 		            detail.description = this.detailData.description;

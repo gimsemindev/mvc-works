@@ -175,10 +175,12 @@ public class ApprovalDocServiceImpl implements ApprovalDocService {
             if (cnt == 0) return false;
         }
 
-        // 남은 WAIT가 0이면 최종 승인
+        // 남은 WAIT가 0이면 최종 승인, 아니면 PENDING 복원 (ON_HOLD → PENDING)
         int remaining = mapper.countRemainingWait(docId);
         if (remaining == 0) {
             mapper.completeDoc(docId);
+        } else {
+            mapper.resumeDocStatus(docId);
         }
         
         ApprovalDocDto doc = mapper.getDoc(docId);
