@@ -17,8 +17,9 @@ public interface TaskMapper {
 	// emp task 생성
 	public void insertEmpTask(ProjectsDto dto) throws SQLException;
 	
-	// task 차트 수정(시작일, 종료일, 상태, 담당자)
+	// task 차트 수정(시작일, 종료일, 상태)
 	public void updateProjectTask(ProjectsDto dto) throws SQLException;
+	public void updateProjectEmp(ProjectsDto dto) throws SQLException;
 	
 	// 히스토리로 인한 삭제 불가로 수정만 진행. 상태 중단으로 고정.
 	public void cancelProjectTask(String taskId) throws SQLException;

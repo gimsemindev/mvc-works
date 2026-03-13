@@ -47,11 +47,11 @@
                     </div>
                     <button type="submit" class="btn btn-primary">검색</button>
                     <button type="button" class="btn btn-secondary"
-                        onclick="location.href='${pageContext.request.contextPath}/projects/task'">↺</button>
+                        onclick="location.href='${pageContext.request.contextPath}/projects/task?projectId=${projectId}'">↺</button>
                 </form>
 
                 <button type="button" class="btn-icon btn-add" onclick="openTaskModal()"><i class="fas fa-plus"></i></button>
-                <button type="button" class="btn-icon btn-edit"><i class="fas fa-pencil-alt"></i></button>
+                <button type="button" class="btn-icon btn-edit" id="editBtn" onclick="toggleEditMode()"><i class="fas fa-check"></i></button>
                 <button type="button" class="btn-icon btn-delete"><i class="fas fa-trash-alt"></i></button>
             </div>
         </div>
@@ -106,14 +106,14 @@
 						                </td>
 						                
 						             	<td>
-						                    <select class="cell-select" onchange="updateTask('${t.taskId}', 'assignee', this.value)">
-						                        <option value="">담당자</option>	                        						                        
-											        <c:forEach var="m" items="${members}">
-												        <option value="${m.EMPID}">
-												            ${m.NAME} (${m.ROLE == 'M' ? '매니저' : m.ROLE == 'D' ? '디자이너' : '개발자'})
-												        </option>
-												    </c:forEach>
-						                    </select>
+										<select class="cell-select" onchange="updateTask('${t.taskId}', 'assignee', this.value)">
+										    <option value="">담당자</option>
+										    <c:forEach var="m" items="${members}">
+										        <option value="${m.empId}" ${m.name == t.name ? 'selected' : ''}>
+										            ${m.name} (${m.role == 'M' ? '매니저' : m.role == 'D' ? '디자이너' : '개발자'})
+										        </option>
+										    </c:forEach>
+										</select>
 						                </td>
 						            </tr>
 						            </c:forEach>
@@ -187,8 +187,8 @@
 							<select id="modalMember">
 							    <option value="">담당자 선택</option>
 							    <c:forEach var="m" items="${members}">
-							        <option value="${m.EMPID}">
-							            ${m.NAME} (${m.ROLE == 'M' ? '매니저' : m.ROLE == 'D' ? '디자이너' : '개발자'})
+							        <option value="${m.empId}">
+							            ${m.name} (${m.role == 'M' ? '매니저' : m.role == 'D' ? '디자이너' : '개발자'})
 							        </option>
 							    </c:forEach>
 							</select>

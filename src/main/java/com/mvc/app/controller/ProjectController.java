@@ -306,6 +306,22 @@ public class ProjectController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		}
 	}
+	
+	@PostMapping("task/update")
+	@ResponseBody
+	public ResponseEntity<?> updateTask(@RequestBody List<ProjectsDto> list, HttpServletRequest req) throws Exception {
+		try {
+			
+			for(ProjectsDto dto : list) {
+				taskService.updateProjectTask(dto);
+			}
+			return ResponseEntity.ok().build();
+			
+		} catch (Exception e) {
+			log.info("updateTask : ", e);
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		}
+	}
 
 	@GetMapping("ganttarticle")
 	public String projectganttarticle() {

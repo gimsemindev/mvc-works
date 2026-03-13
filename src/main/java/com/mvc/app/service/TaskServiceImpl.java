@@ -89,11 +89,17 @@ public class TaskServiceImpl implements TaskService{
 
 	@Override
 	public void updateProjectTask(ProjectsDto dto) throws Exception {
-		// TODO Auto-generated method stub
+		try {
+			mapper.updateProjectTask(dto);
+			if(dto.getEmpId() != null && !dto.getEmpId().isEmpty()) {
+				mapper.updateProjectEmp(dto);
+			}
+		} catch (Exception e) {
+			log.info("updateProjectTask : ", e);
+			throw e;
+		}
 		
 	}
-
-
 
 
 	@Override

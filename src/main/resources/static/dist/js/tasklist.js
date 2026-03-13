@@ -190,3 +190,68 @@ function submitTask() {
         toast('서버 오류가 발생했습니다.');
     });
 }
+
+let editMode = false;
+
+function toggleEditMode() {
+    editMode = !editMode;
+    const btn = document.getElementById('editBtn');
+
+    if (editMode) {
+        // 편집모드 ON
+        btn.innerHTML = '<i class="fas fa-check"></i>';
+        btn.style.background = '#28a745';
+        toast('편집 모드가 활성화되었습니다.');
+    } else {
+        // 완료 클릭 → 전송
+        submitUpdate();
+    }
+}
+
+function submitUpdate() {
+    const rows = document.querySelectorAll('#taskTableBody tr[data-task-id]');
+    const updates = [];
+
+    rows.forEach(row => {
+        const taskId    = row.dataset.taskId;
+        const dates     = row.querySelectorAll('.cell-date');
+        const startDate = dates[0].value;
+        const endDate   = dates[1].value;
+        const status    = row.querySelector('.status-cell').value;
+        const empId     = row.querySelector('.cell-select:not(.status-cell)').value;
+
+        // 콘솔로 값 확인
+        console.log('taskId:', taskId, 'start:', startDate, 'end:', endDate, 'status:', status, 'empId:', empId);
+
+        updates.push({ 
+            taskId, 
+            taskStartDate: startDate, 
+            taskEndDate: endDate, 
+            taskStatus: status, 
+            empId: empId 
+        });
+    });
+
+    console.log('전송 데이터:', JSON.stringify(updates)); // 전송 전 최종 확인
+
+    fetch(contextPath + '/projects/task/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+    })
+    .then(res => {
+        if (res.ok) {
+            toast('저장되었습니다.');
+            const btn = document.getElementById('editBtn');
+            btn.innerHTML = '<i class="fas fa-pencil-alt"></i>';
+            btn.style.background = '';
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            toast('저장 실패. 다시 시도해주세요.');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        toast('서버 오류가 발생했습니다.');
+    });
+}
