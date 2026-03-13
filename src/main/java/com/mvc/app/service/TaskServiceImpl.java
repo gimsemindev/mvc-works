@@ -17,26 +17,27 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class TaskServiceImpl implements TaskService{
 	private final TaskMapper mapper;
-	
-	
+
 	@Override
 	public void insertProjectTask(ProjectsDto dto) throws ExportException {
+		// task 생성
 		try {
-			mapper.insertProjectTask(dto);
-			if (dto.getEmpId() != null && !dto.getEmpId().isEmpty()) {
-				mapper.insertEmpTask(dto);
+			if(dto.getStageId() == null && dto.getStgTitle() != null && !dto.getStgTitle().isEmpty()) {
+				mapper.insertNewStage(dto);				
 			}
+			
+			mapper.insertProjectTask(dto);
+			
+			//if (dto.getEmpId() != null && !dto.getEmpId().isEmpty()) {
+				mapper.insertEmpTask(dto);
+			//}
 		} catch (Exception e) {
 			log.info("insertProjectTask : ", e);
 		}
 	}
 	
 
-	@Override
-	public void updateProjectTask(ProjectsDto dto) throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
+
 
 	@Override
 	public void cancelProjectTask(String taskId) throws Exception {
@@ -83,6 +84,29 @@ public class TaskServiceImpl implements TaskService{
 		}
 		
 		return list;
+	}
+
+
+	@Override
+	public void updateProjectTask(ProjectsDto dto) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+
+	@Override
+	public int taskDataCount(Map<String, Object> map) throws Exception {
+		int result = 0;
+		
+		try {
+			result = mapper.taskDataCount(map);
+		} catch (Exception e) {
+			log.info("taskDataCount : ", e);
+		}
+		
+		return result;
 	}
 
 

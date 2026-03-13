@@ -125,8 +125,6 @@ body {
 /* [1] 프로젝트 리스트 테이블 스타일 */
 .table-wrapper {
     background: #fff;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
     overflow: hidden;
 }
 

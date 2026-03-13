@@ -12,9 +12,10 @@ public interface TaskService {
 	public void updateProjectTask(ProjectsDto dto) throws Exception;
 	public void cancelProjectTask(String taskId) throws Exception;
 	
-	
 	List<ProjectsDto> findStagesByProjectId(long projectId) throws Exception;
 	
 	List<Map<String,Object>> findByEmpId(String empId) throws Exception;
-	public List<ProjectsDto> tasklist(Map<String, Object> map);	
+	public List<ProjectsDto> tasklist(Map<String, Object> map);
+	
+	public int taskDataCount(Map<String, Object> map) throws Exception;
 }

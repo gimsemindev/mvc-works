@@ -67,7 +67,7 @@ public class ProjectsDto {
 	private String taskCreator;
 	
 	// 개인업무(emptask)
-	private String empempTaskId;
+	private String empTaskId;
 	private String empTaskStartDate;
 	private String empTaskEndDate;
 	private String empTaskStatus;	

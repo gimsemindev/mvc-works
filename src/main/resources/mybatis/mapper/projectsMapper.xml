@@ -4,8 +4,7 @@
 <mapper namespace="com.mvc.app.mapper.ProjectsMapper">
 
 	<!-- 프로젝트 생성 -->
-	<insert id="insertProject"
-		parameterType="com.mvc.app.domain.dto.ProjectsDto">
+	<insert id="insertProject" parameterType="com.mvc.app.domain.dto.ProjectsDto">
 		<selectKey keyProperty="projectId" resultType="long"
 			order="BEFORE">
 			SELECT PROJECTS_SEQ .NEXTVAL FROM DUAL
@@ -271,9 +270,7 @@ FROM JSON_TABLE(
 		p.PROGRESS
 	</select>
 
-	<select id="findProjectsByEmpId" parameterType="string"
-		resultType="com.mvc.app.domain.dto.ProjectsDto">
-
+	<select id="findProjectsByEmpId" parameterType="string" resultType="com.mvc.app.domain.dto.ProjectsDto">
 		SELECT p.*
 		FROM PROJECT p
 		JOIN EMPPROJECT ep

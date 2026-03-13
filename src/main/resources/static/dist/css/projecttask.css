@@ -294,7 +294,6 @@ body {
 .task-list-side {
     width: 800px; /* 너비 고정 */
     flex-shrink: 0;
-    border-right: 1px solid var(--border-color);
 }
 
 .task-table {

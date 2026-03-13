@@ -23,6 +23,10 @@ public interface TaskMapper {
 	// 히스토리로 인한 삭제 불가로 수정만 진행. 상태 중단으로 고정.
 	public void cancelProjectTask(String taskId) throws SQLException;
 	
+	public void insertNewStage(ProjectsDto dto) throws SQLException;
+	
+	public int taskDataCount(Map<String, Object> map) throws SQLException;
+	
 	List<ProjectsDto> findStagesByProjectId(long projectId) throws SQLException;
 	
 

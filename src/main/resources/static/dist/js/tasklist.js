@@ -1,6 +1,4 @@
-// ═══════════════════════════════════════════
 // SweetAlert2 유틸
-// ═══════════════════════════════════════════
 const toast = (msg) => {
     Swal.fire({
         html: `<div style="font-size:0.95rem; font-weight:500; margin-top:10px;">${msg}</div>`,
@@ -29,9 +27,8 @@ const ask = (msg, callback) => {
     });
 };
 
-// ═══════════════════════════════════════════
+
 // 간트 차트 렌더링
-// ═══════════════════════════════════════════
 (function () {
     const grid = document.getElementById('ganttGrid');
     const rows = document.querySelectorAll('#taskTableBody tr[data-task-id]');
@@ -101,9 +98,9 @@ const ask = (msg, callback) => {
     grid.style.gridTemplateColumns = 'repeat(' + daysInMonth + ', ' + CELL_W + 'px)';
 })();
 
-// ═══════════════════════════════════════════
+
 // 모달 열기 / 닫기
-// ═══════════════════════════════════════════
+
 function openTaskModal() {
     document.getElementById('taskModal').style.display = 'flex';
 }
@@ -120,9 +117,8 @@ function closeTaskModal() {
     document.getElementById('modalTaskDesc').value     = '';
 }
 
-// ═══════════════════════════════════════════
+
 // 이벤트 바인딩
-// ═══════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', function () {
 
     // 오버레이 클릭 시 닫기
@@ -140,27 +136,27 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// ═══════════════════════════════════════════
+
 // 태스크 등록
-// ═══════════════════════════════════════════
 function submitTask() {
-    let stageId       = document.getElementById('modalStageId').value;
+    let stageId = document.getElementById('modalStageId').value;
     const directStage = document.getElementById('modalDirectStage').value.trim();
-    const taskTitle   = document.getElementById('modalTaskTitle').value.trim();
-    const startDate   = document.getElementById('modalStartDate').value;
-    const endDate     = document.getElementById('modalEndDate').value;
-    const taskDesc    = document.getElementById('modalTaskDesc').value.trim();
-    const empId       = document.getElementById('modalMember').value;
-    const projectId   = document.getElementById('hiddenProjectId').value;
+    const taskTitle = document.getElementById('modalTaskTitle').value.trim();
+    const startDate = document.getElementById('modalStartDate').value;
+    const endDate = document.getElementById('modalEndDate').value;
+    const taskDesc = document.getElementById('modalTaskDesc').value.trim();
+    const empId = document.getElementById('modalMember').value;
+    const projectId = document.getElementById('hiddenProjectId').value;
+	const isDirect = stageId === 'direct';
 
     // 유효성 검사
-    if (!stageId)                             { toast('단계를 선택해주세요.'); return; }
+    if (!stageId) { toast('단계를 선택해주세요.'); return; }
     if (stageId === 'direct' && !directStage) { toast('단계명을 입력해주세요.'); return; }
-    if (!empId)                               { toast('담당자를 선택해주세요.'); return; }
-    if (!taskTitle)                           { toast('태스크명을 입력해주세요.'); return; }
-    if (!startDate)                           { toast('시작일을 입력해주세요.'); return; }
-    if (!endDate)                             { toast('종료일을 입력해주세요.'); return; }
-    if (endDate < startDate)                  { toast('종료일은 시작일보다 빠를 수 없습니다.'); return; }
+    if (!empId) { toast('담당자를 선택해주세요.'); return; }
+    if (!taskTitle) { toast('태스크명을 입력해주세요.'); return; }
+    if (!startDate) { toast('시작일을 입력해주세요.'); return; }
+    if (!endDate) { toast('종료일을 입력해주세요.'); return; }
+    if (endDate < startDate) { toast('종료일은 시작일보다 빠를 수 없습니다.'); return; }
 
     if (stageId === 'direct') stageId = null;
 
@@ -168,13 +164,13 @@ function submitTask() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            projectId:       projectId,
-            stageId:         stageId,
-            stgTitle:        stageId === null ? directStage : null,
-            empId:           empId,
-            taskTitle:       taskTitle,
-            taskStartDate:   startDate,
-            taskEndDate:     endDate,
+            projectId: projectId,
+            stageId: isDirect ? null : stageId,
+            stgTitle: isDirect ? directStage : null,
+            empId: empId,
+            taskTitle: taskTitle,
+            taskStartDate: startDate,
+            taskEndDate: endDate,
             taskDescription: taskDesc
         })
     })

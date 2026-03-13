@@ -49,7 +49,7 @@ public class ProjectController {
 			Model model) throws Exception {
 
 		try {
-			int size = 6;
+			int size = 10;
 			int total_page = 0;
 
 			kwd = myUtil.decodeUrl(kwd);
@@ -161,7 +161,7 @@ public class ProjectController {
 			@RequestParam(name = "kwd", defaultValue = "") String kwd, Model model) throws Exception {
 
 		try {
-			int size = 6;
+			int size = 10;
 			int total_page = 0;
 
 			kwd = myUtil.decodeUrl(kwd);
@@ -221,33 +221,67 @@ public class ProjectController {
 	}
 
 	@GetMapping("task")
-	public String projectask(@RequestParam(name = "projectId") long projectId,
+	public String projectask(@RequestParam(name = "page", defaultValue = "1") int current_page,
+			@RequestParam(name = "projectId") long projectId,
 			@RequestParam(name = "schType", defaultValue = "all") String schType,
 			@RequestParam(name = "kwd", defaultValue = "") String kwd, Model model) {
 
 		try {
+			int size = 10;
+			int total_page = 0;
 
-			ProjectsDto dto = service.projectarticle(projectId);
-			
-			List<ProjectsDto> members = service.projectMembers(projectId);
-			model.addAttribute("members", dto.getMembers());
-			
-			List<ProjectsDto> stages  = taskService.findStagesByProjectId(projectId);
-			model.addAttribute("stages", dto.getStages());
+			kwd = myUtil.decodeUrl(kwd);
 
 			Map<String, Object> map = new HashMap<>();
 			map.put("projectId", projectId);
 			map.put("schType", schType);
 			map.put("kwd", kwd);
+			
+			int taskDataCount = taskService.taskDataCount(map);
+			if (taskDataCount != 0) {
+				total_page = taskDataCount / size + (taskDataCount % size > 0 ? 1 : 0);
+			}
+			
+			current_page = Math.min(current_page, total_page);
+			
+			int offset = (current_page - 1) * size;
+			if (offset < 0)
+				offset = 0;
+			map.put("offset", offset);
+			map.put("size", size);
+			
+			List<ProjectsDto> members = service.projectMembers(projectId);
+			List<ProjectsDto> stages  = taskService.findStagesByProjectId(projectId);
+			
+			String cp = RequestUtils.getContextPath();
+			String query = "";
+			String listUrl = cp + "/projects/task?projectId=" + projectId;
+			String articleUrl = cp + "/projects/task?projectId=" + projectId + "&page=" + current_page;
+
+			if (!kwd.isBlank()) {
+				query = "schType=" + schType + "&kwd=" + myUtil.encodeUrl(kwd);
+
+				listUrl += "?" + query;
+				articleUrl += "&" + query;
+			}
+
+			String paging = paginateUtil.paging(current_page, total_page, listUrl);
 
 			List<ProjectsDto> list = taskService.tasklist(map);
 			model.addAttribute("list", list);
+			model.addAttribute("taskDataCount", taskDataCount);
+			model.addAttribute("size", size);
+			model.addAttribute("total_page", total_page);
+			model.addAttribute("page", current_page);
+
+			model.addAttribute("paging", paging);
+			model.addAttribute("articleUrl", articleUrl);
+			
 			model.addAttribute("projectId", projectId);
 			model.addAttribute("schType", schType);
 			model.addAttribute("kwd", kwd);
 			model.addAttribute("stages", stages);
 			model.addAttribute("members", members);
-			model.addAttribute("stages", stages);
 			
 			
 		} catch (Exception e) {

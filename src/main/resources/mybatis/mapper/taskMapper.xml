@@ -3,43 +3,34 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.mvc.app.mapper.TaskMapper">
 	<!-- task 생성 -->
-	<!-- <insert id="insertProjectTask"
-		parameterType="com.mvc.app.domain.dto.ProjectsDto">
+	<insert id="insertProjectTask" parameterType="com.mvc.app.domain.dto.ProjectsDto">
+	<selectKey keyProperty="taskId" resultType="string" order="BEFORE">
+		SELECT 'TSK' || TASK_SEQ.NEXTVAL FROM DUAL
+	</selectKey>
 		INSERT INTO TASK (
-		TASKID,
-		STAGEID,
-		TASKTITLE,
-		TASKDESCRIPTION,
-		TASKSTARTDATE,
-		TASKENDDATE,
-		TASKSTATUS,
-		TASKCREATEDDATE,
-		TASKCREATOR
+			TASKID, STAGEID, TASKTITLE, TASKDESCRIPTION, TASKSTARTDATE,
+			TASKENDDATE, TASKSTATUS, TASKCREATEDDATE, TASKCREATOR
+		) VALUES (
+			#{taskId}, #{stageId}, #{taskTitle}, #{taskDescription, jdbcType=VARCHAR},
+			TO_DATE(#{taskStartDate, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
+			TO_DATE(#{taskEndDate, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
+			CASE
+			 	WHEN TO_DATE(#{taskEndDate, jdbcType=VARCHAR}, 'YYYY-MM-DD') &lt; TRUNC(SYSDATE) THEN 4
+	            WHEN TO_DATE(#{taskStartDate, jdbcType=VARCHAR}, 'YYYY-MM-DD') &lt;= TRUNC(SYSDATE)
+	            AND TO_DATE(#{taskEndDate, jdbcType=VARCHAR}, 'YYYY-MM-DD') &gt;= TRUNC(SYSDATE) THEN 2
+	            ELSE 1
+			END,
+			SYSDATE,
+			#{taskCreator, jdbcType=VARCHAR}
 		)
-		VALUES (
-		'TSK' || TASK_SEQ.NEXTVAL,
-		#{stageId, jdbcType=VARCHAR},
-		#{taskTitle},
-		#{taskDescription, jdbcType=VARCHAR},
-		#TO_DATE(#{taskStartDate, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
-		#TO_DATE(#{taskEndDate}, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
-		CASE
-		 	WHEN TO_DATE(#{taskEndDate, jdbcType=VARCHAR}, 'YYYY-MM-DD') &lt; TRUNC(SYSDATE) THEN 4
-            WHEN TO_DATE(#{taskStartDate, jdbcType=VARCHAR}, 'YYYY-MM-DD') &lt;= TRUNC(SYSDATE)
-            AND TO_DATE(#{taskEndDate, jdbcType=VARCHAR}, 'YYYY-MM-DD') &gt;= TRUNC(SYSDATE) THEN 2
-            ELSE 1
-		END,
-		SYSDATE,
-		#{taskCreator, jdbcType=VARCHAR}
-		)
-	</insert>-->
+	</insert>
 	
 	<insert id="insertEmpTask" parameterType="com.mvc.app.domain.dto.ProjectsDto">
 	    INSERT INTO EMPTASK (
 	        EMPTASKID,
 	        EMPID,
 	        TASKID,
-	        EMTASKSTARTDATE,
+	        EMPTASKSTARTDATE,
 	        EMPTASKENDDATE,
 	        EMPTASKSTATUS
 	    ) VALUES (
@@ -103,8 +94,7 @@
 	</select>
 
 	<!-- task 리스트 -->
-	<select id="tasklist" parameterType="map"
-		resultType="com.mvc.app.domain.dto.ProjectsDto">
+	<select id="tasklist" parameterType="map" resultType="com.mvc.app.domain.dto.ProjectsDto">
 		SELECT
 		t.taskId,
 		t.stageId,
@@ -133,16 +123,47 @@
 			AND
 			<include refid="where-task" />
 		</if>
-		ORDER BY s.sequence ASC, t.taskStartDate ASC
+			ORDER BY s.sequence ASC, t.taskStartDate ASC
+	   		OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
 	</select>
 
-
-	<select id="findStagesByProjectId" parameterType="long"
-	    resultType="com.mvc.app.domain.dto.ProjectsDto">
+	<!-- 프로젝트 개발 단계 찾기 -->
+	<select id="findStagesByProjectId" parameterType="long" resultType="com.mvc.app.domain.dto.ProjectsDto">
 	    SELECT stageId, stgTitle, sequence
 	    FROM STAGE
 	    WHERE projectId = #{projectId}
 	    ORDER BY sequence
 	</select>
 
+	<insert id="insertNewStage" parameterType="com.mvc.app.domain.dto.ProjectsDto">
+		<selectKey keyProperty="stageId" resultType="string" order="BEFORE">
+			SELECT 'STG' || LPAD(STAGE_SEQ.NEXTVAL, 8, '0') FROM DUAL
+		</selectKey>
+		    INSERT INTO STAGE 
+		    	(stageId, 
+		    	projectId, 
+		    	stgTitle, 
+		    	sequence, 
+		    	stgStatus, 
+		    	stgProgress, 
+		    	stgCreatedDate)
+			VALUES 
+				(#{stageId},
+				#{projectId},
+				#{stgTitle},
+				(SELECT NVL(MAX(sequence), 0) + 1 FROM STAGE WHERE projectId = #{projectId}),
+				'1', 0, SYSDATE)
+	</insert>
+	
+		<select id="taskDataCount" parameterType="map" resultType="Integer">
+			SELECT NVL(COUNT(*), 0)
+			FROM TASK t
+			LEFT JOIN STAGE s ON t.stageId = s.stageId
+			WHERE s.projectId = #{projectId}
+		<if test="kwd != null and kwd != ''">
+			AND
+			<include refid="where-task" />
+		</if>
+	</select>
+	
 </mapper>
