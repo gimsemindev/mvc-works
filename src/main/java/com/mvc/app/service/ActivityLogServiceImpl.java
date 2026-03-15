@@ -22,9 +22,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
 
     private final ActivityLogQueryMapper mapper;
 
-    // ──────────────────────────────────────────────
-    // [1] 건수
-    // ──────────────────────────────────────────────
+    //건수
     @Override
     public int dataCount(Map<String, Object> params) {
         try {
@@ -35,9 +33,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
         }
     }
 
-    // ──────────────────────────────────────────────
-    // [2] 목록
-    // ──────────────────────────────────────────────
+    //목록
     @Override
     public List<ActivityLogDto> listActivityLog(Map<String, Object> params) {
         try {
@@ -48,9 +44,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
         }
     }
 
-    // ──────────────────────────────────────────────
-    // [3] 단건
-    // ──────────────────────────────────────────────
+    //단건
     @Override
     public ActivityLogDto findById(Long logId) {
         try {
@@ -61,9 +55,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
         }
     }
 
-    // ──────────────────────────────────────────────
-    // [5] 엑셀 다운로드
-    // ──────────────────────────────────────────────
+    //엑셀 다운로드
     @Override
     public Resource exportExcel(Map<String, Object> params) throws Exception {
         params.put("offset", 0);
@@ -73,7 +65,7 @@ public class ActivityLogServiceImpl implements ActivityLogService {
         try (Workbook wb = new XSSFWorkbook()) {
             Sheet sheet = wb.createSheet("활동로그");
 
-            // 헤더 스타일
+            // 헤더
             CellStyle headerStyle = wb.createCellStyle();
             headerStyle.setFillForegroundColor(IndexedColors.CORNFLOWER_BLUE.getIndex());
             headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);

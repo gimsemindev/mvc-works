@@ -64,29 +64,20 @@ public class HrmServiceImpl implements HrmService {
         }
     }
 
-    // ──────────────────────────────────────────────
-    // [2-1] 다음 사원번호 자동채번
-    //   MAX(TO_NUMBER(empId)) + 1 을 11자리 zero-padding 으로 반환
-    //   ex) "00000000005" → "00000000006"
-    //   테이블이 비어 있으면 "00000000001" 반환
-    // ──────────────────────────────────────────────
+    //사원번호 자동채번
     @Override
     public String getNextEmpId() {
         try {
-            String maxStr = mapper.findMaxEmpId();          // NVL(MAX(...), '0')
+            String maxStr = mapper.findMaxEmpId();
             long   next   = Long.parseLong(maxStr) + 1;
-            return String.format("%011d", next);            // 11자리 zero-padding
+            return String.format("%011d", next);            // 제로패딩
         } catch (Exception e) {
             log.error("getNextEmpId error", e);
-            return String.format("%011d", 1L);              // 오류 시 00000000001 반환
+            return String.format("%011d", 1L);
         }
     }
 
-    // ──────────────────────────────────────────────
-    // [3] 직원 신규 등록
-    //   employee1(인증) INSERT → employee2(인적) INSERT
-    //   FK 제약 순서 반드시 준수
-    // ──────────────────────────────────────────────
+    //직원 신규 등록
     @Override
     @Transactional
     public void insertEmployee(HrmDto dto) throws Exception {
@@ -111,7 +102,6 @@ public class HrmServiceImpl implements HrmService {
                 dto.setLevelCode(1);
             }
 
-            // INSERT 순서: employee1 먼저 (FK 부모)
             mapper.insertEmployee1(dto);
             mapper.insertEmployee2(dto);
             mapper.insertAuthority(dto);
@@ -122,11 +112,7 @@ public class HrmServiceImpl implements HrmService {
         }
     }
 
-    // ──────────────────────────────────────────────
-    // [4] 단건 수정
-    //   - 사원번호(empId)는 절대 변경하지 않음
-    //   - 비밀번호가 null / "" / "********" 이면 password 컬럼 수정 안 함
-    // ──────────────────────────────────────────────
+    //단건 수정
     @Override
     @Transactional
     public void updateEmployee(HrmDto dto) throws Exception {
@@ -134,11 +120,10 @@ public class HrmServiceImpl implements HrmService {
         	
             String pw = dto.getPassword();
             if (pw == null || pw.isBlank() || "********".equals(pw)) {
-                dto.setPassword(null);   // XML의 <if test="password != null"> 에 걸려 수정 제외
+                dto.setPassword(null);
             } else {
                 dto.setPassword(passwordEncoder.encode(pw));
             }
-            // employee1(인증정보), employee2(인적정보) 각각 UPDATE
             mapper.updateEmployee1(dto);
             mapper.updateEmployee2(dto);
             mapper.updateAuthority(dto);
@@ -148,9 +133,7 @@ public class HrmServiceImpl implements HrmService {
         }
     }
 
-    // ──────────────────────────────────────────────
-    // [5] 벌크 수정
-    // ──────────────────────────────────────────────
+    //벌크 수정
     @Override
     @Transactional
     public void updateEmployees(List<HrmDto> dtoList) throws Exception {
@@ -159,10 +142,7 @@ public class HrmServiceImpl implements HrmService {
         }
     }
 
-    // ──────────────────────────────────────────────
-    // [6] 선택 삭제
-    //   employee1의 drawCode : y update 시 탈퇴 처리
-    // ──────────────────────────────────────────────
+    //선택 삭제
     @Override
     @Transactional
     public void deleteEmployees(List<String> ids) throws Exception {
@@ -174,10 +154,7 @@ public class HrmServiceImpl implements HrmService {
         }
     }
 
-    // ──────────────────────────────────────────────
-    // [7] 엑셀 다운로드 (Apache POI)
-    //   비밀번호 컬럼은 보안상 출력하지 않음
-    // ──────────────────────────────────────────────
+    //엑셀 다운로드 (Apache POI)
     @Override
     public Resource exportExcel(Map<String, Object> params) throws Exception {
         // 페이징 없이 전체 조회
@@ -231,11 +208,8 @@ public class HrmServiceImpl implements HrmService {
         }
     }
 
-    // ──────────────────────────────────────────────
-    // [7-1] 엑셀 업로드 양식 다운로드 (Apache POI)
-    //   헤더: 이름 | 비밀번호 | 부서코드 | 직급코드 | 권한코드 | 권한레벨 | 재직상태코드
-    //   ※ 사원번호는 자동채번, 참여 프로젝트는 자동 연동이므로 양식에서 제외
-    // ──────────────────────────────────────────────
+    //엑셀 업로드 양식 다운로드 (Apache POI)
+    //헤더: 이름 / 비밀번호 / 부서코드 / 직급코드 / 권한코드 /권한레벨 / 재직상태코드
     @Override
     public Resource exportExcelTemplate() throws Exception {
         String[] templateHeaders = {
@@ -290,16 +264,7 @@ public class HrmServiceImpl implements HrmService {
         }
     }
 
-    // ──────────────────────────────────────────────
     // [8] 엑셀 업로드 (Apache POI)
-    //   업로드 컬럼 순서 (헤더 행=0, 데이터=1행부터):
-    //   0:이름 | 1:비밀번호 | 2:부서코드 | 3:직급코드
-    //   4:권한코드 | 5:권한레벨 | 6:재직상태코드
-    //
-    //   ※ 사원번호: 입력받지 않음 — getNextEmpId() 자동채번
-    //   ※ 참여 프로젝트: 입력받지 않음
-    //   ※ 모든 값 trim() 처리 후 insert
-    // ──────────────────────────────────────────────
     @Override
     @Transactional
     public int importExcel(MultipartFile file) throws Exception {
@@ -312,22 +277,21 @@ public class HrmServiceImpl implements HrmService {
                 Row row = sheet.getRow(i);	
                 if (row == null) continue;
 
-                // 0:이름 (필수) — 없으면 행 스킵
-                String name = cellStr(row, 0);   // 이미 trim() 처리됨
+                String name = cellStr(row, 0);
                 if (name.isBlank()) continue;
 
-                // 사원번호 자동채번 (입력받지 않음)
+                // 사원번호 자동채번
                 String nextEmpId = getNextEmpId();
 
                 HrmDto dto = new HrmDto();
                 dto.setEmpId(nextEmpId);
-                dto.setName(name);                                        // 이름
-                dto.setPassword(cellStr(row, 1));                         // 비밀번호 (trim 후 BCrypt 암호화는 insertEmployee에서 처리)
-                dto.setDeptCode(cellStr(row, 2));                         // 부서코드
-                dto.setGradeCode(cellStr(row, 3));                        // 직급코드
-                dto.setAuthorityCode(cellStr(row, 4));                    // 권한코드
+                dto.setName(name);
+                dto.setPassword(cellStr(row, 1));
+                dto.setDeptCode(cellStr(row, 2));
+                dto.setGradeCode(cellStr(row, 3));
+                dto.setAuthorityCode(cellStr(row, 4));
 
-                // 권한레벨 (숫자)
+                // 권한레벨
                 String levelStr = cellStr(row, 5);
                 if (!levelStr.isBlank()) {
                     try {
@@ -341,8 +305,6 @@ public class HrmServiceImpl implements HrmService {
                 String statusCode = cellStr(row, 6);
                 dto.setEmpStatusCode(statusCode.isBlank() ? "ES01" : statusCode);
 
-                // 참여 프로젝트: 입력받지 않음 (별도 연동)
-
                 insertEmployee(dto);
                 count++;
             }
@@ -350,9 +312,7 @@ public class HrmServiceImpl implements HrmService {
         return count;
     }
 
-    // ──────────────────────────────────────────────
-    // [9] 공통코드 조회
-    // ──────────────────────────────────────────────
+    //공통코드 조회
     @Override
     public List<Map<String, String>> getCommonCodes(String codeGroup) {
         try {
@@ -362,8 +322,6 @@ public class HrmServiceImpl implements HrmService {
             return new ArrayList<>();
         }
     }
-
-    // ── 내부 유틸 ─────────────────────────────────────────────
     private String nvl(String s) { return s == null ? "" : s; }
 
     private String cellStr(Row row, int col) {
@@ -371,7 +329,6 @@ public class HrmServiceImpl implements HrmService {
         if (cell == null) return "";
         switch (cell.getCellType()) {
             case NUMERIC:
-                // 숫자 셀: 소수점 없이 정수로 변환 (ex. 5.0 → "5")
                 double d = cell.getNumericCellValue();
                 if (d == Math.floor(d) && !Double.isInfinite(d)) {
                     return String.valueOf((long) d).trim();

@@ -3,11 +3,6 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.mvc.app.aop.mapper.ActivityLogMapper">
-
-    <!-- ════════════════════════════════════════
-         활동 로그 INSERT
-         PK(log_id) : seq_activity_log.NEXTVAL (DDL DEFAULT 처리)
-    ════════════════════════════════════════ -->
     <insert id="insertActivityLog" parameterType="com.mvc.app.aop.dto.ActivityLogDto">
         INSERT INTO activity_log (
             actor_emp_id,

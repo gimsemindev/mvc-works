@@ -21,20 +21,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * HRM 직원관리 활동 로그 AOP Aspect
+ * 직원관리 활동 로그 AOP
  *
- *  적용 대상 (HrmServiceImpl 메서드):
- *    - insertEmployee   : 직원 단건 등록
- *    - updateEmployee   : 직원 단건 수정
- *    - updateEmployees  : 직원 벌크 수정
- *    - deleteEmployees  : 직원 선택 삭제
- *    - importExcel      : 엑셀 업로드 일괄 등록
- *
- *  동작 방식: @Around
- *    → 메서드 실행 전 before_data 스냅샷 (수정/삭제 시)
- *    → 메서드 정상 완료: result = SUCCESS, after_data 기록
- *    → 메서드 예외 발생: result = FAIL, error_msg 기록
- *    → 로그 저장 실패 시 원래 비즈니스 로직 결과에 영향 없음 (try-catch 독립)
+ *  	  HrmServiceImpl
+ *    	insertEmployee
+ *    	updateEmployee
+ *    	updateEmployees
+ *    	deleteEmployees
+ *    	importExcel
  */
 @Aspect
 @Component
@@ -43,9 +37,9 @@ import java.util.stream.Collectors;
 public class HrmActivityAspect {
 
     private final ActivityLogMapper activityLogMapper;
-    private final ObjectMapper      objectMapper;       // Spring Boot 자동 등록 Bean
+    private final ObjectMapper      objectMapper;       //자동 Bean 등록
 
-    // ── Pointcut 표현식 상수 ─────────────────────────────────
+    //Pointcut
     private static final String POINTCUT_INSERT  =
             "execution(* com.mvc.app.service.HrmServiceImpl.insertEmployee(..))";
     private static final String POINTCUT_UPDATE  =
@@ -57,27 +51,22 @@ public class HrmActivityAspect {
     private static final String POINTCUT_EXCEL   =
             "execution(* com.mvc.app.service.HrmServiceImpl.importExcel(..))";
 
-    // ════════════════════════════════════════════════════════
-    // [1] 직원 단건 등록 — insertEmployee(HrmDto)
-    // ════════════════════════════════════════════════════════
+    //직원 단건 등록
+
     @Around(POINTCUT_INSERT)
     public Object logInsert(ProceedingJoinPoint pjp) throws Throwable {
         HrmDto dto = (HrmDto) pjp.getArgs()[0];
         return executeWithLog(pjp, ActionType.INSERT, dto.getEmpId(), null, dto);
     }
 
-    // ════════════════════════════════════════════════════════
-    // [2] 직원 단건 수정 — updateEmployee(HrmDto)
-    // ════════════════════════════════════════════════════════
+    //직원 단건 수정
     @Around(POINTCUT_UPDATE)
     public Object logUpdate(ProceedingJoinPoint pjp) throws Throwable {
         HrmDto dto = (HrmDto) pjp.getArgs()[0];
         return executeWithLog(pjp, ActionType.UPDATE, dto.getEmpId(), null, dto);
     }
 
-    // ════════════════════════════════════════════════════════
-    // [3] 직원 벌크 수정 — updateEmployees(List<HrmDto>)
-    // ════════════════════════════════════════════════════════
+    //직원 벌크 수정
     @Around(POINTCUT_BULK)
     public Object logBulkUpdate(ProceedingJoinPoint pjp) throws Throwable {
         @SuppressWarnings("unchecked")
@@ -91,9 +80,7 @@ public class HrmActivityAspect {
         return executeWithLog(pjp, ActionType.BULK_UPDATE, targetIds, null, dtoList);
     }
 
-    // ════════════════════════════════════════════════════════
-    // [4] 직원 선택 삭제 — deleteEmployees(List<String>)
-    // ════════════════════════════════════════════════════════
+    //직원 선택 삭제
     @Around(POINTCUT_DELETE)
     public Object logDelete(ProceedingJoinPoint pjp) throws Throwable {
         @SuppressWarnings("unchecked")
@@ -103,27 +90,20 @@ public class HrmActivityAspect {
         return executeWithLog(pjp, ActionType.DELETE, targetIds, null, null);
     }
 
-    // ════════════════════════════════════════════════════════
-    // [5] 엑셀 업로드 일괄 등록 — importExcel(MultipartFile)
-    //     반환값: int (등록 건수)
-    // ════════════════════════════════════════════════════════
+    //엑셀 업로드 일괄 등록
     @Around(POINTCUT_EXCEL)
     public Object logExcelImport(ProceedingJoinPoint pjp) throws Throwable {
         return executeWithLog(pjp, ActionType.EXCEL_IMPORT, null, null, null);
     }
 
-    // ════════════════════════════════════════════════════════
-    //  공통 실행 + 로그 저장 메서드
-    //  - 비즈니스 로직 성공/실패와 독립적으로 로그 저장
-    //  - 로그 저장 자체 실패 시 비즈니스 결과에 영향 없음
-    // ════════════════════════════════════════════════════════
+    //로그 저장 메서드
     private Object executeWithLog(ProceedingJoinPoint pjp,
                                   String actionType,
                                   String targetEmpIds,
                                   Object beforeObj,
                                   Object afterObj) throws Throwable {
 
-        // 수행자 정보 (세션)
+        // 수행자 세션
         SessionInfo actor = getSessionInfo();
 
         Object result     = null;
@@ -132,14 +112,11 @@ public class HrmActivityAspect {
         String afterJson  = null;
 
         try {
-            // ── 비즈니스 메서드 실행 ──────────────────────
             result = pjp.proceed();
 
-            // 성공 시 after_data: 등록·수정은 DTO JSON, 삭제는 null
             if (afterObj != null) {
                 afterJson = toJson(afterObj);
             }
-            // EXCEL_IMPORT 성공 시 등록 건수를 after_data 에 기록
             if (ActionType.EXCEL_IMPORT.equals(actionType) && result instanceof Integer cnt) {
                 afterJson = "{\"importedCount\":" + cnt + "}";
             }
@@ -147,10 +124,10 @@ public class HrmActivityAspect {
         } catch (Throwable ex) {
             resultCode = "FAIL";
             errorMsg   = truncate(ex.getMessage(), 2000);
-            throw ex;     // 비즈니스 예외는 그대로 재던짐
+            throw ex;
 
         } finally {
-            // ── 로그 저장 (독립 try — 로그 실패가 비즈니스에 영향 없도록) ──
+            //로그 저장
             try {
                 ActivityLogDto logDto = ActivityLogDto.builder()
                         .actorEmpId (actor != null ? actor.getEmpId()  : "UNKNOWN")
@@ -177,7 +154,7 @@ public class HrmActivityAspect {
         return result;
     }
 
-    // ── 세션에서 현재 로그인 사원 정보 조회 ────────────────
+    //세션에서 현재 로그인 사원 정보 조회
     private SessionInfo getSessionInfo() {
         try {
             ServletRequestAttributes attrs =
@@ -194,7 +171,7 @@ public class HrmActivityAspect {
         }
     }
 
-    // ── 클라이언트 IP 조회 (Proxy/LB 헤더 우선) ────────────
+    // ── 클라이언트 IP 조회 Proxy
     private String getClientIp() {
         try {
             ServletRequestAttributes attrs =
@@ -203,7 +180,7 @@ public class HrmActivityAspect {
 
             HttpServletRequest req = attrs.getRequest();
 
-            // X-Forwarded-For → Proxy-Client-IP → WL-Proxy-Client-IP → RemoteAddr 순
+            // X-Forwarded-For > Proxy-Client-IP > WL-Proxy-Client-IP > RemoteAddr
             String[] headers = {
                 "X-Forwarded-For", "Proxy-Client-IP",
                 "WL-Proxy-Client-IP", "HTTP_CLIENT_IP", "HTTP_X_FORWARDED_FOR"
@@ -211,7 +188,7 @@ public class HrmActivityAspect {
             for (String header : headers) {
                 String ip = req.getHeader(header);
                 if (ip != null && !ip.isBlank() && !"unknown".equalsIgnoreCase(ip)) {
-                    // X-Forwarded-For 는 "클라이언트, 프록시1, 프록시2" 형태일 수 있음
+                    
                     return ip.split(",")[0].trim();
                 }
             }
@@ -222,7 +199,7 @@ public class HrmActivityAspect {
         }
     }
 
-    // ── 객체 → JSON 변환 (비밀번호 필드 마스킹 포함) ────────
+    //객체 -> JSON 변환
     private String toJson(Object obj) {
         try {
             String json = objectMapper.writeValueAsString(obj);
@@ -233,7 +210,7 @@ public class HrmActivityAspect {
         }
     }
 
-    // ── 문자열 길이 제한 ────────────────────────────────────
+    //문자열 길이 제한
     private String truncate(String s, int maxLen) {
         if (s == null) return null;
         return s.length() <= maxLen ? s : s.substring(0, maxLen);

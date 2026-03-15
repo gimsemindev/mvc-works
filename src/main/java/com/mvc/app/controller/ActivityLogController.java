@@ -17,13 +17,6 @@ import com.mvc.app.service.ActivityLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * ActivityLogController — 활동 로그 REST API
- *
- *  GET  /api/activity-log                직원관리 활동 로그 목록 조회 (검색 + 페이징)
- *  GET  /api/activity-log/{logId}        로그 단건 조회
- *  GET  /api/activity-log/excel/download 엑셀 다운로드
- */
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -32,9 +25,7 @@ public class ActivityLogController {
 
     private final ActivityLogService activityLogService;
 
-    // ──────────────────────────────────────────────
-    // [1] 활동 로그 목록 조회 (GET /api/activity-log)
-    // ──────────────────────────────────────────────
+    //활동 로그 목록 조회 /api/activity-log
     @GetMapping
     public ResponseEntity<?> getActivityLogList(
             @RequestParam(name = "page",        defaultValue = "1")     int currentPage,
@@ -78,9 +69,7 @@ public class ActivityLogController {
         }
     }
 
-    // ──────────────────────────────────────────────
-    // [2] 단건 조회 (GET /api/activity-log/{logId})
-    // ──────────────────────────────────────────────
+    //단건 조회 /api/activity-log/{logId}
     @GetMapping("/{logId}")
     public ResponseEntity<?> getActivityLog(@PathVariable Long logId) {
         try {
@@ -95,9 +84,7 @@ public class ActivityLogController {
         }
     }
 
-    // ──────────────────────────────────────────────
-    // [3] 엑셀 다운로드 (GET /api/activity-log/excel/download)
-    // ──────────────────────────────────────────────
+    //엑셀 다운로드 /api/activity-log/excel/download)
     @GetMapping("/excel/download")
     public ResponseEntity<?> downloadExcel(
             @RequestParam(name = "actorEmpId",  defaultValue = "") String actorEmpId,
@@ -129,9 +116,7 @@ public class ActivityLogController {
         }
     }
 
-    // ──────────────────────────────────────────────
-    // 내부 헬퍼 — 검색 파라미터 Map 구성
-    // ──────────────────────────────────────────────
+    //검색 파라미터 Map 구성
     private Map<String, Object> buildSearchParams(
             String actorEmpId, String actorName, String targetMenu,
             String result, String actionType,
@@ -147,7 +132,6 @@ public class ActivityLogController {
         map.put("startDate",  startDate.isBlank()   ? null : startDate.trim());
         map.put("endDate",    endDate.isBlank()      ? null : endDate.trim());
 
-        // sortCol 화이트리스트 검증 (SQL Injection 방지)
         String safeCol = switch (sortCol) {
             case "logId", "actorEmpId", "actorName", "actionType",
                  "targetMenu", "result", "logDate" -> sortCol;

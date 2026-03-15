@@ -26,17 +26,15 @@ public class ReportServiceImpl implements ReportService {
     private final StorageService storageService;
     private final ApplicationEventPublisher eventPublisher;
 
-    /** 보고서 파일 업로드 경로 (웹루트 하위 상대 경로) */
+    //보고서 파일 업로드 경로
     private static final String UPLOAD_WEB_PATH = "upload/report";
 
-    // ── 업로드 실제 경로 반환 헬퍼 ────────────────────────────
+    //업로드 실제 경로 반환
     private String getUploadPath() {
         return storageService.getRealPath(UPLOAD_WEB_PATH);
     }
 
-    // ============================================================
-    // 보고서 목록 / 카운트
-    // ============================================================
+    // 보고서 목록 카운트
     @Override
     public int reportCount(Map<String, Object> params) {
         return reportMapper.reportCount(params);
@@ -47,9 +45,7 @@ public class ReportServiceImpl implements ReportService {
         return reportMapper.listReport(params);
     }
 
-    // ============================================================
-    // 피드백 목록 / 카운트
-    // ============================================================
+    // 피드백 목록 카운트
     @Override
     public int feedbackCount(Map<String, Object> params) {
         return reportMapper.feedbackCount(params);
@@ -60,9 +56,7 @@ public class ReportServiceImpl implements ReportService {
         return reportMapper.listFeedback(params);
     }
 
-    // ============================================================
-    // 보고서 단건 조회 (조회수 증가)
-    // ============================================================
+    // 보고서 단건 조회
     @Override
     @Transactional
     public ReportDto getReport(Long filenum) {
@@ -70,16 +64,12 @@ public class ReportServiceImpl implements ReportService {
         ReportDto dto = reportMapper.findReportById(filenum);
         if (dto != null) {
             dto.setFileList(reportMapper.listFilesByReport(filenum));
-            // 인라인 피드백 조회
-            ReportDto feedback = reportMapper.findFeedbackByParent(filenum);
-            // 보고서 DTO에 직접 담지 않고 Controller에서 model에 별도 추가하므로 여기서는 반환값으로 사용
+            //ReportDto feedback = reportMapper.findFeedbackByParent(filenum);
         }
         return dto;
     }
 
-    // ============================================================
-    // 피드백 단건 조회 (조회수 증가)
-    // ============================================================
+    //피드백 단건 조회
     @Override
     @Transactional
     public ReportDto getFeedback(Long filenum) {
@@ -91,9 +81,7 @@ public class ReportServiceImpl implements ReportService {
         return dto;
     }
 
-    // ============================================================
-    // 피드백 작성 화면 - 원본 보고서 조회 (조회수 증가 없음)
-    // ============================================================
+    // 피드백 작성 화면, 원본 보고서 조회
     @Override
     public ReportDto getReportForRef(Long filenum) {
         ReportDto dto = reportMapper.findReportById(filenum);
@@ -103,9 +91,7 @@ public class ReportServiceImpl implements ReportService {
         return dto;
     }
 
-    // ============================================================
     // 보고서 등록
-    // ============================================================
     @Override
     @Transactional
     public void insertReport(ReportDto dto, List<MultipartFile> files) throws Exception {
@@ -121,9 +107,7 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-    // ============================================================
     // 보고서 수정
-    // ============================================================
     @Override
     @Transactional
     public void updateReport(ReportDto dto, List<MultipartFile> newFiles, List<Long> deleteFilenums) throws Exception {
@@ -146,16 +130,14 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-    // ============================================================
-    // 보고서 삭제 (연관 피드백 + 파일 모두 삭제)
-    // ============================================================
+    // 보고서 삭제
     @Override
     @Transactional
     public void deleteReport(Long filenum) throws Exception {
-        // 1. 보고서 첨부파일 물리 삭제
+        //보고서 첨부파일 물리 삭제
         deletePhysicalFiles(filenum);
 
-        // 2. 연관 피드백 처리
+        //연관 피드백 처리
         ReportDto feedback = reportMapper.findFeedbackByParent(filenum);
         if (feedback != null) {
             // 피드백 첨부파일 물리 삭제
@@ -164,16 +146,14 @@ public class ReportServiceImpl implements ReportService {
             reportMapper.deleteFeedback(feedback.getFilenum());
         }
 
-        // 3. 보고서 첨부파일 DB 삭제
+        //보고서 첨부파일 DB 삭제
         reportMapper.deleteFilesByReport(filenum);
 
-        // 4. 보고서 삭제
+        //보고서 삭제
         reportMapper.deleteReport(filenum);
     }
 
-    // ============================================================
     // 피드백 등록
-    // ============================================================
     @Override
     @Transactional
     public void insertFeedback(ReportDto dto, List<MultipartFile> files) throws Exception {
@@ -190,10 +170,10 @@ public class ReportServiceImpl implements ReportService {
         if (originalReport != null) {
             eventPublisher.publishEvent(
                 new NotificationEvent.Feedback(
-                    originalReport.getEmpId(),    // 수신자: 원본 보고서 작성자 사번
-                    dto.getEmpId(),               // 발신자: 피드백 작성자 사번
+                    originalReport.getEmpId(),    // 수신자
+                    dto.getEmpId(),               // 발신자
                     dto.getWriterName(),          // 발신자 이름
-                    dto.getParent(),              // 원본 보고서 filenum
+                    dto.getParent(),              // 원본 보고서
                     originalReport.getSubject()   // 원본 보고서 제목
                 )
             );

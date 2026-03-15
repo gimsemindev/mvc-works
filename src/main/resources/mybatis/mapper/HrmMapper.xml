@@ -2,10 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.mvc.app.mapper.HrmMapper">
-
-    <!-- ════════════════════════════════════════
-         ResultMap — employee1 + employee2 JOIN
-    ════════════════════════════════════════ -->
     <resultMap id="employeeResultMap" type="com.mvc.app.domain.dto.HrmDto">
         <!-- employee1 -->
         <id     property="empId"              column="empId"/>
@@ -30,12 +26,12 @@
         <result property="hireDate"           column="hireDate"/>
         <result property="deptCode"           column="deptCode"/>
         <result property="gradeCode"          column="gradeCode"/>
-        <!-- 화면 표시용 -->
+
         <result property="deptName"           column="deptName"/>
         <result property="gradeName"          column="gradeName"/>
         <result property="regEmpId"           column="regEmpId"/>
         <result property="e2RegDate"          column="e2RegDate"/>
-        <!-- 권한, 프로젝트 참여명 -->
+
         <result property="projectNames"       column="projectNames"/>
         <result property="authorityCode" column="authorityCode"/>
     	<result property="authorityName" column="authorityName"/>
@@ -44,9 +40,8 @@
     <!--
          공통 검색 조건
          searchParams key:
-           name, empNo, project,
-           empStatusCode, levelCode,
-           pmoY(isPmo='Y'), pmoN(isPmo='N') 
+         name, empNo, project,
+         empStatusCode, levelCode
     -->
     <sql id="searchWhere">
         <where>
@@ -207,19 +202,13 @@
         WHERE  empId = #{empId}
     </select>
 
-    <!-- 
-    가장 큰 사원번호 조회 (사원 번호 자동채번용)
-               empId 는 VARCHAR2(11)
-               MAX(TO_NUMBER(empId)) 로 최댓값을 구한 뒤 +1 반환
-    -->
+    <!-- 가장 큰 사원번호 조회 (사원 번호 자동채번용) -->
     <select id="findMaxEmpId" resultType="string">
         SELECT NVL(MAX(TO_NUMBER(empId DEFAULT 0 ON CONVERSION ERROR)), 0)
 		FROM   employee1
     </select>
 
-    <!--
-    직원 등록 — employee1 먼저 INSERT 참조제약
-    -->
+    <!-- 직원 등록1 -->
     <insert id="insertEmployee1" parameterType="com.mvc.app.domain.dto.HrmDto">
         INSERT INTO employee1
             (empId, password, levelCode, enabled, empStatusCode, regDate, updateDate)
@@ -231,9 +220,7 @@
              SYSDATE, SYSDATE)
     </insert>
 
-    <!--
-    직원 등록 — employee2 INSERT
-    -->
+    <!-- 직원 등록2 -->
     <insert id="insertEmployee2" parameterType="com.mvc.app.domain.dto.HrmDto">
         INSERT INTO employee2
             (empId, name, birth, profilePhoto, tel,
@@ -316,9 +303,7 @@
         </foreach>
     </update>
 
-    <!-- 공통코드 조회 — codeGroup 별 code/codeName 목록
-         반환 Map key : code, codeName 
-    -->
+    <!-- 공통코드 조회 -->
     <select id="listCommonCode" parameterType="string" resultType="map">
         SELECT code, codename AS codeName
         FROM   commoncode

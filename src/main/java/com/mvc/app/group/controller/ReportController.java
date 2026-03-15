@@ -25,27 +25,23 @@ public class ReportController {
 
     private static final int PAGE_SIZE = 10;
 
-    // ============================================================
-    // 공통 헬퍼 - 세션 정보 추출
-    // ============================================================
+    //세션 정보 추출
     private SessionInfo getSession(HttpSession session) {
         return (SessionInfo) session.getAttribute("member");
     }
 
-    /** 접근 제어용 Map 파라미터 구성 */
+    // 접근 제어용 Map 파라미터 구성
     private void fillAccessParams(Map<String, Object> params, SessionInfo si) {
         params.put("sessionEmpId", si.getEmpId());
         params.put("userLevel",    si.getUserLevel());
-        // levelCode 51~98: 같은 프로젝트 사원 목록 필요
+        // levelCode 51~98 - 사원 목록
         if (si.getUserLevel() >= 51 && si.getUserLevel() < 99) {
             List<String> empIdList = reportService.getSharedProjectEmpIds(si.getEmpId());
             params.put("empIdList", empIdList);
         }
     }
 
-    // ============================================================
-    // 목록 (Main - reportMain.jsp 포함 진입점)
-    // ============================================================
+    //리스트
     @GetMapping("/list")
     public String list(
             @RequestParam(name = "page",        defaultValue = "1")      int    page,
@@ -64,7 +60,7 @@ public class ReportController {
 
         SessionInfo si = getSession(session);
 
-        // ── 보고서 탭 ──────────────────────────────────────────
+        //보고서 탭
         Map<String, Object> rParams = new HashMap<>();
         rParams.put("writerName",  writerName);
         rParams.put("subject",     subject);
@@ -86,15 +82,14 @@ public class ReportController {
         model.addAttribute("reportTotalPage", reportTotalPage);
         model.addAttribute("page",            page);
 
-        // 검색 조건 유지
+        //검색 조건 유지
         model.addAttribute("writerName",  writerName);
         model.addAttribute("subject",     subject);
         model.addAttribute("periodStart", periodStart);
         model.addAttribute("periodEnd",   periodEnd);
         model.addAttribute("feedbackYn",  feedbackYn);
 
-        // ── 피드백 탭 (levelCode 51 이상 또는 99만 접근 가능) ──
-        // 일반 사원(51 미만)은 자기 보고서에 달린 피드백만 조회 가능
+        //피드백 탭
         Map<String, Object> fParams = new HashMap<>();
         fParams.put("targetName", targetName);
         fParams.put("subject",    subject);
@@ -119,19 +114,17 @@ public class ReportController {
         model.addAttribute("startDate",  startDate);
         model.addAttribute("endDate",    endDate);
 
-        // 탭 상태 유지
+        //탭 상태 유지
         model.addAttribute("activeTab",  tab);
 
-        // 권한 정보 (JSP 분기용)
+        //권한 정보
         model.addAttribute("userLevel", si.getUserLevel());
         model.addAttribute("sessionEmpId", si.getEmpId());
 
         return "report/reportMain";
     }
 
-    // ============================================================
-    // 보고서 상세
-    // ============================================================
+    //보고서 상세
     @GetMapping("/detail")
     public String detail(@RequestParam(name = "filenum") Long filenum, HttpSession session, Model model) {
         SessionInfo si = getSession(session);
@@ -141,11 +134,11 @@ public class ReportController {
             return "redirect:/report/list";
         }
 
-        // 접근 제어: 일반 사원은 자기 보고서만
+        // 접근 제어
         if (si.getUserLevel() < 51 && !dto.getEmpId().equals(si.getEmpId())) {
             return "redirect:/report/list";
         }
-        // 51~98: 같은 프로젝트 사원 보고서만
+        // 같은 프로젝트 사원 보고서만
         if (si.getUserLevel() >= 51 && si.getUserLevel() < 99) {
             List<String> empIds = reportService.getSharedProjectEmpIds(si.getEmpId());
             if (!empIds.contains(dto.getEmpId())) {
@@ -153,8 +146,7 @@ public class ReportController {
             }
         }
 
-        // 인라인 피드백 (보고서에 달린 첫 번째 피드백)
-        // Service를 통해 조회 - Mapper는 Service에서만 호출
+        //인라인 피드백
         ReportDto inlineFeedback = reportService.getInlineFeedback(filenum);
         model.addAttribute("dto",            dto);
         model.addAttribute("inlineFeedback", inlineFeedback);
@@ -164,20 +156,17 @@ public class ReportController {
         return "report/reportDetail";
     }
 
-    // ============================================================
-    // 보고서 작성 화면
-    // ============================================================
+
+    //보고서 작성 화면
     @GetMapping("/write")
     public String writeForm(HttpSession session, Model model) {
         SessionInfo si = getSession(session);
-        // 피드백 작성자(51 이상)는 보고서 작성 불가 - 선택적 제한
+        // 피드백 작성자(51 이상)는 보고서 작성 불가
         model.addAttribute("userLevel", si.getUserLevel());
         return "report/reportWrite";
     }
 
-    // ============================================================
     // 보고서 등록 처리
-    // ============================================================
     @PostMapping("/write")
     public String write(ReportDto dto,
                         @RequestParam(name = "files", required = false) List<MultipartFile> files,
@@ -194,9 +183,7 @@ public class ReportController {
         return "redirect:/report/list";
     }
 
-    // ============================================================
     // 보고서 수정 화면
-    // ============================================================
     @GetMapping("/edit")
     public String editForm(@RequestParam(name = "filenum") Long filenum, HttpSession session, Model model) {
         SessionInfo si = getSession(session);
@@ -218,9 +205,7 @@ public class ReportController {
         return "report/reportEdit";
     }
 
-    // ============================================================
     // 보고서 수정 처리
-    // ============================================================
     @PostMapping("/edit")
     public String edit(ReportDto dto,
                        @RequestParam(name = "newFiles",      required = false) List<MultipartFile> newFiles,
@@ -243,9 +228,7 @@ public class ReportController {
         return "redirect:/report/detail?filenum=" + dto.getFilenum();
     }
 
-    // ============================================================
     // 보고서 삭제
-    // ============================================================
     @GetMapping("/delete")
     public String delete(@RequestParam(name = "filenum") Long filenum, HttpSession session) {
         SessionInfo si = getSession(session);
@@ -264,9 +247,7 @@ public class ReportController {
         return "redirect:/report/list";
     }
 
-    // ============================================================
     // 피드백 작성 화면
-    // ============================================================
     @GetMapping("/feedback/write")
     public String feedbackWriteForm(@RequestParam(name = "refFilenum") Long refFilenum, HttpSession session, Model model) {
         SessionInfo si = getSession(session);
@@ -282,9 +263,7 @@ public class ReportController {
         return "report/feedbackWrite";
     }
 
-    // ============================================================
     // 피드백 등록 처리
-    // ============================================================
     @PostMapping("/feedback/write")
     public String feedbackWrite(ReportDto dto,
                                 @RequestParam(name = "files", required = false) List<MultipartFile> files,
@@ -305,9 +284,7 @@ public class ReportController {
         return "redirect:/report/detail?filenum=" + dto.getParent();
     }
 
-    // ============================================================
     // 피드백 상세
-    // ============================================================
     @GetMapping("/feedback/detail")
     public String feedbackDetail(@RequestParam(name = "filenum") Long filenum, HttpSession session, Model model) {
         SessionInfo si = getSession(session);
@@ -339,9 +316,7 @@ public class ReportController {
         return "report/feedbackDetail";
     }
 
-    // ============================================================
     // 피드백 수정 화면
-    // ============================================================
     @GetMapping("/feedback/edit")
     public String feedbackEditForm(@RequestParam(name = "filenum") Long filenum, HttpSession session, Model model) {
         SessionInfo si = getSession(session);
@@ -361,9 +336,7 @@ public class ReportController {
         return "report/feedbackEdit";
     }
 
-    // ============================================================
     // 피드백 수정 처리
-    // ============================================================
     @PostMapping("/feedback/edit")
     public String feedbackEdit(ReportDto dto,
                                @RequestParam(name = "newFiles",      required = false) List<MultipartFile> newFiles,
@@ -386,9 +359,7 @@ public class ReportController {
         return "redirect:/report/feedback/detail?filenum=" + dto.getFilenum();
     }
 
-    // ============================================================
     // 피드백 삭제
-    // ============================================================
     @GetMapping("/feedback/delete")
     public String feedbackDelete(@RequestParam(name = "filenum") Long filenum, HttpSession session) {
         SessionInfo si = getSession(session);
@@ -408,9 +379,7 @@ public class ReportController {
         return "redirect:/report/detail?filenum=" + parentFilenum;
     }
 
-    // ============================================================
     // 파일 다운로드
-    // ============================================================
     @GetMapping("/file/download")
     @ResponseBody
     public ResponseEntity<?> fileDownload(@RequestParam(name = "filenum") Long filenum) {
