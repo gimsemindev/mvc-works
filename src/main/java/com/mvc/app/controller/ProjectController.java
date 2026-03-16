@@ -45,7 +45,6 @@ public class ProjectController {
 	public String projectlist(@RequestParam(name = "page", defaultValue = "1") int current_page,
 			@RequestParam(name = "schType", defaultValue = "all") String schType,
 			@RequestParam(name = "kwd", defaultValue = "") String kwd, 
-			@RequestParam(name = "status", defaultValue = "") String status,
 			Model model) throws Exception {
 
 		try {
@@ -60,7 +59,6 @@ public class ProjectController {
 			map.put("empId", info.getEmpId());
 			map.put("schType", schType);
 			map.put("kwd", kwd);
-			map.put("status", status);
 
 			int dataCount = service.dataCount(map);
 
@@ -83,7 +81,7 @@ public class ProjectController {
 			String articleUrl = cp + "/projects/article?page=" + current_page;
 
 			if (!kwd.isBlank()) {
-				query = "schType=" + schType + "&kwd=" + myUtil.encodeUrl(kwd) + "&status=" + status ;
+				query = "schType=" + schType + "&kwd=" + myUtil.encodeUrl(kwd);
 
 				listUrl += "?" + query;
 				articleUrl += "&" + query;
@@ -102,7 +100,6 @@ public class ProjectController {
 
 			model.addAttribute("schType", schType);
 			model.addAttribute("kwd", kwd);
-			model.addAttribute("status", status);
 
 		} catch (Exception e) {
 			log.info("projectlist : ", e);
@@ -227,11 +224,11 @@ public class ProjectController {
 			@RequestParam(name = "kwd", defaultValue = "") String kwd, Model model) {
 
 		try {
-			int size = 10;
+			int size = 30;
 			int total_page = 0;
 
 			kwd = myUtil.decodeUrl(kwd);
-
+			
 			Map<String, Object> map = new HashMap<>();
 			map.put("projectId", projectId);
 			map.put("schType", schType);
@@ -252,6 +249,15 @@ public class ProjectController {
 			
 			List<ProjectsDto> members = service.projectMembers(projectId);
 			List<ProjectsDto> stages  = taskService.findStagesByProjectId(projectId);
+
+			SessionInfo info = LoginMemberUtil.getSessionInfo();
+			String loginEmpId = info.getEmpId();
+			
+			boolean isManager = members.stream()
+				    .anyMatch(m -> m.getEmpId().equals(loginEmpId) && "M".equals(m.getRole()));
+			
+			model.addAttribute("isManager", isManager);
+			model.addAttribute("loginEmpId", loginEmpId);
 			
 			String cp = RequestUtils.getContextPath();
 			String query = "";
@@ -282,6 +288,12 @@ public class ProjectController {
 			model.addAttribute("kwd", kwd);
 			model.addAttribute("stages", stages);
 			model.addAttribute("members", members);
+			
+			ProjectsDto dto = service.projectarticle(projectId);
+			String projectStart = dto.getStartDate() != null ? dto.getStartDate().replace("/", "-") : "";
+			String projectEnd = dto.getEndDate() != null ? dto.getEndDate().replace("/", "-") : "";
+			model.addAttribute("projectStart", projectStart);
+			model.addAttribute("projectEnd", projectEnd);
 			
 			
 		} catch (Exception e) {
@@ -323,6 +335,11 @@ public class ProjectController {
 		}
 	}
 
+	@GetMapping("taskarticle2")
+	public String projecttaskarticle2() {
+	    return "projects/taskarticle2";
+	}
+	
 	@GetMapping("ganttarticle")
 	public String projectganttarticle() {
 		return "projects/ganttarticle";

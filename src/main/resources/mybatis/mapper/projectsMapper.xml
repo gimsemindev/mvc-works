@@ -229,18 +229,6 @@ FROM JSON_TABLE(
 		p.STARTDATE, p.ENDDATE,
 		p.PROGRESS, p.STATUS
 	</select>
-
-	<!-- 프로젝트 구성원 조회 -->
-	<!--<select id="projectMembers" parameterType="long" resultType="map">
-		SELECT
-		ep.EMPID,
-		e.NAME,
-		ep.ROLE
-		FROM EMPPROJECT ep
-		JOIN
-		EMPLOYEE2 e ON ep.EMPID = e.EMPID
-		WHERE ep.PROJECTID = #{projectId}
-	</select>-->
 	
 	<select id="projectMembers" parameterType="long" resultType="com.mvc.app.domain.dto.ProjectsDto">
 	    SELECT ep.EMPID AS empId, e.NAME AS name, ep.ROLE AS role

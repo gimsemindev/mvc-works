@@ -42,7 +42,7 @@
                             <option value="taskCreater"   ${schType == 'taskCreater'   ? 'selected' : ''}>생성자</option>
                             <option value="member"        ${schType == 'member'        ? 'selected' : ''}>담당자</option>
                         </select>
-                        <input type="text" name="kwd" placeholder="태스크 검색..." value="${kwd}">
+                        <input type="text" name="kwd" placeholder="Task 검색..." value="${kwd}">
                         <i class="fas fa-search"></i>
                     </div>
                     <button type="submit" class="btn btn-primary">검색</button>
@@ -50,9 +50,11 @@
                         onclick="location.href='${pageContext.request.contextPath}/projects/task?projectId=${projectId}'">↺</button>
                 </form>
 
-                <button type="button" class="btn-icon btn-add" onclick="openTaskModal()"><i class="fas fa-plus"></i></button>
-                <button type="button" class="btn-icon btn-edit" id="editBtn" onclick="toggleEditMode()"><i class="fas fa-check"></i></button>
-                <button type="button" class="btn-icon btn-delete"><i class="fas fa-trash-alt"></i></button>
+				<c:if test="${isManager}">
+				    <button type="button" class="btn-icon btn-add" onclick="openTaskModal()"><i class="fas fa-plus"></i></button>
+				    <button type="button" class="btn-icon btn-edit" id="editBtn" onclick="toggleEditMode()"><i class="fas fa-check"></i></button>
+				    <button type="button" class="btn-icon btn-delete"><i class="fas fa-trash-alt"></i></button>
+				</c:if>
             </div>
         </div>
 
@@ -68,7 +70,7 @@
                             <th width="110" class="text-center">시작일</th>
                             <th width="110" class="text-center">종료일</th>
                             <th width="100" class="text-center">상태</th>
-                            <th width="100" class="text-center">담당자</th>
+                            <th width="150" class="text-center">담당자</th>
                         </tr>
                     </thead>
                     <tbody id="taskTableBody">
@@ -79,22 +81,25 @@
 						            <tr data-task-id="${t.taskId}" data-start="${t.taskStartDate}" data-end="${t.taskEndDate}">
 						                <td class="text-center">${status.count}</td>
 						                <td class="fw-bold task-name"
-						                    onclick="location.href='${pageContext.request.contextPath}/projects/taskarticle?taskId=${t.taskId}'">
+    											onclick="openTaskDailyModal('${t.taskId}', '${t.taskTitle}', '${t.taskStartDate}', '${t.taskEndDate}', '${t.taskStatus}', '${t.name}', '${projectStart}', '${projectEnd}')">
 						                    <c:if test="${not empty t.stgTitle}">
-						                        <span class="stage-badge">${t.stgTitle}</span>
+						                        <span class="stage-badge" data-stage="${t.stageId}">${t.stgTitle}</span>
 						                    </c:if>
 						                    ${t.taskTitle}
 						                </td>
 						                <td class="text-center">
 						                    <input type="date" class="cell-date" value="${t.taskStartDate}"
+						                    	${isManager ? '' : 'disabled title="편집 권한이 없습니다."'}
 						                           onchange="updateTask('${t.taskId}', 'startDate', this.value)">
 						                </td>
 						                <td class="text-center">
 						                    <input type="date" class="cell-date" value="${t.taskEndDate}"
+						                    	${isManager ? '' : 'disabled title="편집 권한이 없습니다."'}
 						                           onchange="updateTask('${t.taskId}', 'endDate', this.value)">
 						                </td>
 						                <td>
 						                    <select class="cell-select status-cell" data-status="${t.taskStatus}"
+						                    	${isManager ? '' : 'disabled title="편집 권한이 없습니다."'}
 						                            onchange="updateTask('${t.taskId}', 'status', this.value); updateStatusStyle(this)">
 						                        <option value="1" ${t.taskStatus == '1' ? 'selected' : ''}>시작전</option>
 						                        <option value="2" ${t.taskStatus == '2' ? 'selected' : ''}>진행</option>
@@ -106,7 +111,9 @@
 						                </td>
 						                
 						             	<td>
-										<select class="cell-select" onchange="updateTask('${t.taskId}', 'assignee', this.value)">
+										<select class="cell-select cell-assignee" data-emp-id="${t.empId}"
+											${isManager ? '' : 'disabled title="편집 권한이 없습니다."'}
+												onchange="updateTask('${t.taskId}', 'assignee', this.value)">
 										    <option value="">담당자</option>
 										    <c:forEach var="m" items="${members}">
 										        <option value="${m.empId}" ${m.name == t.name ? 'selected' : ''}>
@@ -136,7 +143,7 @@
         </div>
             <%-- 페이징 --%>
             <div class="d-flex justify-content-center py-4 border-top">
-                ${dataCount == 0 ? "등록된 게시글이 없습니다" : paging}
+                ${dataCount == 0 ? "등록된 Task가 없습니다" : paging}
             </div>
     </div>
 </main>
@@ -145,7 +152,7 @@
 		<div id="taskModal" class="modal-overlay" style="display:none;">
 		    <div class="modal-box">
 		        <div class="modal-header">
-		            <h2 class="modal-title">새 태스크 생성</h2>
+		            <h2 class="modal-title">새 Task 생성</h2>
 		            <button class="modal-close" onclick="closeTaskModal()">&times;</button>
 		        </div>
 		        <div class="modal-body">
@@ -176,7 +183,7 @@
 		            <div class="form-row">
 		                <div class="form-group full">
 		                    <label>태스크명 <span class="required">*</span></label>
-		                    <input type="text" id="modalTaskTitle" placeholder="태스크명을 입력하세요">
+		                    <input type="text" id="modalTaskTitle" placeholder="Task 명을 입력하세요">
 		                </div>
 		            </div>
 		
@@ -211,7 +218,7 @@
 		            <div class="form-row">
 		                <div class="form-group full">
 		                    <label>설명</label>
-		                    <input type="text" id="modalTaskDesc" placeholder="태스크 설명을 입력하세요">
+		                    <input type="text" id="modalTaskDesc" placeholder="Task 설명을 입력하세요">
 		                </div>
 		            </div>
 		
@@ -223,8 +230,80 @@
 		    </div>
 		</div>
 
+		<!-- 날짜별 진행 현황 모달 -->
+		<div id="taskDailyModal" class="modal-overlay" style="display:none;">
+		    <div class="modal-box" style="width: 700px;">
+		        <div class="modal-header">
+		            <h2 class="modal-title" id="dailyModalTitle">태스크 진행 현황</h2>
+		            <button class="modal-close" onclick="closeTaskDailyModal()">&times;</button>
+		        </div>
+		        <div class="modal-body">
+		
+		            <%-- 태스크 정보 --%>
+		            <div style="display:flex; gap:16px; margin-bottom:16px; padding:12px; background:#f8f9fa; border-radius:8px;">
+		                <div style="flex:1;">
+		                    <div style="font-size:0.72rem; font-weight:600; color:var(--text-muted); margin-bottom:4px;">기간</div>
+		                    <div style="font-size:0.88rem; font-weight:600;" id="dailyModalPeriod">-</div>
+		                </div>
+		                <div style="flex:1;">
+		                    <div style="font-size:0.72rem; font-weight:600; color:var(--text-muted); margin-bottom:4px;">상태</div>
+		                    <div style="font-size:0.88rem; font-weight:600;" id="dailyModalStatus">-</div>
+		                </div>
+		                <div style="flex:1;">
+		                    <div style="font-size:0.72rem; font-weight:600; color:var(--text-muted); margin-bottom:4px;">담당자</div>
+		                    <div style="font-size:0.88rem; font-weight:600;" id="dailyModalAssignee">-</div>
+		                </div>
+		            </div>
+		
+		            <%-- 날짜별 표 --%>
+		            <div style="overflow-x:auto; border:1px solid var(--border-color); border-radius:8px;">
+		                <div id="dailyGrid" style="display:grid; min-width:max-content;"></div>
+		            </div>
+		
+		        </div>
+		        <div class="modal-footer">
+		            <button class="btn-cancel" onclick="closeTaskDailyModal()">닫기</button>
+		        </div>
+		    </div>
+		</div>
+		
+		<!-- 날짜 클릭 확인 모달 -->
+		<div id="taskDailyCheckModal" class="modal-overlay" style="display:none;">
+		    <div class="modal-box" style="width:360px;">
+		        <div class="modal-header">
+		           <div>
+				        <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:4px;" id="dailyModalProjectTitle">프로젝트명</div>
+				        <h2 class="modal-title" id="dailyModalTitle">태스크 진행 현황</h2>
+				    </div>
+				    <button class="modal-close" onclick="closeTaskDailyModal()">&times;</button>
+				</div>
+		        <div class="modal-body" style="text-align:center; gap:8px;">
+		            <p style="font-size:1rem; font-weight:600; margin-bottom:4px;">오늘도 열심히 작업하셨나요? 🙌</p>
+		            <p style="font-size:0.88rem; color:var(--text-muted);">오늘 진행 상황은 어떻게 되고 있나요?</p>
+		            <div id="checkDate" style="font-size:0.82rem; color:var(--primary-blue); font-weight:600; margin-bottom:8px;"></div>
+		        </div>
+		        <div class="modal-footer" style="justify-content:center; gap:12px;">
+		            <button class="btn-submit" style="background:#12b76a;" onclick="closeDailyCheckModal()">
+		                <i class="fas fa-check me-1"></i>완료
+		            </button>
+		            <button class="btn-submit" style="background:#f59e0b;" onclick="closeDailyCheckModal()">
+		                <i class="fas fa-clock me-1"></i>진행중
+		            </button>
+		            <button class="btn-submit" style="background:#dc2626;" onclick="closeDailyCheckModal()">
+		                <i class="fas fa-pause me-1"></i>지연
+		            </button>
+		            <button class="btn-cancel" onclick="closeDailyCheckModal()">취소</button>
+		        </div>
+		    </div>
+		</div>
+		
 <%-- JS 변수 전달 --%>
 <input type="hidden" id="hiddenProjectId" value="${projectId}">
+<input type="hidden" id="hiddenIsManager" value="${isManager}">
+<input type="hidden" id="hiddenProjectStart" value="${projectStart}">
+<input type="hidden" id="hiddenProjectEnd" value="${projectEnd}">
+<input type="hidden" id="hiddenLoginEmpId" value="${loginEmpId}">
+
 <script>
     const contextPath = '${pageContext.request.contextPath}';
 </script>

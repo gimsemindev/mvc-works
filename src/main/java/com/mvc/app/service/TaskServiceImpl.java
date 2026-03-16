@@ -28,9 +28,9 @@ public class TaskServiceImpl implements TaskService{
 			
 			mapper.insertProjectTask(dto);
 			
-			//if (dto.getEmpId() != null && !dto.getEmpId().isEmpty()) {
+			if (dto.getEmpId() != null && !dto.getEmpId().isEmpty()) {
 				mapper.insertEmpTask(dto);
-			//}
+			}
 		} catch (Exception e) {
 			log.info("insertProjectTask : ", e);
 		}
@@ -91,8 +91,15 @@ public class TaskServiceImpl implements TaskService{
 	public void updateProjectTask(ProjectsDto dto) throws Exception {
 		try {
 			mapper.updateProjectTask(dto);
+			
 			if(dto.getEmpId() != null && !dto.getEmpId().isEmpty()) {
-				mapper.updateProjectEmp(dto);
+				int count = mapper.countEmpTask(dto.getTaskId());
+				
+	            if(count > 0) {
+	                mapper.updateProjectEmp(dto); 
+	            } else {
+	                mapper.insertEmpTask(dto);
+	            }
 			}
 		} catch (Exception e) {
 			log.info("updateProjectTask : ", e);

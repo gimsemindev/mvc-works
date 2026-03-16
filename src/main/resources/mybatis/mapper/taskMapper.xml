@@ -38,8 +38,13 @@
 	        #{empId, jdbcType=VARCHAR},
 	        #{taskId},
 	        TO_DATE(#{taskStartDate, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
-	        TO_DATE(#{taskEndDate, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
-	        '1'
+			TO_DATE(#{taskEndDate, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
+	        CASE
+	            WHEN TO_DATE(#{taskEndDate, jdbcType=VARCHAR}, 'YYYY-MM-DD') &lt; TRUNC(SYSDATE) THEN '4'
+	            WHEN TO_DATE(#{taskStartDate, jdbcType=VARCHAR}, 'YYYY-MM-DD') &lt;= TRUNC(SYSDATE)
+	            AND TO_DATE(#{taskEndDate, jdbcType=VARCHAR}, 'YYYY-MM-DD') &gt;= TRUNC(SYSDATE) THEN '2'
+	            ELSE '1'
+	        END
 	    )
 	</insert>
 	
@@ -49,7 +54,7 @@
 			TASKSTARTDATE = TO_DATE(#{taskStartDate, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
 			TASKENDDATE = TO_DATE(#{taskEndDate, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
 			TASKSTATUS = #{taskStatus}
-		WHERE TASKID = #{taskId}			 
+		WHERE TASKID = #{taskId}
 	</update> 
 	
 	<update id="updateProjectEmp" parameterType="com.mvc.app.domain.dto.ProjectsDto">
@@ -57,6 +62,13 @@
 			EMPID = #{empId}
 		WHERE TASKID = #{taskId}
 	</update>
+	
+	
+	<select id="countEmpTask" parameterType="String" resultType="int">
+	    SELECT COUNT(*) 
+	    FROM EMPTASK 
+	    WHERE TASKID = #{taskId}
+	</select>
 	
 
 	<!-- 계획 취소 / 삭제 불가로 -->
@@ -90,41 +102,41 @@
 
 	<select id="findByEmpId" resultType="map">
 		SELECT
-		p.TITLE AS projectName,
-		t.TASKTITLE AS title,
-		TO_CHAR(e.EMPTASKSTARTDATE,'YYYY-MM-DD') AS deadline
+			p.TITLE AS projectName,
+			t.TASKTITLE AS title,
+			TO_CHAR(e.EMPTASKSTARTDATE,'YYYY-MM-DD') AS deadline
 		FROM EMPTASK e
-		JOIN TASK t ON e.TASKID = t.TASKID
-		JOIN STAGE s ON t.STAGEID = s.STAGEID
-		JOIN PROJECT p ON s.PROJECTID = p.PROJECTID
+			JOIN TASK t ON e.TASKID = t.TASKID
+			JOIN STAGE s ON t.STAGEID = s.STAGEID
+			JOIN PROJECT p ON s.PROJECTID = p.PROJECTID
 		WHERE e.EMPID = #{empId}
-		AND e.EMPTASKSTATUS = '1'
+			AND e.EMPTASKSTATUS = '1'
 		ORDER BY e.EMPTASKSTARTDATE DESC
 	</select>
 
 	<!-- task 리스트 -->
 	<select id="tasklist" parameterType="map" resultType="com.mvc.app.domain.dto.ProjectsDto">
 		SELECT
-		t.taskId,
-		t.stageId,
-		s.projectId,
-		t.taskTitle,
-		t.taskDescription,
-		TO_CHAR(t.taskStartDate, 'YYYY-MM-DD') AS taskStartDate,
-		TO_CHAR(t.taskEndDate, 'YYYY-MM-DD') AS taskEndDate,
-		t.taskStatus,
-		t.taskcreator,
-		TO_CHAR(t.taskCreatedDate, 'YYYY-MM-DD') AS taskCreatedDate,
-		s.stgTitle,
-		s.sequence,
-		e1.NAME AS taskCreaterName,
-		e2.NAME AS name
+			t.taskId,
+			t.stageId,
+			s.projectId,
+			t.taskTitle,
+			t.taskDescription,
+			TO_CHAR(t.taskStartDate, 'YYYY-MM-DD') AS taskStartDate,
+			TO_CHAR(t.taskEndDate, 'YYYY-MM-DD') AS taskEndDate,
+			t.taskStatus,
+			t.taskcreator,
+			TO_CHAR(t.taskCreatedDate, 'YYYY-MM-DD') AS taskCreatedDate,
+			s.stgTitle,
+			s.sequence,
+			e1.NAME AS taskCreaterName,
+			e2.NAME AS name
 		FROM TASK t
-		LEFT JOIN STAGE s ON t.stageId = s.stageId
-		LEFT JOIN EMPLOYEE2 e1 ON t.taskcreator = e1.empId
-		LEFT JOIN EMPTASK ep
-		ON t.taskId = ep.taskId
-		LEFT JOIN EMPLOYEE2 e2 ON ep.empId = e2.empId
+			LEFT JOIN STAGE s ON t.stageId = s.stageId
+			LEFT JOIN EMPLOYEE2 e1 ON t.taskcreator = e1.empId
+			LEFT JOIN EMPTASK ep
+			ON t.taskId = ep.taskId
+			LEFT JOIN EMPLOYEE2 e2 ON ep.empId = e2.empId
 		WHERE s.PROJECTID = #{projectId}
 		<if test="kwd != null and kwd != ''">
 			AND

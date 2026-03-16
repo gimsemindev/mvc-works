@@ -282,13 +282,6 @@ body {
     outline: none;
 }
 
-/* 상태별 색상 */
-.cell-select.status-cell[data-status="1"] { color: #6c757d; }  /* 시작전 - 회색 */
-.cell-select.status-cell[data-status="2"] { color: #0d6efd; }  /* 진행 - 파랑 */
-.cell-select.status-cell[data-status="3"] { color: #fd7e14; }  /* 승인대기 - 주황 */
-.cell-select.status-cell[data-status="4"] { color: #198754; }  /* 종료 - 초록 */
-.cell-select.status-cell[data-status="5"] { color: #dc3545; }  /* 지연 - 빨강 */
-.cell-select.status-cell[data-status="6"] { color: #adb5bd; }  /* 중단 - 연회색 */
 
 /* 왼쪽 리스트 영역 */
 .task-list-side {
@@ -357,11 +350,8 @@ body {
     position: absolute;
     top: 14px;
     height: 24px;
-    background-color: var(--primary-blue);
     border-radius: 4px;
     z-index: 10;
-    left: 5px !important; 
-    width: calc(100% - 10px) !important; 
     padding-left: 5px;
 }
 
@@ -518,3 +508,18 @@ body {
 }
 
 .btn-submit:hover { background: #3a5bbf; }
+
+input:disabled, select:disabled {
+    background-color: transparent;
+    border: none;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.is-weekend-cell {
+    background-color: #f0f0f0;
+}
+
+.grid-header-cell.is-weekend {
+    background-color: #e8e8e8;
+}

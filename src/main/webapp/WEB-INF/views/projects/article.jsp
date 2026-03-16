@@ -39,12 +39,12 @@
 				<div class="member-list">
 				    <c:forEach var="m" items="${members}">
 				            <div class="member-chip">
-				                <div class="member-avatar-text" data-empid="${m.EMPID}">
-				                    ${fn:substring(m.NAME, 0, 1)}
+				                <div class="member-avatar-text" data-empid="${m.empId}">
+				                    ${fn:substring(m.name, 0, 1)}
 				                </div>
 				                <span class="member-name text-dark">
-				                ${m.NAME}
-				                <c:if test="${m.ROLE eq 'M'}"></c:if>
+				                ${m.name}
+				                <c:if test="${m.role eq 'M'}"></c:if>
 				                </span>
 				            </div>
 				    </c:forEach>
@@ -78,12 +78,12 @@
 				    <span class="info-label">Project Manager</span>
 				    <div class="manager-info">
 				        <c:forEach var="m" items="${members}">
-				            <c:if test="${m.ROLE eq 'M'}"> <%-- ROLE이 M인 사람만 출력 --%>
-				                <div class="member-avatar-text" data-empid="${m.EMPID}">
-				                    ${fn:substring(m.NAME, 0, 1)}
+				            <c:if test="${m.role eq 'M'}"> <%-- ROLE이 M인 사람만 출력 --%>
+				                <div class="member-avatar-text" data-empid="${m.empId}">
+				                    ${fn:substring(m.name, 0, 1)}
 				                </div>
 				                <div>
-				                    <div class="manager-name">${m.NAME}</div>
+				                    <div class="manager-name">${m.name}</div>
 				                </div>
 				            </c:if>
 				        </c:forEach>
