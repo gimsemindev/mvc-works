@@ -1,0 +1,130 @@
+/* 전체 */
+.main-content{
+	margin-left:260px;
+	padding:30px 40px;
+	background:#f8f9fc;
+	min-height:100vh;
+}
+
+/* 제목 */
+.page-title{
+	font-size:20px;
+	font-weight:700;
+	color:#2e3a59;
+	margin-bottom:18px;
+}
+
+/* 카드 */
+.notice-card{
+	background:white;
+	border-radius:8px;
+	border:1px solid #e3e6f0;
+	padding:25px 30px;
+}
+
+/* 폼 줄 */
+.form-row{
+	display:flex;
+	flex-direction:column;
+	margin-bottom:18px;
+}
+
+.form-row label{
+	font-size:13px;
+	font-weight:600;
+	margin-bottom:6px;
+	color:#374151;
+}
+
+/* input */
+.form-input{
+	padding:9px 12px;
+	border:1px solid #d1d5db;
+	border-radius:6px;
+	font-size:13px;
+}
+
+.form-input:focus{
+	outline:none;
+	border-color:#4e73df;
+	box-shadow:0 0 0 2px rgba(78,115,223,0.15);
+}
+
+/* textarea */
+.form-textarea{
+	min-height:240px;
+	padding:10px 12px;
+	border:1px solid #d1d5db;
+	border-radius:6px;
+	font-size:13px;
+	resize:vertical;
+}
+
+.form-textarea:focus{
+	outline:none;
+	border-color:#4e73df;
+	box-shadow:0 0 0 2px rgba(78,115,223,0.15);
+}
+
+/* 프로젝트 select */
+.project-select{
+	width:260px;
+	padding:8px 10px;
+	border:1px solid #d1d5db;
+	border-radius:6px;
+	font-size:13px;
+	background:white;
+}
+
+/* 파일 */
+.file-area input{
+	margin-bottom:8px;
+}
+
+.file-list{
+	font-size:12px;
+	color:#6b7280;
+	list-style:none;
+	padding-left:0;
+}
+
+/* 버튼 영역 */
+.form-buttons{
+	display:flex;
+	justify-content:flex-end;
+	gap:10px;
+	margin-top:20px;
+}
+
+/* 버튼 */
+.btn-save{
+	background:#4e73df;
+	color:white;
+	border:none;
+	padding:8px 16px;
+	border-radius:6px;
+	cursor:pointer;
+	font-size:13px;
+}
+
+.btn-save:hover{
+	background:#3f5ec7;
+}
+
+.btn-cancel{
+	background:white;
+	border:1px solid #d1d5db;
+	padding:8px 16px;
+	border-radius:6px;
+	cursor:pointer;
+	font-size:13px;
+}
+
+.btn-cancel:hover{
+	background:#f3f4f6;
+}
+
+/* vue 로딩 숨김 */
+[v-cloak]{
+	display:none;
+}

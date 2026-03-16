@@ -83,7 +83,7 @@
 									v-if="item.isnotice === 1" class="badge-notice">공지</span> <span
 									v-else>{{ item.noticenum }}</span></td>
 								<td>{{ item.subject }}</td>
-								<td style="text-align: center">{{ item.authorName }}</td>
+								<td style="text-align: center">{{ item.authorName }} 매니저</td>
 								<td style="text-align: center">{{ item.regdate }}</td>
 								<td style="text-align: center">{{ item.hitcount }}</td>
 							</tr>
@@ -128,9 +128,23 @@ document.addEventListener('DOMContentLoaded', function() {
 				return res
 			},
 			async fetchMyProjects() {
-				const res = await this.safeApi('/api/projectnotice/myprojects');
-				if(!res) return;
-				try { this.myProjects = await res.json() } catch(e){ console.error("프로젝트 목록 로드 실패:", await res.text()) }
+			    const res = await this.safeApi('/api/projectnotice/myprojects');
+			    if(!res) return;
+
+			    try {
+			        const data = await res.json();
+			        this.myProjects = data;
+
+			        const params = new URLSearchParams(window.location.search);
+			        const pid = params.get("projectid");
+
+			        if(pid){
+			            this.selectedProjectId = pid;
+			        }
+
+			    } catch(e){
+			        console.error("로드 실패:", await res.text());
+			    }
 			},
 			onProjectChange() {
 				this.keyword = '';
@@ -170,8 +184,13 @@ document.addEventListener('DOMContentLoaded', function() {
 				try { this.detail = await res.json() }
 				catch(e){ console.error("공지사항 상세 JSON 파싱 실패"); alert("공지사항 내용을 불러오지 못했습니다."); }
 			},
-				goToForm() {
-				    window.location.href = ctx + '/projects/projectNotice/projectNoticeForm';
+			goToForm() {
+			    if(!this.selectedProjectId){
+			        alert("프로젝트를 먼저 선택하세요");
+			        return;
+			    }
+
+			    window.location.href = ctx + '/projects/projectNotice/projectNoticeForm?projectid=' + this.selectedProjectId;
 			}
 		}
 	}).mount('#app')

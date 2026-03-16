@@ -179,4 +179,8 @@ public class ProjectNoticeServiceImpl implements ProjectNoticeService {
 			mapper.insertFile(fileDto);
 		}
 	}
+
+	public boolean isManager(String empId, long projectid) {
+	    return mapper.isManager(empId, projectid) > 0;
+	}
 }

@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mvc.app.common.MyUtil;
 import com.mvc.app.domain.dto.ProjectsDto;
+import com.mvc.app.mapper.ProjectNoticeMapper;
 import com.mvc.app.mapper.ProjectsMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,11 @@ public class ProjectServiceImpl implements ProjectService {
 	private final ProjectsMapper mapper;
 	private final MyUtil myUtil;
 	private final ObjectMapper objectMapper;
+	private final ProjectNoticeMapper noticeMapper;
+
+	public List<Map<String, Object>> getManagerProjects(String empId) {
+		return noticeMapper.getManagerProjects(empId);
+	}
 
 	@Transactional
 	@Override
@@ -154,7 +160,7 @@ public class ProjectServiceImpl implements ProjectService {
 
 		return dto;
 	}
-
+	
 	@Override
 	public List<ProjectsDto> projectslist(String empId) throws Exception {
 

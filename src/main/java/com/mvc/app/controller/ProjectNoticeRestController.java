@@ -32,7 +32,7 @@ public class ProjectNoticeRestController {
 	@Value("${file.upload-root}")
 	private String uploadRoot;
 
-	// 내 프로젝트 목록
+	// 참여중인 프로젝트 목록
 	@GetMapping("/myprojects")
 	public ResponseEntity<?> myProjects(@AuthenticationPrincipal UserDetails user) {
 
@@ -70,7 +70,7 @@ public class ProjectNoticeRestController {
 		List<ProjectNoticeDto> list = service.listNotice(param);
 		int total = service.countNotice(param);
 
-		boolean isManager = isManager(empId, projectid);
+		boolean isManager = service.isManager(empId, projectid);
 
 		Map<String, Object> result = new HashMap<>();
 		result.put("list", list);
@@ -94,7 +94,8 @@ public class ProjectNoticeRestController {
 
 		String empId = user.getUsername();
 
-		if (!isManager(empId, projectid))
+		// 매니저 권한 체크
+		if (!service.isManager(empId, projectid))
 			return ResponseEntity.status(403).body("권한 없음");
 
 		try {
@@ -114,14 +115,5 @@ public class ProjectNoticeRestController {
 			log.error("insertNotice", e);
 			return ResponseEntity.status(500).body("등록 실패");
 		}
-	}
-
-	// 매니저 확인
-	private boolean isManager(String empId, long projectid) {
-
-		List<Map<String, Object>> list = service.getMyProjects(empId);
-
-		return list.stream().anyMatch(p -> projectid == Long.parseLong(p.get("PROJECTID").toString())
-				&& "M".equalsIgnoreCase(p.get("ROLE").toString()));
 	}
 }

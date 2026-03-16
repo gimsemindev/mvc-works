@@ -13,9 +13,10 @@ import com.mvc.app.domain.dto.NoticeFileDto;
 public interface NoticeMapper {
 
     // ── 공지사항 ──
+	List<Map<String,Object>> getManagerProjects(String empId);
     void insertNotice(NoticeDto dto) throws SQLException;
     void updateNotice(NoticeDto dto) throws SQLException;
-    void deleteNotice(long noticenum) throws SQLException;         // state = 0
+    void deleteNotice(long noticenum) throws SQLException;      
     List<NoticeDto> listNotice(Map<String, Object> map) throws SQLException;
     int countNotice(Map<String, Object> map) throws SQLException;
     NoticeDto getNotice(long noticenum) throws SQLException;

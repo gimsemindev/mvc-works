@@ -4,6 +4,16 @@
 
 <mapper namespace="com.mvc.app.mapper.ProjectNoticeMapper">
 
+	<!-- ───────────────── 매니저 여부 확인 -->
+
+	<select id="isManager" resultType="int">
+		SELECT COUNT(*)
+		FROM empproject
+		WHERE empid = #{empId}
+		AND projectid = #{projectid}
+		AND UPPER(role) = 'M'
+	</select>
+
 	<!-- ───────────────── 등록 -->
 	<insert id="insertNotice"
 		parameterType="com.mvc.app.domain.dto.ProjectNoticeDto">
@@ -46,10 +56,12 @@
 		UPDATE projectnotice
 		SET
 		subject = #{subject},
-		content = #{content},
+		content =
+		#{content},
 		isnotice = #{isnotice},
 		updatedate = SYSDATE
-		WHERE noticenum = #{noticenum}
+		WHERE noticenum
+		= #{noticenum}
 
 	</update>
 
@@ -58,7 +70,8 @@
 	<update id="deleteNotice" parameterType="long">
 
 		UPDATE projectnotice
-		SET state = 0
+		SET
+		state = 0
 		WHERE noticenum = #{noticenum}
 
 	</update>
@@ -68,7 +81,8 @@
 	<update id="increaseHit" parameterType="long">
 
 		UPDATE projectnotice
-		SET hitcount = hitcount + 1
+		SET
+		hitcount = hitcount + 1
 		WHERE noticenum = #{noticenum}
 
 	</update>
@@ -88,11 +102,13 @@
 		TO_CHAR(n.regdate,'YYYY-MM-DD') regdate,
 		TO_CHAR(n.updatedate,'YYYY-MM-DD') updatedate,
 		n.authorempid,
-		e.name authorName
+		e.name
+		authorName
 
 		FROM projectnotice n
 		LEFT JOIN employee2 e
-		ON n.authorempid = e.empid
+		ON n.authorempid =
+		e.empid
 
 		WHERE n.state = 1
 		AND n.projectid = #{projectid}
@@ -100,7 +116,8 @@
 		<if test="keyword != null and keyword != ''">
 			AND (
 			n.subject LIKE '%' || #{keyword} || '%'
-			OR n.content LIKE '%' || #{keyword} || '%'
+			OR n.content
+			LIKE '%' || #{keyword} || '%'
 			)
 		</if>
 
@@ -109,7 +126,8 @@
 		n.noticenum DESC
 
 		OFFSET #{offset} ROWS
-		FETCH NEXT #{pageSize} ROWS ONLY
+		FETCH
+		NEXT #{pageSize} ROWS ONLY
 
 	</select>
 
@@ -121,12 +139,14 @@
 		FROM projectnotice
 
 		WHERE state = 1
-		AND projectid = #{projectid}
+		AND projectid =
+		#{projectid}
 
 		<if test="keyword != null and keyword != ''">
 			AND (
 			subject LIKE '%' || #{keyword} || '%'
-			OR content LIKE '%' || #{keyword} || '%'
+			OR content LIKE
+			'%' || #{keyword} || '%'
 			)
 		</if>
 
@@ -148,15 +168,18 @@
 		TO_CHAR(n.regdate,'YYYY-MM-DD') regdate,
 		TO_CHAR(n.updatedate,'YYYY-MM-DD') updatedate,
 		n.authorempid,
-		e.name authorName,
+		e.name
+		authorName,
 		p.title projectName
 
 		FROM projectnotice n
-		LEFT JOIN employee2 e
+		LEFT JOIN employee2
+		e
 		ON n.authorempid = e.empid
 
 		LEFT JOIN project p
-		ON n.projectid = p.projectid
+		ON n.projectid =
+		p.projectid
 
 		WHERE n.noticenum = #{noticenum}
 
@@ -172,11 +195,13 @@
 		p.title projectname,
 		ep.role
 
-		FROM empproject ep
+		FROM
+		empproject ep
 		JOIN project p
 		ON ep.projectid = p.projectid
 
-		WHERE ep.empid = #{empId}
+		WHERE ep.empid
+		= #{empId}
 
 		ORDER BY p.title
 
@@ -213,7 +238,8 @@
 	<!-- ───────────────── 파일 삭제 -->
 	<delete id="deleteFile" parameterType="long">
 
-		DELETE FROM projectnoticefile
+		DELETE FROM
+		projectnoticefile
 		WHERE filenum = #{filenum}
 
 	</delete>
@@ -234,7 +260,8 @@
 
 		WHERE noticenum = #{noticenum}
 
-		ORDER BY filenum
+		ORDER BY
+		filenum
 
 	</select>
 
