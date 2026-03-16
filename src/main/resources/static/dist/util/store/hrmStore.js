@@ -24,7 +24,7 @@ export const useHrmStore = defineStore('hrm', {
 
         pageInfo: { totalCount: 0, totalPage: 1, pageSize: 10 },
         pagination: null,
-        loading: false,
+        loading: true,
 
         sortCol: '',
         sortDir: 'asc',
@@ -97,6 +97,11 @@ export const useHrmStore = defineStore('hrm', {
             this.searchParams.pmoY = (value === 'Y');
             this.searchParams.pmoN = (value === 'N');
         },
+		
+		async initialize() {
+				    await this.loadCodes();  // 공통코드 완료 후
+				    await this.fetchList();  // 목록 조회
+		},
 		
 		//행 추가
         async addRow() {

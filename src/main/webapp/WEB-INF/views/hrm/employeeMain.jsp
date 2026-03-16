@@ -43,6 +43,7 @@
 	import { createPinia }          from 'pinia';
 	import { useHrmStore }          from 'hrmStore';
 
+	const pinia = createPinia(); //pinia 생성
 	const app = createApp({
 		setup() {
 			const store = useHrmStore();
@@ -50,17 +51,14 @@
 			store.sessionName = '${sessionScope.member.name}';
 
 			onMounted(() => {
-				store.loadCodes(); // 부서, 직급, 재직상태 공통코드
-				store.fetchList();
+				store.initialize();
 			});
 
 			return { store };
 		}
 	});
-
-	const pinia = createPinia();
-	app.use(pinia);
-	app.mount('#vue-app');
+	app.use(pinia); //pinia 등록
+	app.mount('#vue-app'); //마운트
 </script>
 
 <jsp:include page="/WEB-INF/views/layout/footerResources.jsp"/>

@@ -28,8 +28,8 @@ public class HrmServiceImpl implements HrmService {
     private final HrmMapper       mapper;
     private final PasswordEncoder passwordEncoder;   // BCryptPasswordEncoder 빈 주입 (strength 10, 단건 등록용)
 
-    // 엑셀 대량 업로드 전용 저강도 인코더 (strength 4 → 1회 약 5~10ms)
-    // 업로드 초기 비밀번호는 첫 로그인 후 변경을 전제로 하므로 strength 완화
+    // 엑셀 대량 업로드 전용 저강도 인코더
+    // 임시 비밀번호 이므로 strength 완화
     private static final PasswordEncoder BULK_ENCODER = new BCryptPasswordEncoder(4);
 
     //조회 건 수
@@ -236,7 +236,7 @@ public class HrmServiceImpl implements HrmService {
             hFont.setColor(IndexedColors.WHITE.getIndex());
             headerStyle.setFont(hFont);
 
-            // 헤더 행만 생성 (데이터 행 없음)
+            // 헤더 행
             Row header = sheet.createRow(0);
             for (int i = 0; i < templateHeaders.length; i++) {
                 Cell cell = header.createCell(i);
@@ -245,7 +245,7 @@ public class HrmServiceImpl implements HrmService {
                 sheet.setColumnWidth(i, 5000);
             }
 
-            // 안내 행 (2번째 행 — 연한 노란 배경)
+            // 안내 행
             CellStyle guideStyle = wb.createCellStyle();
             guideStyle.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
             guideStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
@@ -256,7 +256,7 @@ public class HrmServiceImpl implements HrmService {
 
             Row guideRow = sheet.createRow(1);
             String[] guides = {
-                "예) 홍길동", "예) password123", "예) D00121", "예) RANK03",
+                "예) 홍길동", "예) pwd1234", "예) D00121", "예) RANK03",
                 "예) AUTH01", "예) 1", "예) ES01"
             };
             for (int i = 0; i < guides.length; i++) {
@@ -271,7 +271,7 @@ public class HrmServiceImpl implements HrmService {
         }
     }
 
-    // 엑셀 업로드 (Apache POI) — 배치 INSERT 방식
+    // 엑셀 업로드
     @Override
     @Transactional
     public int importExcel(MultipartFile file) throws Exception {
@@ -280,7 +280,7 @@ public class HrmServiceImpl implements HrmService {
             Sheet sheet  = wb.getSheetAt(0);
             int lastRow  = sheet.getLastRowNum();
 
-            // ① MAX(empId) 는 업로드 시작 전 딱 한 번만 조회
+            // 사원번호 자동채번
             String maxStr  = mapper.findMaxEmpId();
             long   nextSeq = Long.parseLong(maxStr) + 1;
 
@@ -293,7 +293,7 @@ public class HrmServiceImpl implements HrmService {
                 String name = cellStr(row, 0);
                 if (name.isBlank()) continue;
 
-                // ② DB 호출 없이 Java에서 순번 증가
+                // 사원번호 자동채번 Java 처리
                 String nextEmpId = String.format("%011d", nextSeq++);
 
                 HrmDto dto = new HrmDto();
@@ -311,17 +311,17 @@ public class HrmServiceImpl implements HrmService {
                 String statusCode = cellStr(row, 6);
                 dto.setEmpStatusCode(statusCode.isBlank() ? "ES01" : statusCode);
 
-                // ③ 엑셀 업로드 전용 저강도 인코더로 암호화 (strength 4)
-                //    단건 등록(strength 10, ~150ms)과 달리 대량 처리 성능 우선
+                //엑셀 업로드 전용 저강도 인코더로 암호화 4
+                //단건 등록 10
                 String pw = cellStr(row, 1);
-                dto.setPassword(BULK_ENCODER.encode(pw.isBlank() ? "password123" : pw));
+                dto.setPassword(BULK_ENCODER.encode(pw.isBlank() ? "pwd1234" : pw));
 
                 dto.setEnabled(1);
                 batchList.add(dto);
                 count++;
             }
 
-            // ④ 1,000건 단위로 배치 INSERT (Oracle INSERT ALL 한계 고려)
+            //1000건 단위로 배치
             int batchSize = 1000;
             for (int i = 0; i < batchList.size(); i += batchSize) {
                 List<HrmDto> chunk = batchList.subList(i,
