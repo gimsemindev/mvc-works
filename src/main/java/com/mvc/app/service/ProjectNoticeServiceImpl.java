@@ -20,90 +20,163 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProjectNoticeServiceImpl implements ProjectNoticeService {
 
-    private final ProjectNoticeMapper mapper;
+	private final ProjectNoticeMapper mapper;
 
-    @Value("${file.upload-root}")
-    private String uploadRoot;
+	@Value("${file.upload-root}")
+	private String uploadRoot;
 
-    @Override
-    @Transactional
-    public void insertNotice(ProjectNoticeDto dto, List<MultipartFile> files) throws Exception {
-        mapper.insertNotice(dto);
-        saveFiles(files, dto.getNoticenum());
-    }
+	// 공지 등록
+	@Override
+	@Transactional
+	public void insertNotice(ProjectNoticeDto dto, List<MultipartFile> files) throws Exception {
 
-    @Override
-    @Transactional
-    public void updateNotice(ProjectNoticeDto dto, List<MultipartFile> files) throws Exception {
-        mapper.updateNotice(dto);
-        saveFiles(files, dto.getNoticenum());
-    }
+		mapper.insertNotice(dto);
 
-    @Override
-    @Transactional
-    public void deleteNotice(long noticenum) throws Exception {
-        mapper.deleteNotice(noticenum);
-    }
+		if (files != null && !files.isEmpty()) {
+			saveFiles(files, dto.getNoticenum());
+		}
+	}
 
-    @Override
-    public List<ProjectNoticeDto> listNotice(Map<String, Object> param) {
-        return mapper.listNotice(param);
-    }
+	// 공지 수정
+	@Override
+	@Transactional
+	public void updateNotice(ProjectNoticeDto dto, List<MultipartFile> files) throws Exception {
 
-    @Override
-    public int countNotice(Map<String, Object> param) {
-        return mapper.countNotice(param);
-    }
+		mapper.updateNotice(dto);
 
-    @Override
-    public ProjectNoticeDto getNotice(long noticenum) {
-        mapper.increaseHit(noticenum);
-        ProjectNoticeDto dto = mapper.getNotice(noticenum);
-        if (dto != null) {
-            dto.setFiles(mapper.getFiles(noticenum));
-        }
-        return dto;
-    }
+		if (files != null && !files.isEmpty()) {
+			saveFiles(files, dto.getNoticenum());
+		}
+	}
 
-    @Override
-    public List<Map<String, Object>> getMyProjects(String empId) {
-        return mapper.getMyProjects(empId);
-    }
+	// 공지 삭제
+	@Override
+	@Transactional
+	public void deleteNotice(long noticenum) throws Exception {
 
-    @Override
-    @Transactional
-    public void deleteFile(long filenum) throws Exception {
-        ProjectNoticeFileDto file = mapper.getFile(filenum);
-        if (file != null) {
-            File f = new File(uploadRoot + File.separator + file.getSavefilename());
-            if (f.exists()) f.delete();
-            mapper.deleteFile(filenum);
-        }
-    }
+		List<ProjectNoticeFileDto> files = mapper.getFiles(noticenum);
 
-    @Override
-    public ProjectNoticeFileDto getFile(long filenum) {
-        return mapper.getFile(filenum);
-    }
+		if (files != null && !files.isEmpty()) {
+			for (ProjectNoticeFileDto file : files) {
 
-    // ── 파일 저장 헬퍼 ──
-    private void saveFiles(List<MultipartFile> files, long noticenum) throws Exception {
-        if (files == null || files.isEmpty()) return;
-        File dir = new File(uploadRoot);
-        if (!dir.exists()) dir.mkdirs();
+				File f = new File(uploadRoot, file.getSavefilename());
 
-        for (MultipartFile mf : files) {
-            if (mf.isEmpty()) continue;
-            String saveName = UUID.randomUUID().toString().replace("-", "") + "_" + mf.getOriginalFilename();
-            File dest = new File(uploadRoot + File.separator + saveName);
-            mf.transferTo(dest);
+				if (f.exists()) {
+					f.delete();
+				}
 
-            ProjectNoticeFileDto fDto = new ProjectNoticeFileDto();
-            fDto.setSavefilename(saveName);
-            fDto.setOriginalfilename(mf.getOriginalFilename());
-            fDto.setFilesize(mf.getSize());
-            fDto.setNoticenum(noticenum);
-            mapper.insertFile(fDto);
-        }
-    }
+				mapper.deleteFile(file.getFilenum());
+			}
+		}
+
+		mapper.deleteNotice(noticenum);
+	}
+
+	// 공지 목록
+	@Override
+	public List<ProjectNoticeDto> listNotice(Map<String, Object> param) {
+		return mapper.listNotice(param);
+	}
+
+	// 공지 개수
+	@Override
+	public int countNotice(Map<String, Object> param) {
+		return mapper.countNotice(param);
+	}
+
+	// 공지 단건
+	@Override
+	@Transactional
+	public ProjectNoticeDto getNotice(long noticenum) {
+
+		mapper.increaseHit(noticenum);
+
+		ProjectNoticeDto dto = mapper.getNotice(noticenum);
+
+		if (dto != null) {
+			dto.setFiles(mapper.getFiles(noticenum));
+		}
+
+		return dto;
+	}
+
+	// 내 프로젝트 목록
+	@Override
+	public List<Map<String, Object>> getMyProjects(String empId) {
+		return mapper.getMyProjects(empId);
+	}
+
+	// 파일 삭제
+	@Override
+	@Transactional
+	public void deleteFile(long filenum) throws Exception {
+
+		ProjectNoticeFileDto file = mapper.getFile(filenum);
+
+		if (file == null)
+			return;
+
+		File f = new File(uploadRoot, file.getSavefilename());
+
+		if (f.exists()) {
+			f.delete();
+		}
+
+		mapper.deleteFile(filenum);
+	}
+
+	// 파일 조회
+	@Override
+	public ProjectNoticeFileDto getFile(long filenum) {
+		return mapper.getFile(filenum);
+	}
+
+	// 첨부파일 목록
+	@Override
+	public List<ProjectNoticeFileDto> getFiles(long noticenum) {
+		return mapper.getFiles(noticenum);
+	}
+
+	// 파일 저장
+	private void saveFiles(List<MultipartFile> files, long noticenum) throws Exception {
+
+		File dir = new File(uploadRoot);
+
+		if (!dir.exists()) {
+			dir.mkdirs();
+		}
+
+		for (MultipartFile mf : files) {
+
+			if (mf == null || mf.isEmpty())
+				continue;
+
+			String origin = mf.getOriginalFilename();
+
+			if (origin == null)
+				continue;
+
+			String ext = "";
+
+			int idx = origin.lastIndexOf(".");
+			if (idx != -1) {
+				ext = origin.substring(idx);
+			}
+
+			String saveName = UUID.randomUUID().toString().replace("-", "") + ext;
+
+			File dest = new File(uploadRoot, saveName);
+
+			mf.transferTo(dest);
+
+			ProjectNoticeFileDto fileDto = new ProjectNoticeFileDto();
+
+			fileDto.setSavefilename(saveName);
+			fileDto.setOriginalfilename(origin);
+			fileDto.setFilesize(mf.getSize());
+			fileDto.setNoticenum(noticenum);
+
+			mapper.insertFile(fileDto);
+		}
+	}
 }
