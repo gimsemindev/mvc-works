@@ -155,21 +155,34 @@
 
 	<div class="card notice-card">
 		<div class="card-title">공지사항</div>
-		<div class="notice-slider">
-			<div class="notice-track">
-				<c:forEach var="n" items="${noticeList}" varStatus="s">
-					<c:if test="${s.index % 2 == 0}">
-						<div class="notice-slide">
-					</c:if>
-					<div class="notice-item">
-						<div class="notice-subject">공지 타이틀</div>
-						<div class="notice-date">공지일</div>
+
+		<c:choose>
+			<c:when test="${empty noticeList}">
+				<div class="notice-empty">등록된 공지사항이 없습니다.</div>
+			</c:when>
+
+			<c:otherwise>
+				<div class="notice-slider">
+					<div class="notice-track">
+						<c:forEach var="n" items="${noticeList}" varStatus="s">
+							<c:if test="${s.index % 2 == 0}">
+								<div class="notice-slide">
+							</c:if>
+
+							<div class="notice-item">
+								<div class="notice-subject">${n.subject}</div>
+								<div class="notice-date">${n.regDate}</div>
+							</div>
+
+							<c:if test="${s.index % 2 == 1 || s.last}">
 					</div>
-					<c:if test="${s.index % 2 == 1 || s.last}">
-			</div>
-			</c:if>
-			</c:forEach>
-		</div>
+					</c:if>
+					</c:forEach>
+				</div>
+	</div>
+	</c:otherwise>
+	</c:choose>
+
 	</div>
 	</div>
 

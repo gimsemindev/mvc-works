@@ -341,6 +341,15 @@
 	flex: 0 0 auto;
 }
 
+.notice-empty{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:90px;
+    color:#888;
+    font-size:14px;
+}
+
 /* FullCalendar 기본 레이아웃 보정 */
 .fc {
 	height: auto !important;
