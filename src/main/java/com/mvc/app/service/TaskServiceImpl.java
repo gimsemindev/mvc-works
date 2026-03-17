@@ -36,9 +36,6 @@ public class TaskServiceImpl implements TaskService{
 		}
 	}
 	
-
-
-
 	@Override
 	public void cancelProjectTask(String taskId) throws Exception {
 		// TODO Auto-generated method stub
@@ -86,7 +83,6 @@ public class TaskServiceImpl implements TaskService{
 		return list;
 	}
 
-
 	@Override
 	public void updateProjectTask(ProjectsDto dto) throws Exception {
 		try {
@@ -108,7 +104,6 @@ public class TaskServiceImpl implements TaskService{
 		
 	}
 
-
 	@Override
 	public int taskDataCount(Map<String, Object> map) throws Exception {
 		int result = 0;
@@ -120,6 +115,31 @@ public class TaskServiceImpl implements TaskService{
 		}
 		
 		return result;
+	}
+
+	@Override
+	public void insertTaskDailylog(ProjectsDto dto) throws Exception {
+		try {
+			mapper.insertTaskDailylog(dto);
+		} catch (Exception e) {
+			log.info("insertTaskDailylog : ", e);
+			throw e;
+		}
+		
+	}
+
+	@Override
+	public List<ProjectsDto> taskDailylist(String empTaskId) throws Exception {
+		List<ProjectsDto> list = null;
+		
+		try {
+			list = mapper.taskDailylist(empTaskId);
+			
+		} catch (Exception e) {
+			log.info("taskDailylist : ", e);
+			throw e;
+		}
+		return list;
 	}
 
 

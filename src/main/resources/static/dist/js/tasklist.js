@@ -260,12 +260,15 @@ function closeTaskModal() {
     document.getElementById('taskModal').style.display = 'none';
 }
 
+function closeTaskDailyModal() {
+    document.getElementById('taskDailyModal').style.display = 'none';
+}
 
 // 이벤트 바인딩
 document.addEventListener('DOMContentLoaded', function () {
 
-    applyStageColors();  // 배지 색상 먼저
-    renderGanttChart();  // 그 다음 차트
+    applyStageColors();
+    renderGanttChart();
 
     document.getElementById('taskModal').addEventListener('click', function (e) {
         if (e.target === this) closeTaskModal();
@@ -281,6 +284,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (this.value !== 'direct') {
             document.getElementById('modalDirectStage').value = '';
         }
+    });
+
+    document.getElementById('dailyReason').addEventListener('input', function () {
+        this.style.border = '1px solid #d0d5dd';
+        document.getElementById('reasonRequired').style.display = 'none';
+        document.getElementById('reasonOptional').style.display = 'inline';
     });
 });
 
@@ -344,6 +353,8 @@ function submitTask() {
 
 let editMode = false;
 let currentTaskEmpId = '';
+let currentTaskId = '';
+let currentEmpTaskId = '';
 
 function toggleEditMode() {
     const isManager = document.getElementById('hiddenIsManager').value === 'true';
@@ -467,15 +478,26 @@ function updateStatusStyle(select) {
     select.style.color = colors[select.value] || '#1d2939';
 }
 
-
-function openTaskDailyModal(taskId, title, startStr, endStr, status, assignee, assigneeEmpId) {
-    const taskStatusMap = {
+function openTaskDailyModal(taskId, title, startStr, endStr, status, assignee, assigneeEmpId, stgTitle, projectTitle, empTaskId) {
+	
+	const taskStatusMap = {
         '1': '시작전', '2': '진행', '3': '승인대기',
         '4': '종료', '5': '지연', '6': '중단'
     };
 
+    currentTaskId = taskId;
     currentTaskEmpId = assigneeEmpId;
+    currentEmpTaskId = empTaskId;
 
+    document.getElementById('dailyModalProjectTitle').textContent = projectTitle || '프로젝트';
+    const stageEl = document.getElementById('dailyModalStage');
+    if (stgTitle) {
+        stageEl.textContent = stgTitle;
+        stageEl.style.display = '';
+    } else {
+        stageEl.textContent = '';
+        stageEl.style.display = 'none';
+    }
     document.getElementById('dailyModalTitle').textContent = title;
     document.getElementById('dailyModalPeriod').textContent = startStr + ' ~ ' + endStr;
     document.getElementById('dailyModalStatus').textContent = taskStatusMap[status] || status;
@@ -486,8 +508,12 @@ function openTaskDailyModal(taskId, title, startStr, endStr, status, assignee, a
 
     const start = new Date(startStr);
     const end = new Date(endStr);
-    const CELL_W = 40;
-    const WEEKEND_W = 12;
+
+    const totalDays = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
+    const isLong = totalDays > 62;
+
+    const CELL_W = isLong ? 15 : 40;
+    const WEEKEND_W = isLong ? 5 : 40;
 
     function toStr(d) {
         return d.getFullYear() + '-' +
@@ -502,43 +528,105 @@ function openTaskDailyModal(taskId, title, startStr, endStr, status, assignee, a
         cur.setDate(cur.getDate() + 1);
     }
 
-    // 헤더
-    allDates.forEach(d => {
-        const isWe = d.getDay() === 0 || d.getDay() === 6;
-        const cell = document.createElement('div');
-        cell.style.cssText = `
-            height:40px; background:${isWe ? '#e8e8e8' : '#f9fafb'};
-            border-right:1px solid #eaecf0; border-bottom:1px solid #eaecf0;
-            display:flex; align-items:center; justify-content:center;
-            font-weight:700; font-size:0.72rem;
-            color:${isWe ? '#ef4444' : '#667085'};
-        `;
-        cell.textContent = (d.getMonth()+1) + '/' + d.getDate();
-        grid.appendChild(cell);
-    });
-
-    // 체크 칸
-    allDates.forEach(d => {
-        const isWe = d.getDay() === 0 || d.getDay() === 6;
-        const cell = document.createElement('div');
-        cell.style.cssText = `
-            height:52px; background:${isWe ? '#f5f5f5' : '#fff'};
-            border-right:1px solid #eaecf0; border-bottom:1px solid #eaecf0;
-            display:flex; align-items:center; justify-content:center;
-            cursor:${isWe ? 'default' : 'pointer'}; transition:background 0.15s;
-        `;
-        cell.addEventListener('mouseenter', () => { if(!isWe) cell.style.background = '#f0f4ff'; });
-        cell.addEventListener('mouseleave', () => { cell.style.background = isWe ? '#f5f5f5' : '#fff'; });
-        cell.addEventListener('click', () => {
-            if (!isWe) openDailyCheckModal(toStr(d));
-        });
-        grid.appendChild(cell);
-    });
-
+    // grid 컬럼 너비 설정
     grid.style.gridTemplateColumns = allDates.map(d => {
         const isWe = d.getDay() === 0 || d.getDay() === 6;
         return (isWe ? WEEKEND_W : CELL_W) + 'px';
     }).join(' ');
+
+    // 헤더 먼저 렌더링
+    allDates.forEach(d => {
+        const isWe = d.getDay() === 0 || d.getDay() === 6;
+        const cell = document.createElement('div');
+        cell.style.cssText = `
+            border:1px solid #eaecf0;
+            height:40px; background:${isWe ? '#e8e8e8' : '#f9fafb'};
+            display:flex; align-items:center; justify-content:center;
+            font-weight:700; font-size:0.72rem; color:#667085;
+        `;
+        if (!isLong || !isWe) {
+            cell.textContent = (d.getMonth()+1) + '/' + d.getDate();
+        }
+        grid.appendChild(cell);
+    });
+
+	const statusStyle = {
+	    // 세련된 파스텔 초록 (UI 톤앤매너에 맞춤)
+	    'F': { bg: '#f0fdf4', color: '#22c55e', text: '완료' }, 
+	    
+	    // 차분하고 현대적인 파란색
+	    'I': { bg: '#eff6ff', color: '#3b82f6', text: '진행' }, 
+	    
+	    // 쨍하지 않고 부드러운 분홍색 (중단 느낌)
+	    'S': { bg: '#fef2f2', color: '#f87171', text: '중단' }  
+	};
+
+
+	// daily log 조회 후 체크칸 렌더링
+	fetch(contextPath + '/projects/task/dailylist?empTaskId=' + empTaskId)
+	    .then(res => res.json())
+	    .then(logs => {
+	        const logMap = {};
+	        logs.forEach(log => { logMap[log.logDate] = log.logStatus; });
+
+	        allDates.forEach(d => {
+	            const isWe = d.getDay() === 0 || d.getDay() === 6;
+	            const dateStr = toStr(d);
+	            const st = statusStyle[logMap[dateStr]];
+
+	            const cell = document.createElement('div');
+	            cell.style.cssText = `
+	                border:1px solid #eaecf0; height:60px; /* 높이 통일 */
+	                background:${isWe ? '#f9fafb' : '#fff'};
+	                display:flex; flex-direction:column; align-items:center; justify-content:center;
+	                cursor:${isWe ? 'default' : 'pointer'}; transition:all 0.2s;
+	                gap: 4px;
+	            `;
+
+	            if (st) {
+	                const dot = document.createElement('div');
+	                dot.style.cssText = `
+	                    width: 10px; height: 10px; border-radius: 50%;
+	                    background: ${st.color}; box-shadow: 0 0 4px ${st.color}44;
+	                `;
+	                
+	                const text = document.createElement('span');
+	                text.textContent = st.text;
+	                text.style.cssText = `
+	                    font-size: 0.65rem; font-weight: 700; color: ${st.color};
+	                `;
+
+	                cell.appendChild(dot);
+	                cell.appendChild(text);
+	                cell.style.background = isWe ? '#f2f4f7' : '#fcfdfd';
+	            }
+
+	            if (!isWe) {
+	                cell.addEventListener('mouseenter', () => { cell.style.background = '#f0f4ff'; });
+	                cell.addEventListener('mouseleave', () => { 
+	                    cell.style.background = st ? (isWe ? '#f2f4f7' : '#fcfdfd') : (isWe ? '#f9fafb' : '#fff'); 
+	                });
+	                cell.addEventListener('click', () => openDailyCheckModal(dateStr));
+	            }
+	            grid.appendChild(cell);
+	        });
+	    })
+	    .catch(err => {
+	        console.error('dailylist 조회 실패:', err);
+	        // API 실패 시에도 높이를 60px로 맞춰서 렌더링
+	        allDates.forEach(d => {
+	            const isWe = d.getDay() === 0 || d.getDay() === 6;
+	            const cell = document.createElement('div');
+	            cell.style.cssText = `
+	                border:1px solid #eaecf0; height:60px; /* 여기도 60px로 수정 */
+	                background:${isWe ? '#f0f0f0' : '#fff'};
+	                display:flex; align-items:center; justify-content:center;
+	                cursor:${isWe ? 'default' : 'pointer'};
+	            `;
+	            if (!isWe) cell.addEventListener('click', () => openDailyCheckModal(toStr(d)));
+	            grid.appendChild(cell);
+	        });
+	    });
 
     document.getElementById('taskDailyModal').style.display = 'flex';
 }
@@ -547,18 +635,100 @@ function closeTaskDailyModal() {
     document.getElementById('taskDailyModal').style.display = 'none';
 }
 
+let selectedDailyType = null;
+
 function openDailyCheckModal(dateStr) {
     const loginEmpId = document.getElementById('hiddenLoginEmpId').value;
-
-    if(loginEmpId !== currentTaskEmpId) {
+    if (loginEmpId !== currentTaskEmpId) {
         toast('담당자만 체크할 수 있습니다.');
         return;
     }
-
+    selectedDailyType = null;
     document.getElementById('checkDate').textContent = dateStr;
+    document.getElementById('dailyReason').value = '';
+    document.getElementById('dailyReason').style.border = '1px solid #d0d5dd';
+    document.getElementById('reasonRequired').style.display = 'none';
+    document.getElementById('reasonOptional').style.display = 'inline';
+    document.querySelectorAll('.daily-check-btn').forEach(b => b.classList.remove('selected'));
     document.getElementById('taskDailyCheckModal').style.display = 'flex';
+}
+
+function selectDailyType(type, btn) {
+    selectedDailyType = type;
+    document.querySelectorAll('.daily-check-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+
+    const reasonLabel = document.getElementById('reasonRequired');
+    const reasonOptional = document.getElementById('reasonOptional');
+    const reasonTextarea = document.getElementById('dailyReason');
+
+    if (type === 'progress' || type === 'stop') {
+        reasonLabel.style.display = 'inline';
+        reasonOptional.style.display = 'none';
+        reasonTextarea.style.border = '1px solid #f59e0b';
+        reasonTextarea.style.background = '#fffbeb';
+        reasonTextarea.placeholder = '사유를 입력해주세요. (필수)';
+        reasonTextarea.focus();
+    } else {
+        reasonLabel.style.display = 'none';
+        reasonOptional.style.display = 'inline';
+        reasonTextarea.style.border = '1px solid #d0d5dd';
+        reasonTextarea.style.background = '#fff';
+        reasonTextarea.placeholder = '사유를 입력해주세요. (선택)';
+    }
+}
+
+function submitDailyCheck() {
+	console.log('empTaskId:', currentEmpTaskId);
+	
+    if (!selectedDailyType) {
+        toast('오늘 Task 진행 상태와 사유 선택해주세요.');
+        return;
+    }
+
+    const reason = document.getElementById('dailyReason').value.trim();
+    if ((selectedDailyType === 'progress' || selectedDailyType === 'stop') && !reason) {
+        document.getElementById('reasonRequired').style.display = 'inline';
+        document.getElementById('reasonOptional').style.display = 'none';
+        document.getElementById('dailyReason').style.border = '1px solid #dc2626';
+        document.getElementById('dailyReason').focus();
+        toast('사유를 입력해주세요.');
+        return;
+    }
+
+    const dateStr = document.getElementById('checkDate').textContent;
+
+    fetch(contextPath + '/projects/task/dailyinsert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            empTaskId: currentEmpTaskId,
+            logDate: dateStr,
+            logStatus: selectedDailyType === 'done' ? 'F' : selectedDailyType === 'progress' ? 'I' : 'S',
+            logReason: reason
+        })
+    })
+    .then(res => {
+        if (res.ok) {
+            const msg = selectedDailyType === 'done' ? '완료' : selectedDailyType === 'progress' ? '진행' : '중단';
+            toast(msg + '으로 기록되었습니다.');
+            closeDailyCheckModal();
+        } else {
+            toast('저장 실패. 다시 시도해주세요.');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        toast('서버 오류가 발생했습니다.');
+    });
 }
 
 function closeDailyCheckModal() {
     document.getElementById('taskDailyCheckModal').style.display = 'none';
+    document.getElementById('dailyReason').value = '';
+    document.getElementById('dailyReason').style.border = '1px solid #d0d5dd';
+    document.getElementById('reasonRequired').style.display = 'none';
+    document.getElementById('reasonOptional').style.display = 'inline';
+    document.querySelectorAll('.daily-check-btn').forEach(b => b.classList.remove('selected'));
+    selectedDailyType = null;
 }

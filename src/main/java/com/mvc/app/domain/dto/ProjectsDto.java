@@ -70,5 +70,11 @@ public class ProjectsDto {
 	private String empTaskId;
 	private String empTaskStartDate;
 	private String empTaskEndDate;
-	private String empTaskStatus;	
+	private String empTaskStatus;
+	
+	// 매일 작업량
+	private String logId;
+	private String logDate;
+	private String logStatus; // 완료 - F / 진행 - I / 중단 - S
+	private String logReason; 
 }

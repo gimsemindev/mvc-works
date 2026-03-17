@@ -294,6 +294,7 @@ public class ProjectController {
 			String projectEnd = dto.getEndDate() != null ? dto.getEndDate().replace("/", "-") : "";
 			model.addAttribute("projectStart", projectStart);
 			model.addAttribute("projectEnd", projectEnd);
+			model.addAttribute("projectTitle", dto.getTitle());
 			
 			
 		} catch (Exception e) {
@@ -335,9 +336,33 @@ public class ProjectController {
 		}
 	}
 
-	@GetMapping("taskarticle2")
-	public String projecttaskarticle2() {
-	    return "projects/taskarticle2";
+	@PostMapping("task/dailyinsert")
+	@ResponseBody
+	public ResponseEntity<?> insertTaskDailylog(@RequestBody ProjectsDto dto) throws Exception {
+		try {
+			SessionInfo info = LoginMemberUtil.getSessionInfo();
+			dto.setEmpId(info.getEmpId());
+			
+			taskService.insertTaskDailylog(dto);
+			return ResponseEntity.ok().build();
+			
+		} catch (Exception e) {
+			log.info("insertTaskDailylog : ", e);
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		}
+	}
+	
+	@GetMapping("task/dailylist")
+	@ResponseBody
+	public ResponseEntity<?> taskDailylist(@RequestParam("empTaskId") String empTaskId) {
+	    try {
+	        List<ProjectsDto> logs = taskService.taskDailylist(empTaskId);
+	        return ResponseEntity.ok(logs);
+	        
+	    } catch (Exception e) {
+	        log.info("getDailyLogs : ", e);
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+	    }
 	}
 	
 	@GetMapping("ganttarticle")

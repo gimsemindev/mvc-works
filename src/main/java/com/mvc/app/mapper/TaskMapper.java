@@ -39,6 +39,9 @@ public interface TaskMapper {
 	// 사원 task리스트
 	List<Map<String, Object>> findByEmpId(@Param("empId") String empId);
 	
+	// task 매일 진행되는 작업
+	public void insertTaskDailylog(ProjectsDto dto) throws SQLException;
+	public List<ProjectsDto> taskDailylist(@Param("empTaskId") String empTaskId) throws SQLException;
 
 
 }

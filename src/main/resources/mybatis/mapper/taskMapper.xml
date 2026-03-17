@@ -130,7 +130,9 @@
 			s.stgTitle,
 			s.sequence,
 			e1.NAME AS taskCreaterName,
-			e2.NAME AS name
+			ep.EMPTASKID AS empTaskId,
+			e2.NAME AS name,
+			e2.empId AS empId
 		FROM TASK t
 			LEFT JOIN STAGE s ON t.stageId = s.stageId
 			LEFT JOIN EMPLOYEE2 e1 ON t.taskcreator = e1.empId
@@ -183,6 +185,25 @@
 			AND
 			<include refid="where-task" />
 		</if>
+	</select>
+	
+	<insert id="insertTaskDailylog" parameterType="com.mvc.app.domain.dto.ProjectsDto">
+		<selectKey keyProperty="logId" resultType="string" order="BEFORE">
+		 	SELECT 'TDL' || LPAD(TASKDAILY_SEQ.NEXTVAL, 12, '0') FROM DUAL
+		</selectKey>
+			INSERT INTO TASKDAILYLOG (logId, empTaskId, logDate, logStatus, logReason)
+				VALUES(#{logId}, #{empTaskId}, TO_DATE(#{logDate}, 'YYYY-MM-DD'), #{logStatus}, #{logReason, jdbcType=VARCHAR})
+	</insert>
+	
+
+	<select id="taskDailylist" parameterType="String" resultType="com.mvc.app.domain.dto.ProjectsDto">
+	    SELECT 
+	        TO_CHAR(logDate, 'YYYY-MM-DD') AS logDate,
+	        logStatus,
+	        logReason
+	    FROM TASKDAILYLOG
+	    WHERE empTaskId = #{empTaskId}
+	    ORDER BY logDate ASC
 	</select>
 	
 </mapper>

@@ -3,6 +3,8 @@ package com.mvc.app.service;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.repository.query.Param;
+
 import com.mvc.app.domain.dto.ProjectsDto;
 
 public interface TaskService {
@@ -18,4 +20,7 @@ public interface TaskService {
 	public List<ProjectsDto> tasklist(Map<String, Object> map);
 	
 	public int taskDataCount(Map<String, Object> map) throws Exception;
+	
+	public void insertTaskDailylog(ProjectsDto dto) throws Exception;
+	public List<ProjectsDto> taskDailylist(@Param("empTaskId") String empTaskId) throws Exception;
 }

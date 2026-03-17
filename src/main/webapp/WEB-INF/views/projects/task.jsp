@@ -81,7 +81,9 @@
 						            <tr data-task-id="${t.taskId}" data-start="${t.taskStartDate}" data-end="${t.taskEndDate}">
 						                <td class="text-center">${status.count}</td>
 						                <td class="fw-bold task-name"
-    											onclick="openTaskDailyModal('${t.taskId}', '${t.taskTitle}', '${t.taskStartDate}', '${t.taskEndDate}', '${t.taskStatus}', '${t.name}', '${projectStart}', '${projectEnd}')">
+    											onclick="openTaskDailyModal('${t.taskId}', '${t.taskTitle}', '${t.taskStartDate}', 
+    												'${t.taskEndDate}', '${t.taskStatus}', '${t.name}', '${t.empId}', 
+    												'${t.stgTitle}', '${projectTitle}', '${t.empTaskId}')">
 						                    <c:if test="${not empty t.stgTitle}">
 						                        <span class="stage-badge" data-stage="${t.stageId}">${t.stgTitle}</span>
 						                    </c:if>
@@ -234,65 +236,110 @@
 		<div id="taskDailyModal" class="modal-overlay" style="display:none;">
 		    <div class="modal-box" style="width: 700px;">
 		        <div class="modal-header">
-		            <h2 class="modal-title" id="dailyModalTitle">태스크 진행 현황</h2>
+		            <div style="display:flex; flex-direction:column; gap:2px;">
+		                <%-- 1줄: 프로젝트 제목 크게 --%>
+		                <div style="font-size:1.2rem; font-weight:800; color:#1d2939;" id="dailyModalProjectTitle">-</div>
+		            </div>
 		            <button class="modal-close" onclick="closeTaskDailyModal()">&times;</button>
 		        </div>
-		        <div class="modal-body">
-		
+		        
+		        <div class="modal-body" style="gap:6px;">
 		            <%-- 태스크 정보 --%>
-		            <div style="display:flex; gap:16px; margin-bottom:16px; padding:12px; background:#f8f9fa; border-radius:8px;">
-		                <div style="flex:1;">
-		                    <div style="font-size:0.72rem; font-weight:600; color:var(--text-muted); margin-bottom:4px;">기간</div>
-		                    <div style="font-size:0.88rem; font-weight:600;" id="dailyModalPeriod">-</div>
+		            <div style="padding:12px 14px;">
+		                <%-- 1줄: 단계 + Task 제목 --%>
+		                <div style="display:flex; align-items:center; gap:8px; margin-bottom:15px;">
+		                    <span style="font-size:0.95rem; font-weight:700; border-radius:20px; background:#eff4ff; color:#4e73df; white-space:nowrap;" id="dailyModalStage"></span>
 		                </div>
-		                <div style="flex:1;">
-		                    <div style="font-size:0.72rem; font-weight:600; color:var(--text-muted); margin-bottom:4px;">상태</div>
-		                    <div style="font-size:0.88rem; font-weight:600;" id="dailyModalStatus">-</div>
+		                <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+		                    <span style="font-size:0.92rem; font-weight:600; color:var(--text-muted);">제목 : </span>
+		                    <span style="font-size:1.05rem; font-weight:700; color:#1d2939; flex:1;" id="dailyModalTitle">-</span>
 		                </div>
-		                <div style="flex:1;">
-		                    <div style="font-size:0.72rem; font-weight:600; color:var(--text-muted); margin-bottom:4px;">담당자</div>
-		                    <div style="font-size:0.88rem; font-weight:600;" id="dailyModalAssignee">-</div>
+		                <%-- 2줄: Task 기간 --%>
+		                <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+		                    <span style="font-size:0.95rem; font-weight:600; color:var(--text-muted);">기간 : </span>
+		                    <span style="font-size:1.05rem; font-weight:600; color:#344054;" id="dailyModalPeriod">-</span>
 		                </div>
-		            </div>
-		
+		             </div>  
+		             
+		                
+		                <div style="padding:12px 14px; border-radius:8px;">
+		                <%-- 3줄: 상태 + 매니저 --%>
+			                <div style="display:flex; align-items:center; gap:100px;">
+			                    <div style="display:flex; align-items:center; gap:6px;">
+			                        <span style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">상태</span>
+			                        <span style="font-size:0.95rem; font-weight:600; color:#344054;" id="dailyModalStatus">-</span>
+			                    </div>
+			                    <div style="display:flex; align-items:center; gap:6px;">
+			                        <span style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">매니저</span>
+			                        <span style="font-size:0.95rem; font-weight:600; color:#1d2939;" id="dailyModalAssignee">-</span>
+			                    </div>
+			                </div>
+			            </div>
+
+		            		
 		            <%-- 날짜별 표 --%>
-		            <div style="overflow-x:auto; border:1px solid var(--border-color); border-radius:8px;">
-		                <div id="dailyGrid" style="display:grid; min-width:max-content;"></div>
+		            <div style="overflow-x:auto; padding:12px 14px; align-items:center; border-radius:8px;">
+		            <span style="font-size:0.95rem; font-weight:700; color:#1d2939; flex:1;">Task 진행표</span>
+		                <div id="dailyGrid" style="display:grid;  padding-top: 10px; min-width:max-content;"></div>
 		            </div>
-		
 		        </div>
+		        
 		        <div class="modal-footer">
 		            <button class="btn-cancel" onclick="closeTaskDailyModal()">닫기</button>
 		        </div>
 		    </div>
-		</div>
+		    </div>
+
+		
 		
 		<!-- 날짜 클릭 확인 모달 -->
 		<div id="taskDailyCheckModal" class="modal-overlay" style="display:none;">
-		    <div class="modal-box" style="width:360px;">
+		    <div class="modal-box" style="width:420px;">
 		        <div class="modal-header">
-		           <div>
-				        <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:4px;" id="dailyModalProjectTitle">프로젝트명</div>
-				        <h2 class="modal-title" id="dailyModalTitle">태스크 진행 현황</h2>
-				    </div>
-				    <button class="modal-close" onclick="closeTaskDailyModal()">&times;</button>
-				</div>
-		        <div class="modal-body" style="text-align:center; gap:8px;">
-		            <p style="font-size:1rem; font-weight:600; margin-bottom:4px;">오늘도 열심히 작업하셨나요? 🙌</p>
-		            <p style="font-size:0.88rem; color:var(--text-muted);">오늘 진행 상황은 어떻게 되고 있나요?</p>
-		            <div id="checkDate" style="font-size:0.82rem; color:var(--primary-blue); font-weight:600; margin-bottom:8px;"></div>
+		            <h2 class="modal-title">태스크 진행 현황</h2>
+		            <button class="modal-close" onclick="closeDailyCheckModal()">&times;</button>
+		        </div>
+		        <div class="modal-body" style="gap:12px;">
+		            <%-- 날짜 가운데 정렬 --%>
+		            <div style="text-align:center; margin-bottom:12px;">
+		                <p style="font-size:1rem; font-weight:600; margin-bottom:4px;">오늘도 열심히 작업하셨나요?</p>
+		                <p style="font-size:1rem; font-weight:600; margin-bottom:4px;">오늘의 작업 상황을 공유해주세요!</p>
+		                <div id="checkDate" style="font-size:0.82rem; color:var(--primary-blue); font-weight:600;"></div>
+		            </div>
+		
+		            <%-- 버튼 (툴팁 포함) --%>
+		            <div style="display:flex; justify-content:center; gap:12px; margin-bottom:16px; position:relative;">
+		                <div class="daily-btn-wrap" data-tooltip="오늘 작업량을 모두 처리했을 때">
+		                    <button class="btn-submit daily-check-btn" style="background:#12b76a;" onclick="selectDailyType('done', this)">
+		                        <i class="fas fa-check me-1"></i>완료
+		                    </button>
+		                </div>
+		                <div class="daily-btn-wrap" data-tooltip="오늘 작업량을 다 처리하지 못했을 때 (사유 필수)">
+		                    <button class="btn-submit daily-check-btn" style="background:#f59e0b;" onclick="selectDailyType('progress', this)">
+		                        <i class="fas fa-clock me-1"></i>진행
+		                    </button>
+		                </div>
+		                <div class="daily-btn-wrap" data-tooltip="태스크 작업이 중단되었을 때 (사유 필수)">
+		                    <button class="btn-submit daily-check-btn" style="background:#dc2626;" onclick="selectDailyType('stop', this)">
+		                        <i class="fas fa-pause me-1"></i>중단
+		                    </button>
+		                </div>
+		            </div>
+
+		            <%-- 사유 입력란 --%>
+		            <div style="display:flex; flex-direction:column; gap:4px;">
+		                <label style="font-size:0.8rem; font-weight:600; color:#344054;">
+		                    사유 <span id="reasonRequired" style="color:#dc2626; display:none;">*필수</span>
+		                    <span id="reasonOptional" style="color:#aaa; font-weight:400;">(선택)</span>
+		                </label>
+		                <textarea id="dailyReason" rows="3" placeholder="사유를 입력해주세요."
+		                    style="width:100%; padding:8px 10px; border:1px solid #d0d5dd; border-radius:8px;
+		                           font-size:0.85rem; resize:none; outline:none; box-sizing:border-box;"></textarea>
+		            </div>
 		        </div>
 		        <div class="modal-footer" style="justify-content:center; gap:12px;">
-		            <button class="btn-submit" style="background:#12b76a;" onclick="closeDailyCheckModal()">
-		                <i class="fas fa-check me-1"></i>완료
-		            </button>
-		            <button class="btn-submit" style="background:#f59e0b;" onclick="closeDailyCheckModal()">
-		                <i class="fas fa-clock me-1"></i>진행중
-		            </button>
-		            <button class="btn-submit" style="background:#dc2626;" onclick="closeDailyCheckModal()">
-		                <i class="fas fa-pause me-1"></i>지연
-		            </button>
 		            <button class="btn-cancel" onclick="closeDailyCheckModal()">취소</button>
+		            <button class="btn-submit" style="background:#4e73df;" onclick="submitDailyCheck()">저장</button>
 		        </div>
 		    </div>
 		</div>
