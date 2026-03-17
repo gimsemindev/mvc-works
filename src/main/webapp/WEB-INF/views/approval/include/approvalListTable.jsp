@@ -5,9 +5,7 @@
     <table class="approval-table">
         <thead>
             <tr>
-                <th class="cb-col">
-                    <input type="checkbox" id="chkAll" title="전체선택">
-                </th>
+				<th class="cb-col">No.</th>
                 <th @click="toggleSort('regDate')"
                     :class="{ 'sort-active': store.sortField === 'regDate' }">
                     <span class="th-inner">
@@ -63,11 +61,11 @@
                 </td>
             </tr>
             <!-- 데이터 목록 -->
-            <tr v-for="item in store.list" :key="item.docId"
+            <tr v-for="(item, index) in store.list" :key="item.docId"
                 @click="goDoc(item)"
                 :class="{ 'row-unread': (store.filterType === 'ref' || store.filterType === 'unreadRef') && item.readYn === 'N' }"
                 style="cursor:pointer;">
-                <td class="cb-col" @click.stop><input type="checkbox" name="chk" :value="item.docId"></td>
+                <td class="cb-col">{{ store.totalCount - ((store.pageNo - 1) * store.pageSize) - index}}</td>
                 <td>{{ item.regDate }}</td>
                 <td>{{ item.typeName }}</td>
                 <td class="td-title">

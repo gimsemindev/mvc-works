@@ -45,21 +45,4 @@
         </a>
     </div>
 
-    <!-- Status Filter -->
-    <div class="filter-section">
-        <div class="filter-label">Status Filter</div>
-        <label class="filter-checkbox-item">
-            <input type="checkbox" name="status" value="임시"> 임시
-        </label>
-        <label class="filter-checkbox-item">
-            <input type="checkbox" name="status" value="진행"> 진행
-        </label>
-        <label class="filter-checkbox-item">
-            <input type="checkbox" name="status" value="완료"> 완료
-        </label>
-        <label class="filter-checkbox-item">
-            <input type="checkbox" name="status" value="반려"> 반려
-        </label>
-    </div>
-
 </div>
