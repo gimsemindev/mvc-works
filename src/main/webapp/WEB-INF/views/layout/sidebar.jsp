@@ -6,7 +6,9 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/main-sidebar.css">
 
 <aside id="sidebar">
-    <a href="${pageContext.request.contextPath}/home" class="sidebar-brand">MVC</a>
+    <a href="${pageContext.request.contextPath}/home" class="sidebar-brand">
+        <img src="${pageContext.request.contextPath}/dist/images/mvc_logo.png" alt="MVC" class="sidebar-logo">MVC
+    </a>
 
     <a href="${pageContext.request.contextPath}/home" class="nav-link"><i class="fas fa-th-large"></i> 대시보드</a>
 

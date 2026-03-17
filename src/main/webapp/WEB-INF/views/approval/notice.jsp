@@ -263,6 +263,14 @@
 
            onMounted(() => {
                store.fetchList();
+
+               // 뒤로가기 → 목록으로 복귀
+               window.addEventListener('popstate', () => {
+                   if (store.viewMode !== 'LIST') {
+                       store.viewMode = 'LIST';
+                       store.fetchList();
+                   }
+               });
            });
 
            return { store, isAdmin, handleSave };

@@ -27,12 +27,18 @@
 .sidebar-brand {
     padding: 24px;
     font-weight: 800;
-    font-size: 1.5rem;
+    font-size: 1.7rem;
     color: var(--primary-blue);
     display: flex;
     align-items: center;
     gap: 8px;
     letter-spacing: 1px;
+}
+
+.sidebar-logo {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
 }
 
 .nav-section {

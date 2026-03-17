@@ -552,6 +552,20 @@
                     store.fetchByDate(todayStr),
                     store.fetchStats()
                 ]);
+
+                // 모달 열릴 때 히스토리 추가
+                document.addEventListener('shown.bs.modal', () => {
+                    history.pushState({ modal: true }, '');
+                });
+
+                // 뒤로가기 → 열린 모달 닫기
+                window.addEventListener('popstate', () => {
+                    const openModal = document.querySelector('.modal.show');
+                    if (openModal) {
+                        const inst = bootstrap.Modal.getInstance(openModal);
+                        if (inst) inst.hide();
+                    }
+                });
             });
 
             return {

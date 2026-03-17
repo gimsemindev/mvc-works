@@ -67,6 +67,7 @@ export const useApprovalNoticeStore = defineStore('approvalNotice', {
 		        const res = await http.get('/approval/notice/' + noticeId);
 		        this.doc = res.data;
 		        this.viewMode = 'DETAIL';
+		        history.pushState({ viewMode: 'DETAIL' }, '');
 		    } catch (e) {
 		        console.error('상세 조회 실패:', e);
 		        alert('게시글을 불러올 수 없습니다.');
@@ -77,6 +78,7 @@ export const useApprovalNoticeStore = defineStore('approvalNotice', {
 		    this.form = { noticeId: null, title: '', content: '' };
 		    this.attachedFiles = [];
 		    this.viewMode = 'WRITE';
+		    history.pushState({ viewMode: 'WRITE' }, '');
 		},
 		
 		openEditForm() {
@@ -87,6 +89,7 @@ export const useApprovalNoticeStore = defineStore('approvalNotice', {
 		    };
 		    this.attachedFiles = [];    // ← 추가
 		    this.viewMode = 'EDIT';
+		    history.pushState({ viewMode: 'EDIT' }, '');
 		},
 		
 		async saveForm() {
