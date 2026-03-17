@@ -3,6 +3,7 @@ package com.mvc.app.service;
 import java.util.List;
 import java.util.Map;
 
+import com.mvc.app.domain.dto.ProjectNoticeDto;
 import com.mvc.app.domain.dto.ReportsDto;
 
 public interface ReportsService {

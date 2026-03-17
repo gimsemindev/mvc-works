@@ -181,6 +181,12 @@ public class ProjectNoticeServiceImpl implements ProjectNoticeService {
 	}
 
 	public boolean isManager(String empId, long projectid) {
-	    return mapper.isManager(empId, projectid) > 0;
+		return mapper.isManager(empId, projectid) > 0;
 	}
+
+	@Override
+	public ProjectNoticeDto getNoticeDetail(long noticenum) {
+		return getNotice(noticenum);
+	}
+
 }

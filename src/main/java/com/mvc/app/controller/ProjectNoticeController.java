@@ -41,4 +41,9 @@ public class ProjectNoticeController {
 	public String projectNoticeForm() {
 		return "projects/projectNoticeForm";
 	}
+	
+	@GetMapping("/projectNoticeDetail")
+	public String detail() {
+	    return "projects/projectNoticeDetail";
+	}
 }

@@ -139,7 +139,8 @@ document.addEventListener('DOMContentLoaded', function() {
 			        const pid = params.get("projectid");
 
 			        if(pid){
-			            this.selectedProjectId = pid;
+			        	this.selectedProjectId = pid;
+			        	this.fetchList(1);
 			        }
 
 			    } catch(e){
@@ -178,11 +179,9 @@ document.addEventListener('DOMContentLoaded', function() {
 			        console.error("fetch 오류:", err);
 			    }
 			},
-			async openDetail(noticenum) {
-				const res = await this.safeApi('/api/projectnotice/' + noticenum);
-				if(!res) return;
-				try { this.detail = await res.json() }
-				catch(e){ console.error("공지사항 상세 JSON 파싱 실패"); alert("공지사항 내용을 불러오지 못했습니다."); }
+			openDetail(noticenum) {
+				window.location.href = ctx + '/projects/projectNotice/projectNoticeDetail?noticenum=' 
+					+ noticenum + '&projectid=' + this.selectedProjectId
 			},
 			goToForm() {
 			    if(!this.selectedProjectId){

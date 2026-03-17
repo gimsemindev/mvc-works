@@ -35,4 +35,6 @@ public interface ProjectNoticeService {
 	List<ProjectNoticeFileDto> getFiles(long noticenum);
 
 	boolean isManager(String empId, long projectid);
+
+	public ProjectNoticeDto getNoticeDetail(long noticenum);
 }

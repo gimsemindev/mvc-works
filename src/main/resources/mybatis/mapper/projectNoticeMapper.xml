@@ -108,6 +108,20 @@
 
 		WHERE n.state = 1
 
+		<!-- 🔥 이거 추가 -->
+		<if test="projectid != null">
+			AND n.projectid = #{projectid}
+		</if>
+
+		<!-- 🔥 검색 조건도 같이 -->
+		<if test="keyword != null and keyword != ''">
+			AND (
+			n.subject LIKE '%' || #{keyword} || '%'
+			OR n.content LIKE '%' ||
+			#{keyword} || '%'
+			)
+		</if>
+
 		ORDER BY
 		n.isnotice DESC,
 		n.noticenum DESC
