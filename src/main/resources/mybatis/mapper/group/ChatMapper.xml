@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mvc.app.group.mapper.ChatMapper">
+
+    <!-- ============================================================
+         직원 목록 (무한스크롤, 프로젝트 + 키워드 필터)
+         정렬: 1.미읽음 2.최근 받은 메시지 3.최근 보낸 메시지 4.이름 가나다
+         ============================================================ -->
+    <select id="listChatUsers" parameterType="com.mvc.app.group.dto.ChatUserDto"
+            resultType="com.mvc.app.group.dto.ChatUserDto">
+        SELECT *
+        FROM (
+            SELECT ROWNUM AS rn, inner_q.*
+            FROM (
+                SELECT
+                    e2.empId,
+                    e2.name,
+                    e2.profilePhoto,
+                    e2.deptCode,
+                    cc_dept.codeName    AS deptName,
+                    e2.gradeCode,
+                    cc_rank.codeName    AS gradeName,
+                    e1.empStatusCode,
+                    cc_stat.codeName    AS empStatusName,
+                    cr.roomId,
+                    CASE
+                        WHEN cm_last.msgType = 'FILE' THEN cf_last.originalName
+                        ELSE cm_last.content
+                    END                 AS lastMessage,
+                    cm_last.msgType     AS lastMessageType,
+                    cm_last.senderId    AS lastSenderId,
+                    TO_CHAR(cm_last.sentAt, 'YYYY-MM-DD"T"HH24:MI:SS') AS lastMessageAt,
+                    NVL(unread.cnt, 0)  AS unreadCount
+                FROM employee2 e2
+                /* ① 재직 정보 */
+                JOIN employee1 e1
+                    ON e1.empId = e2.empId
+                /* ② 공통코드 */
+                LEFT JOIN commoncode cc_dept
+                    ON cc_dept.codeGroup = 'DEPT'      AND cc_dept.code = e2.deptCode
+                LEFT JOIN commoncode cc_rank
+                    ON cc_rank.codeGroup = 'RANK'      AND cc_rank.code = e2.gradeCode
+                LEFT JOIN commoncode cc_stat
+                    ON cc_stat.codeGroup = 'EMPSTATUS' AND cc_stat.code = e1.empStatusCode
+                /* ③ 두 사람 간 채팅방 */
+                LEFT JOIN chatroom cr
+                    ON (
+                           (cr.userAid = #{myEmpId} AND cr.userBid = e2.empId)
+                        OR (cr.userBid = #{myEmpId} AND cr.userAid = e2.empId)
+                    )
+                    AND cr.status = 'ACTIVE'
+                /* ④ 가장 최근 메시지 */
+                LEFT JOIN chatmessage cm_last
+                    ON cm_last.messageId = (
+                        SELECT MAX(messageId)
+                        FROM chatmessage
+                        WHERE roomId  = cr.roomId
+                          AND status != 'DELETED'
+                    )
+                LEFT JOIN chatfile cf_last
+                    ON cf_last.messageId = cm_last.messageId
+                /* ⑤ 미읽음 카운트 */
+                LEFT JOIN (
+                    SELECT roomId, COUNT(*) AS cnt
+                    FROM chatmessage
+                    WHERE senderId != #{myEmpId}
+                      AND isRead    = 'N'
+                      AND status   != 'DELETED'
+                    GROUP BY roomId
+                ) unread ON unread.roomId = cr.roomId
+                /* ⑥ WHERE — 반드시 모든 JOIN 뒤에 위치 (Oracle 문법) */
+                WHERE e2.empId != #{myEmpId}
+                  AND e1.enabled = 1
+                  AND EXISTS (
+                      SELECT 1
+                      FROM empProject ep_other
+                      JOIN empProject ep_me
+                          ON ep_me.projectId = ep_other.projectId
+                         AND ep_me.empId     = #{myEmpId}
+                      WHERE ep_other.empId = e2.empId
+                      <if test="projectId != null and projectId != ''">
+                        AND ep_other.projectId = #{projectId}
+                      </if>
+                  )
+                  <if test="keyword != null and keyword != ''">
+                  AND (
+                      LOWER(e2.name)  LIKE '%' || LOWER(#{keyword}) || '%'
+                   OR LOWER(e2.empId) LIKE '%' || LOWER(#{keyword}) || '%'
+                  )
+                  </if>
+                ORDER BY
+                    NVL(unread.cnt, 0)                                DESC,  -- 1. 미읽음 수
+                    CASE WHEN cm_last.senderId != #{myEmpId}
+                         THEN cm_last.sentAt END                      DESC,  -- 2. 최근 받은 메시지
+                    CASE WHEN cm_last.senderId  = #{myEmpId}
+                         THEN cm_last.sentAt END                      DESC,  -- 3. 최근 보낸 메시지
+                    NLSSORT(e2.name, 'NLS_SORT=BINARY_AI')            ASC    -- 4. 이름 가나다
+            ) inner_q
+        )
+        WHERE rn > #{offset}
+          AND rn &lt;= #{offset} + #{size}
+    </select>
+
+    <!-- ============================================================
+         내가 참여 중인 프로젝트 목록
+         ============================================================ -->
+    <select id="listMyProjects" resultType="map">
+        SELECT DISTINCT
+            p.projectId,
+            p.title AS projectName
+        FROM project p
+        JOIN empProject ep ON ep.projectId = p.projectId
+        WHERE ep.empId = #{empId}
+          AND p.status = 'I'   -- 진행 중
+        ORDER BY p.title
+    </select>
+
+    <!-- ============================================================
+         채팅방
+         ============================================================ -->
+    <select id="findRoomByUsers" resultType="com.mvc.app.group.dto.ChatRoomDto">
+        SELECT roomId, userAid, userBid, status,
+               TO_CHAR(createdAt,     'YYYY-MM-DD"T"HH24:MI:SS') AS createdAt,
+               TO_CHAR(lastMessageAt, 'YYYY-MM-DD"T"HH24:MI:SS') AS lastMessageAt
+        FROM chatroom
+        WHERE (
+            (userAid = #{userAid} AND userBid = #{userBid})
+         OR (userAid = #{userBid} AND userBid = #{userAid})
+        )
+        AND status = 'ACTIVE'
+    </select>
+
+    <insert id="insertRoom" parameterType="com.mvc.app.group.dto.ChatRoomDto">
+        INSERT INTO chatroom (roomId, userAid, userBid, createdAt, status)
+        VALUES (#{roomId}, #{userAid}, #{userBid}, SYSTIMESTAMP, 'ACTIVE')
+    </insert>
+
+    <insert id="insertRoomMember">
+        INSERT INTO chatroommember (memberid, roomId, empId, joinedAt)
+        VALUES (#{memberId}, #{roomId}, #{empId}, SYSTIMESTAMP)
+    </insert>
+
+    <select id="nextRoomMemberSeq" resultType="long">
+        SELECT SEQ_CHATROOMMEMBER.NEXTVAL FROM DUAL
+    </select>
+
+    <select id="countRoomMember" resultType="int">
+        SELECT COUNT(*)
+        FROM chatroommember
+        WHERE roomId = #{roomId}
+          AND empId  = #{empId}
+    </select>
+
+    <update id="updateRoomLastMessageAt">
+        UPDATE chatroom
+        SET lastMessageAt = SYSTIMESTAMP
+        WHERE roomId = #{roomId}
+    </update>
+
+    <select id="nextRoomSeq" resultType="long">
+        SELECT SEQ_CHATROOM.NEXTVAL FROM DUAL
+    </select>
+
+    <!-- ============================================================
+         채팅 메시지
+         ============================================================ -->
+    <insert id="insertMessage" parameterType="com.mvc.app.group.dto.ChatMessageDto">
+        INSERT INTO chatmessage (
+            messageId, roomId, senderId, msgType,
+            content, sentAt, isRead, status, expireAt
+        ) VALUES (
+            #{messageId}, #{roomId}, #{senderId}, #{msgType},
+            #{content}, SYSTIMESTAMP, 'N', 'SENT',
+            SYSTIMESTAMP + INTERVAL '7' DAY
+        )
+    </insert>
+
+    <select id="nextMessageSeq" resultType="long">
+        SELECT SEQ_CHATMESSAGE.NEXTVAL FROM DUAL
+    </select>
+
+    <!-- 최신 메시지부터 offset 기준 size건 조회 후 시간순 정렬 -->
+    <select id="listMessages" resultType="com.mvc.app.group.dto.ChatMessageDto">
+        SELECT *
+        FROM (
+            SELECT
+                cm.messageId,
+                cm.roomId,
+                cm.senderId,
+                e2.name         AS senderName,
+                e2.profilePhoto AS senderAvatar,
+                cm.msgType,
+                cm.content,
+                TO_CHAR(cm.sentAt, 'YYYY-MM-DD"T"HH24:MI:SS') AS sentAt,
+                cm.isRead,
+                cm.status,
+                cf.fileId,
+                cf.originalName,
+                cf.saveName,
+                cf.fileSize,
+                cf.fileExt,
+                ROW_NUMBER() OVER (ORDER BY cm.sentAt DESC) AS rn
+            FROM chatmessage cm
+            JOIN employee2 e2 ON e2.empId = cm.senderId
+            LEFT JOIN chatfile cf ON cf.messageId = cm.messageId
+            WHERE cm.roomId = #{roomId}
+              AND cm.status != 'DELETED'
+        )
+        WHERE rn > #{offset}
+          AND rn &lt;= #{offset} + #{size}
+        ORDER BY sentAt ASC
+    </select>
+
+    <update id="markAsRead">
+        UPDATE chatmessage
+        SET isRead = 'Y'
+        WHERE roomId  = #{roomId}
+          AND senderId != #{empId}
+          AND isRead  = 'N'
+    </update>
+
+    <update id="markMessageRead">
+        UPDATE chatmessage
+        SET isRead = 'Y'
+        WHERE messageId = #{messageId}
+    </update>
+
+    <select id="countUnread" resultType="int">
+        SELECT COUNT(*)
+        FROM chatmessage
+        WHERE roomId  = #{roomId}
+          AND senderId != #{empId}
+          AND isRead  = 'N'
+          AND status != 'DELETED'
+    </select>
+
+    <update id="updateMessageStatus">
+        UPDATE chatmessage
+        SET status = #{status}
+        WHERE messageId = #{messageId}
+    </update>
+
+    <delete id="deleteExpiredMessages">
+        DELETE FROM chatmessage
+        WHERE expireAt &lt; SYSTIMESTAMP
+    </delete>
+
+    <!-- ============================================================
+         채팅 파일
+         ============================================================ -->
+    <insert id="insertFile" parameterType="com.mvc.app.group.dto.ChatFileDto">
+        INSERT INTO chatfile (
+            fileId, messageId, roomId, uploaderId,
+            originalName, saveName, fileSize, fileExt,
+            uploadedAt, expireAt
+        ) VALUES (
+            #{fileId}, #{messageId}, #{roomId}, #{uploaderId},
+            #{originalName}, #{saveName}, #{fileSize}, #{fileExt},
+            SYSTIMESTAMP,
+            SYSTIMESTAMP + INTERVAL '7' DAY
+        )
+    </insert>
+
+    <select id="nextFileSeq" resultType="long">
+        SELECT SEQ_CHATFILE.NEXTVAL FROM DUAL
+    </select>
+
+    <select id="findFileById" resultType="com.mvc.app.group.dto.ChatFileDto">
+        SELECT fileId, messageId, roomId, uploaderId,
+               originalName, saveName, fileSize, fileExt,
+               TO_CHAR(uploadedAt, 'YYYY-MM-DD"T"HH24:MI:SS') AS uploadedAt,
+               TO_CHAR(expireAt,   'YYYY-MM-DD"T"HH24:MI:SS') AS expireAt
+        FROM chatfile
+        WHERE fileId = #{fileId}
+    </select>
+
+    <select id="listExpiredFiles" resultType="com.mvc.app.group.dto.ChatFileDto">
+        SELECT fileId, saveName, roomId
+        FROM chatfile
+        WHERE expireAt &lt; SYSTIMESTAMP
+    </select>
+
+    <delete id="deleteExpiredFiles">
+        DELETE FROM chatfile
+        WHERE expireAt &lt; SYSTIMESTAMP
+    </delete>
+</mapper>

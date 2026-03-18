@@ -25,15 +25,18 @@ public class ViewController {
 		return "hrm/orgMain";      
 	}
 
-	
-	 @GetMapping("/hrm/performance") 
-	 public String handleHrmPerformance() { 
-		 return "hrm/empPerformanceMain"; 
-	 }
+	@GetMapping("/hrm/performance") 
+	public String handleHrmPerformance() { 
+		return "hrm/empPerformanceMain"; 
+	}
 	 
-
 	@GetMapping("/hrm/records")
 	public String handleHrmRecords() {
 		return "hrm/recordsMain";
+	}
+	
+	@GetMapping("/chat")
+	public String handleChat() {
+	    return "groupware/chatMain";
 	}
 }
