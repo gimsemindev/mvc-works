@@ -43,12 +43,13 @@ public class ProjectNoticeController {
         return "projects/projectNotice";
     }
 
-    // 공지 등록 폼
+    // 공지 등록, 수정 폼
     @GetMapping("/projectNoticeForm")
     public String projectNoticeForm(
             @AuthenticationPrincipal UserDetails user,
             Model model,
-            @RequestParam(name = "projectid", required = false) String projectid) { // ← 수정
+            @RequestParam(name = "projectid", required = false) String projectid,
+            @RequestParam(name = "noticenum", required = false) Long noticenum) {
 
         if (user == null) {
             return "redirect:/";
@@ -56,12 +57,14 @@ public class ProjectNoticeController {
 
         String empId = user.getUsername();
 
-        // 참여중인 프로젝트 목록
-        List<Map<String, Object>> projectList = projectNoticeService.getMyProjects(empId);
+        // ⭐ 등록은 매니저만 → 수정도 동일하게 PM 기준
+        List<Map<String, Object>> projectList = projectNoticeService.getMyPmProjects(empId);
         model.addAttribute("projectList", projectList);
 
-        // 선택 프로젝트 지정
         model.addAttribute("selectedProjectId", projectid);
+
+        // ⭐ 핵심: 수정이면 noticenum 전달
+        model.addAttribute("noticenum", noticenum);
 
         return "projects/projectNoticeForm";
     }

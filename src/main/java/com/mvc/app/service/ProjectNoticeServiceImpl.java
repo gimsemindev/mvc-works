@@ -25,7 +25,7 @@ public class ProjectNoticeServiceImpl implements ProjectNoticeService {
 	@Value("${file.upload-root}")
 	private String uploadRoot;
 
-	// 공지 등록
+	// ✅ 공지 등록
 	@Override
 	@Transactional
 	public void insertNotice(ProjectNoticeDto dto, List<MultipartFile> files) throws Exception {
@@ -37,19 +37,37 @@ public class ProjectNoticeServiceImpl implements ProjectNoticeService {
 		}
 	}
 
-	// 공지 수정
+	// ✅ 공지 수정 (🔥 기존 파일 삭제 후 재등록)
 	@Override
 	@Transactional
 	public void updateNotice(ProjectNoticeDto dto, List<MultipartFile> files) throws Exception {
 
+		// 1. 공지 수정
 		mapper.updateNotice(dto);
 
+		// 2. 기존 파일 삭제
+		List<ProjectNoticeFileDto> oldFiles = mapper.getFiles(dto.getNoticenum());
+
+		if (oldFiles != null && !oldFiles.isEmpty()) {
+			for (ProjectNoticeFileDto file : oldFiles) {
+
+				File f = new File(uploadRoot, file.getSavefilename());
+
+				if (f.exists()) {
+					f.delete();
+				}
+
+				mapper.deleteFile(file.getFilenum());
+			}
+		}
+
+		// 3. 새 파일 저장
 		if (files != null && !files.isEmpty()) {
 			saveFiles(files, dto.getNoticenum());
 		}
 	}
 
-	// 공지 삭제
+	// ✅ 공지 삭제
 	@Override
 	@Transactional
 	public void deleteNotice(long noticenum) throws Exception {
@@ -72,24 +90,23 @@ public class ProjectNoticeServiceImpl implements ProjectNoticeService {
 		mapper.deleteNotice(noticenum);
 	}
 
-	// 공지 목록
+	// ✅ 공지 목록
 	@Override
 	public List<ProjectNoticeDto> listNotice(Map<String, Object> param) {
 		return mapper.listNotice(param);
 	}
 
-	// 공지 개수
+	// ✅ 공지 개수
 	@Override
 	public int countNotice(Map<String, Object> param) {
 		return mapper.countNotice(param);
 	}
 
-	// 공지 단건
 	@Override
 	@Transactional
 	public ProjectNoticeDto getNotice(long noticenum) {
 
-		mapper.increaseHit(noticenum);
+		mapper.increaseHit(noticenum); // ⭐ 조회수 증가
 
 		ProjectNoticeDto dto = mapper.getNotice(noticenum);
 
@@ -100,18 +117,19 @@ public class ProjectNoticeServiceImpl implements ProjectNoticeService {
 		return dto;
 	}
 
-	// 내 프로젝트 목록
+	// ✅ 내 프로젝트 목록
 	@Override
 	public List<Map<String, Object>> getMyProjects(String empId) {
 		return mapper.getMyProjects(empId);
 	}
 
+	// ✅ 내가 PM인 프로젝트 목록
 	@Override
 	public List<Map<String, Object>> getMyPmProjects(String empId) {
 		return mapper.getMyPmProjects(empId);
 	}
 
-	// 파일 삭제
+	// ✅ 파일 삭제
 	@Override
 	@Transactional
 	public void deleteFile(long filenum) throws Exception {
@@ -130,19 +148,19 @@ public class ProjectNoticeServiceImpl implements ProjectNoticeService {
 		mapper.deleteFile(filenum);
 	}
 
-	// 파일 조회
+	// ✅ 파일 조회
 	@Override
 	public ProjectNoticeFileDto getFile(long filenum) {
 		return mapper.getFile(filenum);
 	}
 
-	// 첨부파일 목록
+	// ✅ 첨부파일 목록
 	@Override
 	public List<ProjectNoticeFileDto> getFiles(long noticenum) {
 		return mapper.getFiles(noticenum);
 	}
 
-	// 파일 저장
+	// ✅ 파일 저장
 	private void saveFiles(List<MultipartFile> files, long noticenum) throws Exception {
 
 		File dir = new File(uploadRoot);
@@ -185,13 +203,9 @@ public class ProjectNoticeServiceImpl implements ProjectNoticeService {
 		}
 	}
 
+	// ✅ 매니저 여부
+	@Override
 	public boolean isManager(String empId, long projectid) {
 		return mapper.isManager(empId, projectid) > 0;
 	}
-
-	@Override
-	public ProjectNoticeDto getNoticeDetail(long noticenum) {
-		return getNotice(noticenum);
-	}
-
 }

@@ -30,7 +30,7 @@
 	<div id="app" v-cloak>
 		<div class="main-content">
 			<div class="page-header">
-				<h2 class="page-title">공지사항 등록</h2>
+				<h2 class="page-title">{{ isEdit ? '공지사항 수정' : '공지사항 등록' }}</h2>
 			</div>
 
 			<div class="notice-card">
@@ -70,7 +70,8 @@
 				<!-- 버튼 -->
 				<div class="form-buttons">
 					<button class="btn-cancel" @click="goBack">취소</button>
-					<button class="btn-save" @click="submitForm">저장</button>
+					<button class="btn-save" @click="submitForm">{{ isEdit ?
+						'수정' : '저장' }}</button>
 				</div>
 
 			</div>
@@ -88,41 +89,82 @@ document.addEventListener('DOMContentLoaded', function() {
 				projects: [],
 				selectedProjectId: '',
 				formData: {
+					noticenum: null, // ⭐ 추가
 					subject: '',
 					content: '',
 					files: []
 				},
-				quill: null
+				quill: null,
+				isEdit: false // ⭐ 수정모드 여부
 			}
 		},
 
-		mounted() {
-			// URL 파라미터 처리
+		async mounted() {
 			const params = new URLSearchParams(window.location.search);
+
 			const pid = params.get("projectid");
+			const noticenum = params.get("noticenum");
+
+			// ⭐ 수정모드 체크
+			if (noticenum) {
+				this.isEdit = true;
+				this.formData.noticenum = noticenum;
+			}
+
 			if (pid) this.selectedProjectId = pid;
 
-			// Quill 초기화
+			// Quill
 			this.quill = new Quill('#editor', {
 				theme: 'snow',
 				placeholder: '내용을 입력하세요'
 			});
 
-			// 프로젝트 목록 가져오기
-			fetch(ctx + "/api/projectnotice/myprojects/pm", {
-			    credentials: "include"
-			})
-			.then(res => res.json())
-			.then(data => {
-			    this.projects = data.map(p => ({
-			        projectid: p.PROJECTID,
-			        projectName: p.PROJECTNAME
-			    }));
-			})
-			.catch(err => console.error("프로젝트 가져오기 오류:", err));
+			// 프로젝트 목록
+			await this.loadProjects();
+
+			// ⭐ 수정일 때 기존 데이터 불러오기
+			if (this.isEdit) {
+				await this.loadDetail();
+			}
 		},
 
 		methods: {
+			async loadProjects() {
+				try {
+					const res = await fetch(ctx + "/api/projectnotice/myprojects/pm", {
+						credentials: "include"
+					});
+					const data = await res.json();
+
+					this.projects = data.map(p => ({
+						projectid: p.PROJECTID,
+						projectName: p.PROJECTNAME
+					}));
+				} catch (err) {
+					console.error(err);
+				}
+			},
+
+			// ⭐ 기존 데이터 로드
+			async loadDetail() {
+				try {
+					const res = await fetch(ctx + '/api/projectnotice/detail?noticenum=' + this.formData.noticenum, {
+						credentials: "include"
+					});
+
+					const data = await res.json();
+
+					this.formData.subject = data.detail.subject;
+					this.selectedProjectId = data.detail.projectid;
+
+					this.quill.root.innerHTML = data.detail.content;
+
+				} catch (e) {
+					console.error(e);
+					alert("데이터 불러오기 실패");
+				}
+			},
+
 			handleFiles(e) {
 				this.formData.files = Array.from(e.target.files);
 			},
@@ -145,29 +187,40 @@ document.addEventListener('DOMContentLoaded', function() {
 				}
 
 				const form = new FormData();
+
 				form.append("projectid", this.selectedProjectId);
 				form.append("subject", this.formData.subject);
 				form.append("content", this.formData.content);
 
+				// ⭐ 수정이면 noticenum 추가
+				if (this.isEdit) {
+					form.append("noticenum", this.formData.noticenum);
+				}
+
 				this.formData.files.forEach(f => form.append("files", f));
 
 				try {
-					const res = await fetch(ctx + "/api/projectnotice", {
+					const url = this.isEdit
+						? ctx + "/api/projectnotice/update"
+						: ctx + "/api/projectnotice";
+
+					const res = await fetch(url, {
 						method: "POST",
 						body: form,
 						credentials: "include"
 					});
 
 					if (res.ok) {
-						alert("공지 등록 완료");
-						location.href = ctx + "/projects/projectNotice?projectid=" + this.selectedProjectId;
+						alert(this.isEdit ? "수정 완료" : "등록 완료");
+
+						location.href = ctx + "/projects/projectNotice";
 					} else {
 						const text = await res.text();
-						alert("등록 실패 : " + text);
+						alert("실패 : " + text);
 					}
 				} catch (err) {
 					console.error(err);
-					alert("등록 중 오류 발생");
+					alert("오류 발생");
 				}
 			},
 

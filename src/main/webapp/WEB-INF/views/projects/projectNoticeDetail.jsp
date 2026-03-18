@@ -92,6 +92,33 @@
 	background: #fff;
 	cursor: pointer;
 }
+
+/* 하단 버튼 정렬 */
+.notice-footer {
+	display: flex;
+	align-items: center;
+	margin-top: 10px;
+}
+
+/* 왼쪽: 목록 */
+.btn-list:first-child {
+	margin-right: auto;
+}
+
+/* 오른쪽 버튼 간격 */
+.notice-footer .btn-list {
+	margin-left: 6px;
+}
+
+/* 삭제 버튼만 강조 */
+.notice-footer .btn-list:last-child {
+	border-color: #ef4444;
+	color: #ef4444;
+}
+
+.notice-footer .btn-list:last-child:hover {
+	background: #fee2e2;
+}
 </style>
 </head>
 
@@ -128,6 +155,10 @@
 				<!-- 하단 -->
 				<div class="notice-footer">
 					<button class="btn-list" @click="goList">목록</button>
+
+					<!-- ⭐ 매니저만 -->
+					<button v-if="isManager" class="btn-list" @click="goEdit">수정</button>
+					<button v-if="isManager" class="btn-list" @click="deleteNotice">삭제</button>
 				</div>
 
 			</div>
@@ -135,14 +166,15 @@
 	</div>
 
 	<script>
-document.addEventListener('DOMContentLoaded', function() {
+	document.addEventListener('DOMContentLoaded', function() {
 	const ctx = document.querySelector('meta[name="ctx"]').content
 	const { createApp } = Vue
 
 	createApp({
 		data() {
 			return {
-				detail: {}
+				detail: {},
+				isManager: false // ⭐ 추가
 			}
 		},
 		mounted() {
@@ -155,10 +187,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 				try {
 					const res = await fetch(ctx + '/api/projectnotice/detail?noticenum=' + noticenum, {
-					    credentials: "include"
+						credentials: "include"
 					})
+
 					const data = await res.json()
-					this.detail = data
+
+					// ⭐ 구조 변경 반영
+					this.detail = data.detail
+					this.isManager = data.isManager
+
 				} catch (e) {
 					alert("공지사항을 불러오지 못했습니다.")
 					console.error(e)
@@ -170,12 +207,37 @@ document.addEventListener('DOMContentLoaded', function() {
 			},
 
 			goList() {
-				window.location.href = ctx + '/projects/projectNotice'
+				location.href = ctx + '/projects/projectNotice'
+			},
+
+			// ⭐ 수정
+			goEdit() {
+				location.href = ctx + '/projects/projectNotice/projectNoticeForm?noticenum=' + this.detail.noticenum
+			},
+
+			// ⭐ 삭제
+			async deleteNotice() {
+				if (!confirm("삭제하시겠습니까?")) return
+
+				try {
+					const res = await fetch(ctx + '/api/projectnotice/delete?noticenum=' + this.detail.noticenum, {
+						method: "POST",
+						credentials: "include"
+					})
+
+					if (res.ok) {
+						alert("삭제 완료")
+						this.goList()
+					} else {
+						alert("삭제 실패")
+					}
+				} catch (e) {
+					console.error(e)
+				}
 			}
 		}
 	}).mount('#app')
 })
 </script>
-
 </body>
 </html>

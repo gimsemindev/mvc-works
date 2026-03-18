@@ -1,17 +1,17 @@
 /* 전체 영역 */
 .main-content {
 	margin-left: 260px;
-	padding: 28px 24px; /* 좌우 줄이고 위아래 늘림 */
+	padding: 30px 26px; /* 좌우 살짝 여유 */
 	background: #f8f9fc;
 	min-height: 100vh;
 	box-sizing: border-box;
 }
 
-/* select 스타일 */
+/* select */
 .project-select {
 	margin-top: 10px;
 	width: 240px;
-	padding: 7px 32px 7px 10px;
+	padding: 8px 32px 8px 10px; /* 높이 살짝 맞춤 */
 	font-size: 13px;
 	border: 1px solid #d1d5db;
 	border-radius: 6px;
@@ -36,14 +36,9 @@
 	box-shadow: 0 0 0 2px rgba(78, 115, 223, 0.15);
 }
 
-/* Vue 렌더 전 숨김 */
-[v-cloak] {
-	display: none !important;
-}
-
-/* 페이지 제목 */
+/* 제목 */
 .page-header {
-	margin-bottom: 16px;
+	margin-bottom: 18px;
 }
 
 .page-title {
@@ -52,22 +47,28 @@
 	color: #2e3a59;
 }
 
-/* 상단 검색 + 버튼 */
+/* 상단 */
 .notice-topbar {
 	display: flex;
 	justify-content: flex-end;
 	align-items: center;
-	gap: 6px;
-	margin-bottom: 12px;
+	gap: 8px; /* 간격 조금만 증가 */
+	margin-bottom: 14px;
 }
 
-/* 검색 입력 */
+/* 검색 */
 .notice-search-bar input {
 	width: 200px;
-	padding: 6px 8px;
+	padding: 7px 8px; /* 높이 맞춤 */
 	border: 1px solid #d1d5db;
 	border-radius: 4px;
 	font-size: 13px;
+}
+
+.notice-search-bar input:focus {
+	border-color: #4e73df;
+	box-shadow: 0 0 0 2px rgba(78, 115, 223, 0.1);
+	outline: none;
 }
 
 /* 버튼 */
@@ -75,7 +76,7 @@
 	background: #4e73df;
 	border: none;
 	color: white;
-	padding: 6px 12px;
+	padding: 7px 12px; /* input이랑 높이 맞춤 */
 	border-radius: 4px;
 	font-size: 13px;
 	cursor: pointer;
@@ -85,7 +86,7 @@
 	background: #3f5ec7;
 }
 
-/* 테이블 카드 */
+/* 카드 */
 .notice-panel {
 	background: white;
 	border-radius: 6px;
@@ -107,7 +108,7 @@
 }
 
 .notice-table th {
-	padding: 10px 6px; /* 위아래 여유 */
+	padding: 11px 6px; /* 균형 */
 	font-weight: 600;
 	color: #6b7280;
 	border-bottom: 1px solid #e3e6f0;
@@ -115,19 +116,18 @@
 
 /* 바디 */
 .notice-table td {
-	padding: 10px 6px; /* 위아래는 넓게 / 좌우는 좁게 */
+	padding: 11px 6px; /* 균형 */
 	border-bottom: 1px solid #f1f3f7;
 	color: #374151;
 	vertical-align: middle;
 }
 
-
 /* hover */
 .notice-table tbody tr:hover {
-	background: #f9fafc;
+	background: #f7f9fc; /* 너무 튀지 않게 */
 }
 
-/* 공지 badge */
+/* 공지 */
 .badge-notice {
 	background: #fff4e0;
 	color: #d97706;
@@ -137,7 +137,7 @@
 	font-weight: 700;
 }
 
-/* 컬럼 정렬 */
+/* 정렬 */
 .notice-table th:nth-child(1), .notice-table td:nth-child(1),
 	.notice-table th:nth-child(3), .notice-table td:nth-child(3),
 	.notice-table th:nth-child(4), .notice-table td:nth-child(4),
@@ -145,13 +145,13 @@
 	text-align: center;
 }
 
-/* 컬럼 너비 */
+/* 너비 */
 .notice-table th:nth-child(1), .notice-table td:nth-child(1) {
 	width: 60px;
 }
 
 .notice-table th:nth-child(2), .notice-table td:nth-child(2) {
-	width: auto; /* 핵심 */
+	width: auto;
 }
 
 .notice-table th:nth-child(3), .notice-table td:nth-child(3) {
@@ -166,15 +166,15 @@
 	width: 80px;
 }
 
-/* 제목 말줄임 */
+/* 제목 */
 .notice-table td:nth-child(2) {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-	padding-left: 6px;
+	padding-left: 8px; /* 살짝 여유 */
 }
 
-/* 작성자 날짜 줄바꿈 방지 */
+/* 줄바꿈 방지 */
 .notice-table td:nth-child(3), .notice-table td:nth-child(4) {
 	white-space: nowrap;
 }
@@ -183,7 +183,7 @@
 .pagination {
 	display: flex;
 	justify-content: center;
-	padding: 14px 0;
+	padding: 15px 0;
 	gap: 4px;
 }
 

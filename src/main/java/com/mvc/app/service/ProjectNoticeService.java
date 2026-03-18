@@ -36,7 +36,5 @@ public interface ProjectNoticeService {
 
 	public boolean isManager(String empId, long projectid);
 
-	public ProjectNoticeDto getNoticeDetail(long noticenum);
-
 	public List<Map<String, Object>> getMyPmProjects(String empId);
 }

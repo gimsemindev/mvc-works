@@ -18,13 +18,14 @@
 <meta name="ctx" content="${pageContext.request.contextPath}">
 
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
 <style>
-/* v-cloak 적용: Vue 렌더 전 템플릿 숨김 */
 [v-cloak] {
 	display: none !important;
 }
 </style>
 </head>
+
 <body>
 	<jsp:include page="/WEB-INF/views/layout/header.jsp" />
 	<jsp:include page="/WEB-INF/views/layout/sidebar.jsp" />
@@ -35,7 +36,6 @@
 				<h2 class="page-title">프로젝트 공지사항</h2>
 			</div>
 
-			<!-- 프로젝트 선택 -->
 			<div class="project-select-wrap">
 				<select v-model="selectedProjectId" @change="onProjectChange"
 					class="project-select">
@@ -61,28 +61,30 @@
 						<tr>
 							<th style="width: 60px">번호</th>
 							<th>제목</th>
-							<!-- 전체 프로젝트 선택 시에만 프로젝트 이름 컬럼 표시 -->
-							<th v-if="selectedProjectId === 'all'">프로젝트</th>
 							<th style="width: 100px">작성자</th>
 							<th style="width: 90px">날짜</th>
 							<th style="width: 60px">조회</th>
 						</tr>
 					</thead>
+
 					<tbody>
 						<tr v-if="list.length === 0">
-							<td :colspan="selectedProjectId === 'all' ? 6 : 5"
+							<td :colspan="5"
 								style="text-align: center; padding: 30px; color: #999;">
 								등록된 공지사항이 없습니다.</td>
 						</tr>
+
 						<tr v-for="item in list" :key="item.noticenum"
 							@click="openDetail(item.noticenum)">
+
 							<td style="text-align: center"><span
 								v-if="item.isnotice === 1" class="badge-notice">공지</span> <span
 								v-else>{{ item.noticenum }}</span></td>
-							<td>{{ item.subject }}</td>
-							<!-- 전체 프로젝트 선택 시에만 프로젝트 이름 표시 -->
-							<td v-if="selectedProjectId === 'all'">{{ item.projectname
-								}}</td>
+
+							<td><span v-if="selectedProjectId === 'all'"
+								style="color: #888; margin-right: 8px;"> [{{
+									item.projectName }}] </span> {{ item.subject }}</td>
+
 							<td style="text-align: center">{{ item.authorName }} 매니저</td>
 							<td style="text-align: center">{{ item.regdate }}</td>
 							<td style="text-align: center">{{ item.hitcount }}</td>
@@ -90,6 +92,7 @@
 					</tbody>
 				</table>
 			</div>
+
 		</div>
 	</div>
 
@@ -102,14 +105,13 @@ document.addEventListener('DOMContentLoaded', function() {
         data() {
             return {
                 myProjects: [],
-                selectedProjectId: 'all', // 전체 프로젝트 기본 선택
+                selectedProjectId: 'all',
                 list: [],
                 isManager: false,
                 total: 0,
                 page: 1,
                 pageSize: 10,
-                keyword: '',
-                detail: {}
+                keyword: ''
             }
         },
         mounted() {
@@ -130,15 +132,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const res = await this.safeApi('/api/projectnotice/myprojects');
                 if(!res) return;
 
-                try {
-                    const data = await res.json();
-                    this.myProjects = data;
+                const data = await res.json();
+                this.myProjects = data;
 
-                    // 페이지 로드 시 전체 프로젝트 공지 보여주기
-                    this.fetchList(1);
-                } catch(e){
-                    console.error("로드 실패:", await res.text());
-                }
+                this.fetchList(1);
             },
             onProjectChange() {
                 this.keyword = '';
@@ -147,47 +144,47 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             async fetchList(p) {
                 this.page = p;
-                const projectid = this.selectedProjectId === 'all' ? '' : this.selectedProjectId; // 전체 프로젝트 처리
+
+                const projectid = this.selectedProjectId === 'all' ? '' : this.selectedProjectId;
+
                 const params = new URLSearchParams({
                     projectid: projectid,
                     page: this.page,
                     keyword: this.keyword || ''
                 });
 
-                try {
-                    const res = await fetch(ctx + '/api/projectnotice/list?' + params, {
-                        credentials: "include",
-                        headers: { "AJAX": "true", "Content-Type": "application/json" }
-                    });
-                    const text = await res.text();
-                    try {
-                        const data = JSON.parse(text);
-                        this.list = data.list;
-                        this.total = data.total;
-                        this.isManager = data.isManager;
-                    } catch(e) {
-                        console.error("공지사항 JSON 파싱 실패:", text);
-                        alert("공지사항을 불러오지 못했습니다.");
-                    }
-                } catch(err) {
-                    console.error("fetch 오류:", err);
-                }
+                const res = await fetch(ctx + '/api/projectnotice/list?' + params, {
+                    credentials: "include",
+                    headers: { "AJAX": "true", "Content-Type": "application/json" }
+                });
+
+                const data = await res.json();
+
+                this.list = data.list;
+                this.total = data.total;
+                this.isManager = data.isManager;
             },
             openDetail(noticenum) {
-                window.location.href = ctx + '/projects/projectNotice/projectNoticeDetail?noticenum=' 
-                    + noticenum + '&projectid=' + (this.selectedProjectId === 'all' ? '' : this.selectedProjectId)
+                window.location.href =
+                    ctx + '/projects/projectNotice/projectNoticeDetail?noticenum='
+                    + noticenum
+                    + '&projectid='
+                    + (this.selectedProjectId === 'all' ? '' : this.selectedProjectId)
             },
             goToForm() {
-                if(this.selectedProjectId === 'all' || !this.selectedProjectId){
-                    alert("공지 등록은 개별 프로젝트를 선택해야 가능합니다.");
+                if(this.selectedProjectId === 'all'){
+                    alert("공지 등록은 프로젝트 선택 후 가능합니다.");
                     return;
                 }
 
-                window.location.href = ctx + '/projects/projectNotice/projectNoticeForm?projectid=' + this.selectedProjectId;
+                window.location.href =
+                    ctx + '/projects/projectNotice/projectNoticeForm?projectid='
+                    + this.selectedProjectId;
             }
         }
     }).mount('#app')
 })
 </script>
+
 </body>
 </html>

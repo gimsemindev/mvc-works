@@ -40,7 +40,6 @@ public class ProjectNoticeRestController {
 	@Value("${file.upload-root}")
 	private String uploadRoot;
 
-	// 참여중인 프로젝트 목록
 	@GetMapping("/myprojects")
 	public ResponseEntity<?> myProjects(@AuthenticationPrincipal UserDetails user) {
 		if (user == null)
@@ -52,7 +51,6 @@ public class ProjectNoticeRestController {
 		return ResponseEntity.ok(list);
 	}
 
-	// 매니저 프로젝트 목록 (공지 등록용)
 	@GetMapping("/myprojects/pm")
 	public ResponseEntity<?> myPmProjects(@AuthenticationPrincipal UserDetails user) {
 		if (user == null)
@@ -64,12 +62,12 @@ public class ProjectNoticeRestController {
 		return ResponseEntity.ok(list);
 	}
 
-	// 공지 목록 (전체/프로젝트별)
 	@GetMapping("/list")
-	public ResponseEntity<?> list(@RequestParam(value = "projectid", required = false) Long projectid, // null이면 전체
+	public ResponseEntity<?> list(@RequestParam(value = "projectid", required = false) Long projectid,
 			@RequestParam(value = "page", defaultValue = "1") int page,
 			@RequestParam(value = "keyword", defaultValue = "") String keyword,
 			@AuthenticationPrincipal UserDetails user) {
+
 		if (user == null)
 			return ResponseEntity.status(401).body("로그인 필요");
 
@@ -78,7 +76,7 @@ public class ProjectNoticeRestController {
 		int offset = (page - 1) * pageSize;
 
 		Map<String, Object> param = new HashMap<>();
-		param.put("projectid", projectid); // null이면 전체 공지
+		param.put("projectid", projectid);
 		param.put("keyword", keyword);
 		param.put("offset", offset);
 		param.put("pageSize", pageSize);
@@ -86,7 +84,6 @@ public class ProjectNoticeRestController {
 		List<ProjectNoticeDto> list = service.listNotice(param);
 		int total = service.countNotice(param);
 
-		// 전체 공지일 경우 isManager = false
 		boolean isManager = (projectid != null) ? service.isManager(empId, projectid) : false;
 
 		Map<String, Object> result = new HashMap<>();
@@ -99,12 +96,12 @@ public class ProjectNoticeRestController {
 		return ResponseEntity.ok(result);
 	}
 
-	// 공지 등록
 	@PostMapping
 	public ResponseEntity<?> insert(@RequestParam("projectid") long projectid, @RequestParam("subject") String subject,
 			@RequestParam("content") String content, @RequestParam(value = "isnotice", defaultValue = "0") int isnotice,
 			@RequestParam(value = "files", required = false) List<MultipartFile> files,
 			@AuthenticationPrincipal UserDetails user) {
+
 		if (user == null)
 			return ResponseEntity.status(401).body("로그인 필요");
 
@@ -131,21 +128,89 @@ public class ProjectNoticeRestController {
 		}
 	}
 
-	// 공지 상세
 	@GetMapping("/detail")
 	public ResponseEntity<?> detail(@RequestParam("noticenum") long noticenum,
 			@AuthenticationPrincipal UserDetails user) {
+
 		if (user == null)
 			return ResponseEntity.status(401).body("로그인 필요");
 
-		ProjectNoticeDto dto = service.getNoticeDetail(noticenum);
+		String empId = user.getUsername();
+
+		ProjectNoticeDto dto = service.getNotice(noticenum);
 		if (dto == null)
 			return ResponseEntity.status(404).body("공지 없음");
 
-		return ResponseEntity.ok(dto);
+		boolean isManager = service.isManager(empId, dto.getProjectid());
+
+		Map<String, Object> result = new HashMap<>();
+		result.put("detail", dto);
+		result.put("isManager", isManager);
+
+		return ResponseEntity.ok(result);
 	}
 
-	// 파일 다운로드
+	@PostMapping("/update")
+	public ResponseEntity<?> update(@RequestParam("noticenum") long noticenum, @RequestParam("subject") String subject,
+			@RequestParam("content") String content, @RequestParam(value = "isnotice", defaultValue = "0") int isnotice,
+			@AuthenticationPrincipal UserDetails user) {
+
+		if (user == null)
+			return ResponseEntity.status(401).body("로그인 필요");
+
+		try {
+			String empId = user.getUsername();
+
+			ProjectNoticeDto origin = service.getNotice(noticenum);
+			if (origin == null)
+				return ResponseEntity.status(404).body("공지 없음");
+
+			if (!service.isManager(empId, origin.getProjectid()))
+				return ResponseEntity.status(403).body("권한 없음");
+
+			ProjectNoticeDto dto = new ProjectNoticeDto();
+			dto.setNoticenum(noticenum);
+			dto.setSubject(subject);
+			dto.setContent(content);
+			dto.setIsnotice(isnotice);
+
+			service.updateNotice(dto, null);
+
+			return ResponseEntity.ok("수정 완료");
+
+		} catch (Exception e) {
+			log.error("updateNotice", e);
+			return ResponseEntity.status(500).body("수정 실패");
+		}
+	}
+
+	@PostMapping("/delete")
+	public ResponseEntity<?> delete(@RequestParam("noticenum") long noticenum,
+			@AuthenticationPrincipal UserDetails user) {
+
+		if (user == null)
+			return ResponseEntity.status(401).body("로그인 필요");
+
+		try {
+			String empId = user.getUsername();
+
+			ProjectNoticeDto dto = service.getNotice(noticenum);
+			if (dto == null)
+				return ResponseEntity.status(404).body("공지 없음");
+
+			if (!service.isManager(empId, dto.getProjectid()))
+				return ResponseEntity.status(403).body("권한 없음");
+
+			service.deleteNotice(noticenum);
+
+			return ResponseEntity.ok().build();
+
+		} catch (Exception e) {
+			log.error("deleteNotice", e);
+			return ResponseEntity.status(500).body("삭제 실패");
+		}
+	}
+
 	@GetMapping("/file/{filenum}")
 	public ResponseEntity<?> downloadFile(@PathVariable("filenum") long filenum) {
 		try {
