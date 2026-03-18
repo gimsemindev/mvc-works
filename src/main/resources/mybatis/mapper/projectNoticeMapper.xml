@@ -100,24 +100,25 @@
 		TO_CHAR(n.regdate,'YYYY-MM-DD') regdate,
 		TO_CHAR(n.updatedate,'YYYY-MM-DD') updatedate,
 		n.authorempid,
-		e.name authorName
+		e.name
+		authorName
 
 		FROM projectnotice n
 		LEFT JOIN employee2 e
-		ON n.authorempid = e.empid
+		ON n.authorempid =
+		e.empid
 
 		WHERE n.state = 1
 
-		<!-- 🔥 이거 추가 -->
 		<if test="projectid != null">
 			AND n.projectid = #{projectid}
 		</if>
 
-		<!-- 🔥 검색 조건도 같이 -->
 		<if test="keyword != null and keyword != ''">
 			AND (
 			n.subject LIKE '%' || #{keyword} || '%'
-			OR n.content LIKE '%' ||
+			OR n.content
+			LIKE '%' ||
 			#{keyword} || '%'
 			)
 		</if>
@@ -128,7 +129,8 @@
 
 		<if test="offset != null and pageSize != null">
 			OFFSET #{offset, jdbcType=NUMERIC} ROWS
-			FETCH NEXT #{pageSize, jdbcType=NUMERIC} ROWS ONLY
+			FETCH NEXT
+			#{pageSize, jdbcType=NUMERIC} ROWS ONLY
 		</if>
 
 	</select>
@@ -208,6 +210,18 @@
 
 	</select>
 
+	<select id="getMyPmProjects" parameterType="string"
+		resultType="map">
+		SELECT
+		ep.projectid,
+		p.title projectname,
+		ep.role
+		FROM empproject ep
+		JOIN project p ON ep.projectid = p.projectid
+		WHERE ep.empid = #{empId}
+		AND UPPER(ep.role) = 'M'
+		ORDER BY p.title
+	</select>
 
 	<!-- 파일 등록 -->
 	<insert id="insertFile"

@@ -32,6 +32,7 @@ public interface ProjectNoticeMapper {
 	public void insertFile(ProjectNoticeFileDto dto);
 	public void deleteFile(@Param("filenum") long filenum);
 	public List<ProjectNoticeFileDto> getFiles(@Param("noticenum") long noticenum);
+	
 	public ProjectNoticeFileDto getFile(@Param("filenum") long filenum);
-	public List<Map<String, Object>> getManagerProjects(String empId);
+	List<Map<String, Object>> getMyPmProjects(@Param("empId") String empId);
 }

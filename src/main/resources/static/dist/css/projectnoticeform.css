@@ -67,13 +67,26 @@
 }
 
 /* 프로젝트 select */
-.project-select{
+.project-select, select {
 	width:260px;
 	padding:8px 10px;
 	border:1px solid #d1d5db;
 	border-radius:6px;
 	font-size:13px;
 	background:white;
+	color:#000;             /* 글자색 검정 */
+	appearance:none;        /* 브라우저 기본 스타일 제거 */
+}
+
+.project-select option, select option {
+	color:#000;             /* 옵션 글자색 */
+	background-color:#fff;  /* 옵션 배경색 */
+}
+
+/* z-index 문제 대비 */
+.notice-card select {
+	position: relative;
+	z-index: 1000;
 }
 
 /* 파일 */
@@ -124,7 +137,7 @@
 	background:#f3f4f6;
 }
 
-/* vue 로딩 숨김 */
+/* vue 로딩 숨김 → 마운트 후 자동 제거 */
 [v-cloak]{
 	display:none;
 }

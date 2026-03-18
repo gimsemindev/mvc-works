@@ -106,6 +106,11 @@ public class ProjectNoticeServiceImpl implements ProjectNoticeService {
 		return mapper.getMyProjects(empId);
 	}
 
+	@Override
+	public List<Map<String, Object>> getMyPmProjects(String empId) {
+		return mapper.getMyPmProjects(empId);
+	}
+
 	// 파일 삭제
 	@Override
 	@Transactional

@@ -190,8 +190,7 @@
 				<c:forEach var="n" items="${noticeList}" varStatus="s">
 					<c:if test="${s.index < 3}">
 						<div class="notice-item"
-							onclick="location.href='<c:url value='/projectNotice/detail?noticenum=${n.noticenum}' />'">
-
+							onclick="location.href='<c:url value='/projects/projectNotice/projectNoticeDetail?noticenum=${n.noticenum}' />'">
 							<div class="notice-subject">${n.subject}</div>
 							<div class="notice-date">${n.regdate}</div>
 

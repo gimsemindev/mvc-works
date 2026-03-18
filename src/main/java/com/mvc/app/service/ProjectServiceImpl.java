@@ -27,7 +27,7 @@ public class ProjectServiceImpl implements ProjectService {
 	private final ProjectNoticeMapper noticeMapper;
 
 	public List<Map<String, Object>> getManagerProjects(String empId) {
-		return noticeMapper.getManagerProjects(empId);
+		return noticeMapper.getMyPmProjects(empId);
 	}
 
 	@Transactional
