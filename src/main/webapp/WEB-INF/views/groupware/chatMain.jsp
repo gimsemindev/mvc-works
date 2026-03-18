@@ -16,6 +16,10 @@
 
 <%-- 채팅 전용 CSS --%>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/chat.css" type="text/css">
+
+<%-- SockJS + @stomp/stompjs 6.x CDN --%>
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@6.1.2/bundles/stomp.umd.min.js"></script>
 </head>
 <body>
 
@@ -40,13 +44,13 @@
 <%-- Vue 3 CDN --%>
 <jsp:include page="/WEB-INF/views/vue/vue_cdn.jsp"/>
 
-<%--
-    Import Map
-    TODO: API 연동 완료 후 http, paginate 다시 추가
---%>
+<%-- Import Map --%>
 <script type="importmap">
 {
     "imports": {
+        "axios"     : "${pageContext.request.contextPath}/dist/util/axios.min.js",
+        "http"      : "${pageContext.request.contextPath}/dist/util/http.js",
+        "paginate"  : "${pageContext.request.contextPath}/dist/util/paginate.js",
         "chatStore" : "${pageContext.request.contextPath}/dist/util/store/chatStore.js"
     }
 }
@@ -54,24 +58,58 @@
 
 <%-- Vue 앱 초기화 --%>
 <script type="module">
-    import { createApp, onMounted } from 'vue';
-    import { createPinia }          from 'pinia';
-    import { useChatStore }         from 'chatStore';
+    import { createApp, onMounted, onUnmounted } from 'vue';
+    import { createPinia }                        from 'pinia';
+    import { useChatStore }                       from 'chatStore';
 
     const app = createApp({
         setup() {
             const store = useChatStore();
 
-            <%--
-                TODO: API 연동 시 아래 세션 주입 주석 해제
-                store.sessionEmpId  = '${sessionScope.member.empId}';
-                store.sessionName   = '${sessionScope.member.name}';
-                store.sessionAvatar = '${sessionScope.member.avatar}';
-            --%>
+            /* JSP EL → Pinia 세션 주입 */
+            store.sessionEmpId  = '${sessionScope.member.empId}';
+            store.sessionName   = '${sessionScope.member.name}';
+            store.sessionAvatar = '${sessionScope.member.avatar}';
 
-            onMounted(() => {
-                store.loadProjects();   // 가데이터 로드 (TODO: API 연동 시 그대로 유지)
-                store.loadUserList();   // 가데이터 로드 (TODO: API 연동 시 그대로 유지)
+            onMounted(async () => {
+                /* WebSocket 연결 */
+                store.connectWebSocket();
+
+                /* 초기 데이터 로드 */
+                await store.loadProjects();
+                await store.loadUserList();
+
+                /* 직원 목록 무한스크롤 감지 */
+                const userListEl = document.querySelector('.chat-user-list');
+                if (userListEl) {
+                    userListEl.addEventListener('scroll', () => {
+                        const { scrollTop, scrollHeight, clientHeight } = userListEl;
+                        if (scrollHeight - scrollTop - clientHeight < 80) {
+                            store.loadMoreUsers();
+                        }
+                    });
+                }
+
+                /* 메시지 목록 상단 스크롤 시 과거 메시지 로드 */
+                const msgListEl = document.querySelector('.chat-messages');
+                if (msgListEl) {
+                    msgListEl.addEventListener('scroll', async () => {
+                        if (msgListEl.scrollTop < 60 && store.msgHasMore && !store.msgLoading) {
+                            const prevScrollHeight = msgListEl.scrollHeight;
+                            await store.loadMessages(true);
+                            /* 스크롤 위치 보정 (과거 메시지 로드 후 기존 위치 유지) */
+                            msgListEl.scrollTop = msgListEl.scrollHeight - prevScrollHeight;
+                        }
+                    });
+                }
+            });
+
+            onUnmounted(() => {
+                /* 페이지 이탈 시 WebSocket 정리 */
+                store._closeCurrentRoom();
+                if (store.stompClient) {
+                    store.stompClient.deactivate(); // 6.x API
+                }
             });
 
             return { store };

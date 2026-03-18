@@ -47,12 +47,14 @@
         <div class="chat-user-list">
 
             <!-- 로딩 -->
-            <div v-if="store.loading" class="chat-list-loading">
+            <div v-if="store.userLoading && store.allUsers.length === 0"
+                 class="chat-list-loading">
                 <i class="bi bi-arrow-repeat chat-spin"></i> 불러오는 중...
             </div>
 
             <!-- 목록 없음 -->
-            <div v-else-if="store.filteredUsers.length === 0" class="chat-list-empty">
+            <div v-else-if="store.filteredUsers.length === 0 && !store.userLoading"
+                 class="chat-list-empty">
                 <i class="bi bi-person-x"></i>
                 <span>검색 결과가 없습니다.</span>
             </div>
@@ -67,7 +69,12 @@
 
                 <!-- 아바타 + 온라인 상태 -->
                 <div class="chat-avatar">
-                    <div class="chat-avatar-img"
+                    <div v-if="user.profilePhoto"
+                         class="chat-avatar-img chat-avatar-photo">
+                        <img :src="user.profilePhoto" :alt="user.name">
+                    </div>
+                    <div v-else
+                         class="chat-avatar-img"
                          :class="store.getAvatarColor(user.empId)">
                         {{ user.name.charAt(0) }}
                     </div>
@@ -86,13 +93,22 @@
                         <span class="chat-user-rank">{{ user.gradeName }}</span>
                     </div>
                     <div class="chat-user-preview">
-                        <span class="chat-user-last-msg">{{ user.lastMessage || '대화를 시작해보세요.' }}</span>
+                        <span class="chat-user-last-msg">
+                            <template v-if="user.lastMessageType === 'FILE'">
+                                <i class="bi bi-paperclip"></i> {{ user.lastMessage || '파일' }}
+                            </template>
+                            <template v-else>
+                                {{ user.lastMessage || '대화를 시작해보세요.' }}
+                            </template>
+                        </span>
                     </div>
                 </div>
 
                 <!-- 시간 + 미읽음 배지 + 재직상태 -->
                 <div class="chat-user-right">
-                    <span class="chat-user-time">{{ store.formatListTime(user.lastMessageTime) }}</span>
+                    <span class="chat-user-time">
+                        {{ store.formatListTime(user.lastMessageAt) }}
+                    </span>
                     <span v-if="user.unreadCount > 0" class="chat-unread-badge">
                         {{ user.unreadCount > 99 ? '99+' : user.unreadCount }}
                     </span>
@@ -103,6 +119,13 @@
                 </div>
 
             </div>
+
+            <!-- 무한스크롤 로딩 표시 -->
+            <div v-if="store.userLoading && store.allUsers.length > 0"
+                 class="chat-list-loading">
+                <i class="bi bi-arrow-repeat chat-spin"></i>
+            </div>
+
         </div><!-- /chat-user-list -->
 
     </div><!-- /chat-user-panel -->
@@ -126,7 +149,14 @@
             <!-- 채팅방 헤더 -->
             <div class="chat-room-header">
                 <div class="chat-avatar">
-                    <div class="chat-avatar-img"
+                    <div v-if="store.activeUser.profilePhoto"
+                         class="chat-avatar-img chat-avatar-photo"
+                         style="width:38px; height:38px;">
+                        <img :src="store.activeUser.profilePhoto"
+                             :alt="store.activeUser.name">
+                    </div>
+                    <div v-else
+                         class="chat-avatar-img"
                          :class="store.getAvatarColor(store.activeUser.empId)"
                          style="width:38px; height:38px; font-size:0.85rem;">
                         {{ store.activeUser.name.charAt(0) }}
@@ -145,9 +175,6 @@
                     </div>
                 </div>
                 <div class="chat-room-actions">
-                    <button class="chat-room-btn" title="메시지 검색">
-                        <i class="bi bi-search"></i>
-                    </button>
                     <button class="chat-room-btn" title="더보기">
                         <i class="bi bi-three-dots-vertical"></i>
                     </button>
@@ -155,7 +182,12 @@
             </div>
 
             <!-- 메시지 목록 -->
-            <div class="chat-messages" ref="chatMessagesRef">
+            <div class="chat-messages">
+
+                <!-- 상단 스크롤 로딩 -->
+                <div v-if="store.msgLoading" class="chat-list-loading">
+                    <i class="bi bi-arrow-repeat chat-spin"></i>
+                </div>
 
                 <template v-for="(item, idx) in store.messageGroups" :key="idx">
 
@@ -177,11 +209,11 @@
                         <!-- 아바타: 상대방만, 연속 메시지는 숨김 -->
                         <div class="msg-avatar"
                              :class="[
-                                 item.isMine ? '' : store.getAvatarColor(item.empId),
+                                 item.isMine ? '' : store.getAvatarColor(item.senderId),
                                  { hidden: item.isMine || item.hiddenAvatar }
                              ]">
                             <template v-if="!item.isMine && !item.hiddenAvatar">
-                                {{ item.senderName.charAt(0) }}
+                                {{ item.senderName ? item.senderName.charAt(0) : '?' }}
                             </template>
                         </div>
 
@@ -194,14 +226,18 @@
                             </div>
 
                             <!-- 파일 메시지 -->
-                            <div v-if="item.msgType === 'FILE'" class="msg-file">
+                            <div v-if="item.msgType === 'FILE'"
+                                 class="msg-file"
+                                 style="cursor:pointer"
+                                 @click="store.downloadFile(item.fileId, item.originalName)">
                                 <i :class="store.getFileIcon(item.fileExt) + ' msg-file-icon'"
                                    :style="store.getFileIconColor(item.fileExt, item.isMine)"></i>
                                 <div class="msg-file-info">
-                                    <div class="msg-file-name">{{ item.fileName }}</div>
+                                    <div class="msg-file-name">{{ item.originalName }}</div>
                                     <div class="msg-file-size"
                                          :style="item.isMine ? 'color:rgba(255,255,255,0.75)' : ''">
-                                        {{ store.formatFileSize(item.fileSize) }} · {{ item.fileExt.toUpperCase() }}
+                                        {{ store.formatFileSize(item.fileSize) }}
+                                        {{ item.fileExt ? '· ' + item.fileExt.toUpperCase() : '' }}
                                     </div>
                                 </div>
                                 <i class="bi bi-download"
@@ -210,15 +246,19 @@
                             </div>
 
                             <!-- 텍스트 메시지 -->
-                            <div v-else class="msg-bubble" v-html="store.formatMsgText(item.content)"></div>
+                            <div v-else
+                                 class="msg-bubble"
+                                 v-html="store.formatMsgText(item.content)"></div>
 
                             <!-- 메타: 읽음 + 시간 -->
                             <div class="msg-meta">
                                 <span v-if="item.isMine"
                                       class="read-status"
-                                      :class="item.isRead ? 'read' : 'unread'"
-                                      :title="item.isRead ? '읽음' : '미읽음'">
-                                    <i :class="item.isRead ? 'bi bi-check2-all' : 'bi bi-check2'"></i>
+                                      :class="item.isRead === 'Y' ? 'read' : 'unread'"
+                                      :title="item.isRead === 'Y' ? '읽음' : '미읽음'">
+                                    <i :class="item.isRead === 'Y'
+                                        ? 'bi bi-check2-all'
+                                        : 'bi bi-check2'"></i>
                                 </span>
                                 <span class="msg-time">{{ store.formatMsgTime(item.sentAt) }}</span>
                             </div>
@@ -236,10 +276,10 @@
                      :class="{ focused: store.inputFocused }">
                     <textarea
                         class="chat-textarea"
-                        ref="chatInputRef"
                         v-model="store.inputText"
                         placeholder="메시지를 입력하세요... (Shift+Enter: 줄바꿈)"
                         rows="1"
+                        maxlength="200"
                         @keydown="store.handleKeydown($event)"
                         @input="store.autoResize($event.target)"
                         @focus="store.inputFocused = true"
@@ -261,6 +301,9 @@
                 </div>
                 <div class="chat-input-hint">
                     Enter: 전송 &nbsp;·&nbsp; Shift+Enter: 줄바꿈
+                    <span style="float:right; color:#94a3b8;">
+                        {{ store.inputText.length }}/200
+                    </span>
                 </div>
                 <%-- 파일 input (숨김) --%>
                 <input type="file"

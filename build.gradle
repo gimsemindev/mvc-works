@@ -72,3 +72,7 @@ bootRun {
         '--add-opens=java.base/java.util=ALL-UNNAMED'
     ]
 }
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs << '-parameters'
+}

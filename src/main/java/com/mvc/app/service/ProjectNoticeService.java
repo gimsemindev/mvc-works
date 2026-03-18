@@ -11,30 +11,30 @@ import com.mvc.app.domain.dto.ProjectNoticeFileDto;
 public interface ProjectNoticeService {
 
 	// 공지 CRUD
-	void insertNotice(ProjectNoticeDto dto, List<MultipartFile> files) throws Exception;
+	public void insertNotice(ProjectNoticeDto dto, List<MultipartFile> files) throws Exception;
 
-	void updateNotice(ProjectNoticeDto dto, List<MultipartFile> files) throws Exception;
+	public void updateNotice(ProjectNoticeDto dto, List<MultipartFile> files) throws Exception;
 
-	void deleteNotice(long noticenum) throws Exception;
+	public void deleteNotice(long noticenum) throws Exception;
 
 	// 목록 / 조회
-	List<ProjectNoticeDto> listNotice(Map<String, Object> param);
+	public List<ProjectNoticeDto> listNotice(Map<String, Object> param);
 
-	int countNotice(Map<String, Object> param);
+	public int countNotice(Map<String, Object> param);
 
-	ProjectNoticeDto getNotice(long noticenum);
+	public ProjectNoticeDto getNotice(long noticenum);
 
 	// 프로젝트 목록
-	List<Map<String, Object>> getMyProjects(String empId);
+	public List<Map<String, Object>> getMyProjects(String empId);
 
 	// 파일
-	void deleteFile(long filenum) throws Exception;
+	public void deleteFile(long filenum) throws Exception;
 
-	ProjectNoticeFileDto getFile(long filenum);
+	public ProjectNoticeFileDto getFile(long filenum);
 
-	List<ProjectNoticeFileDto> getFiles(long noticenum);
+	public List<ProjectNoticeFileDto> getFiles(long noticenum);
 
-	boolean isManager(String empId, long projectid);
+	public boolean isManager(String empId, long projectid);
 
-	public ProjectNoticeDto getNoticeDetail(long noticenum);
+	public List<Map<String, Object>> getMyPmProjects(String empId);
 }
