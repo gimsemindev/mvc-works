@@ -1,4 +1,4 @@
-/* 대시보드 메인 */
+/* -------------------- 대시보드 기본 -------------------- */
 .dashboard {
 	margin-left: 260px;
 	width: calc(100% - 260px);
@@ -9,6 +9,7 @@
 	gap: 20px;
 	box-sizing: border-box;
 }
+
 /* 1행: 프로필(1/3) + 할일(2/3) */
 .top-row {
 	display: flex !important;
@@ -18,12 +19,11 @@
 
 .profile-card {
 	flex: 0 0 calc(33.33% - 13.33px) !important;
-	/* 정확히 1/3 너비 강제 (gap 계산 포함) */
 	min-width: 0;
 }
 
 .todo-card {
-	flex: 0 0 calc(66.66% - 6.66px) !important; /* 정확히 2/3 너비 강제 */
+	flex: 0 0 calc(66.66% - 6.66px) !important;
 	min-width: 0;
 }
 
@@ -35,16 +35,17 @@
 }
 
 .middle-row>.card {
-	flex: 1 1 0 !important; /* 핵심 */
+	flex: 1 1 0 !important;
 	min-width: 0;
 }
 
-/* 캘린더는 전체 너비 */
+/* 캘린더 전체 너비 */
 .calendar-card {
 	width: 100%;
+	min-width: 0;
 }
 
-/* 2. 카드 공통 스타일 */
+/* -------------------- 카드 공통 -------------------- */
 .card {
 	background: white;
 	border-radius: 14px;
@@ -53,7 +54,7 @@
 	transition: all .2s ease;
 	display: flex;
 	flex-direction: column;
-	min-width: 0; /* 내부 콘텐츠 넘침 방지 */
+	min-width: 0;
 }
 
 .card:hover {
@@ -68,7 +69,7 @@
 	color: #333;
 }
 
-/* 4. 프로필 상세 */
+/* -------------------- 프로필 -------------------- */
 .profile-top {
 	display: flex;
 	align-items: center;
@@ -113,7 +114,7 @@
 	font-weight: 500;
 }
 
-/* 5. 할일(Todo) 상세 */
+/* -------------------- 할일(Todo) -------------------- */
 .todo-slider {
 	overflow: hidden;
 	width: 100%;
@@ -124,12 +125,11 @@
 	transition: 0.4s;
 }
 
-/* 할일 그리드 설정 (2열 3행) */
 .todo-grid {
 	display: grid;
-	grid-template-columns: 1fr 1fr; /* 가로 2줄 */
-	grid-template-rows: repeat(3, 1fr); /* 세로 3줄 */
-	gap: 10px 20px; /* 항목 간 간격 */
+	grid-template-columns: 1fr 1fr;
+	grid-template-rows: repeat(3, 1fr);
+	gap: 10px 20px;
 	width: 100%;
 }
 
@@ -139,29 +139,28 @@
 	flex-direction: column;
 }
 
-/* 개별 아이템 높이 조절 (3줄이 딱 맞게) */
 .todo-item {
 	display: flex;
-	justify-content: space-between; /* 제목과 날짜를 양 끝으로 */
-	align-items: center; /* 세로 중앙 정렬 */
-	padding: 8px 0; /* 간격 조절 */
+	justify-content: space-between;
+	align-items: center;
+	padding: 8px 0;
 	border-bottom: 1px solid #eee;
-	width: 100%; /* 전체 너비 확보 */
+	width: 100%;
 }
 
 .todo-left {
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	flex: 1; /* 제목 영역이 공간을 채움 */
-	min-width: 0; /* 텍스트 넘침 방지 */
-	margin-right: 15px; /* 날짜와 겹치지 않게 여유 공간 */
+	flex: 1;
+	min-width: 0;
+	margin-right: 15px;
 }
 
 .todo-date {
 	font-size: 13px;
 	color: #888;
-	flex-shrink: 0; /* 날짜는 줄어들지 않음 */
+	flex-shrink: 0;
 	text-align: right;
 }
 
@@ -176,7 +175,7 @@
 	white-space: nowrap;
 }
 
-/* 6. 프로젝트 진행률 상세 */
+/* -------------------- 프로젝트 -------------------- */
 .project-header {
 	display: flex;
 	align-items: center;
@@ -246,17 +245,17 @@
 	background: #e2e6ea;
 }
 
-/* 7. 결재 & 공지사항 상세 */
+/* -------------------- 결재 & 공지 -------------------- */
 .approval-grid {
 	display: flex;
-	gap: 10px; /* ✔ 간격 줄임 */
+	gap: 10px;
 	margin-top: 5px;
 }
 
 .approval-box {
 	flex: 1;
 	text-align: center;
-	padding: 20px 10px; /* ✔ 균형 맞춤 */
+	padding: 20px 10px;
 	border-radius: 12px;
 	background: #f8f9fc;
 	cursor: pointer;
@@ -265,7 +264,7 @@
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: 6px; /* ✔ 아이콘/텍스트 간격 */
+	gap: 6px;
 }
 
 .approval-box:hover {
@@ -284,11 +283,6 @@
 	font-weight: 500;
 }
 
-.approval-icon {
-	position: relative;
-	display: inline-block;
-}
-
 .badge-count {
 	position: absolute;
 	top: -6px;
@@ -303,7 +297,6 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding: 0 4px;
 }
 
 .notice-item {
@@ -312,51 +305,6 @@
 	padding: 10px 0;
 	border-bottom: 1px solid #eee;
 	font-size: 14px;
-}
-
-/* 8. 캘린더 전용 스타일 */
-.fc-theme-standard td, .fc-theme-standard th {
-	border-color: #f0f0f0;
-}
-
-/* 캘린더 헤더: 레이아웃 고정 */
-.calendar-header {
-	display: flex !important;
-	justify-content: space-between !important;
-	align-items: center !important;
-	margin-bottom: 25px !important;
-	position: relative !important;
-	height: 40px !important;
-}
-
-/* 다른 카드와 동일한 제목 스타일 */
-.calendar-card .card-title {
-	margin: 0 !important;
-	font-size: 16px !important;
-	font-weight: 600 !important;
-	color: #333 !important;
-	flex: 0 0 auto;
-}
-
-/* 중앙 월 타이틀 */
-#calendar-title {
-	position: absolute;
-	left: 50%;
-	transform: translateX(-50%);
-	font-size: 20px !important;
-	font-weight: 700 !important;
-	color: #333 !important;
-	pointer-events: none;
-}
-
-/* 오른쪽 네비게이션 버튼 그룹 */
-.calendar-header .project-nav-wrap {
-	display: flex !important;
-	gap: 6px !important;
-	flex: 0 0 auto;
-}
-
-.notice-item {
 	cursor: pointer;
 	transition: background 0.15s ease;
 	border-radius: 8px;
@@ -375,32 +323,18 @@
 	font-size: 14px;
 }
 
-.calendar-card {
-	width: 100%;
-	min-width: 0;
-}
-
+/* -------------------- 캘린더 -------------------- */
 .calendar-card .fc {
 	width: 100% !important;
 }
 
-.calendar-card .fc-view-harness {
-	width: 100% !important;
-}
-
-.calendar-card .fc-scrollgrid {
-	width: 100% !important;
-}
-
-.fc-scrollgrid-sync-table {
-	width: 100% !important;
-}
-
+.calendar-card .fc-view-harness,
+.calendar-card .fc-scrollgrid,
+.fc-scrollgrid-sync-table,
 .fc-daygrid-body {
 	width: 100% !important;
 }
 
-/* 1. 날짜 숫자 스타일 */
 .fc .fc-daygrid-day-number {
 	font-size: 15px !important;
 	font-weight: 600 !important;
@@ -409,7 +343,6 @@
 	text-decoration: none !important;
 }
 
-/* 2. 요일 헤더 스타일 */
 .fc .fc-col-header-cell-cushion {
 	font-size: 14px !important;
 	font-weight: 700 !important;
@@ -417,13 +350,11 @@
 	padding: 10px 0 !important;
 }
 
-/* 3. 날짜 칸 높이 고정 */
 .fc .fc-daygrid-day-frame {
 	min-height: 120px !important;
 	padding: 4px !important;
 }
 
-/* 4. 이벤트 바 스타일 */
 .fc .fc-daygrid-event {
 	margin: 2px 2px !important;
 	padding: 5px 8px !important;
@@ -441,7 +372,6 @@
 	text-overflow: ellipsis !important;
 }
 
-/* 5. '+n more' 링크 스타일 */
 .fc .fc-daygrid-more-link {
 	font-size: 12px !important;
 	color: #4e73df !important;
@@ -450,4 +380,133 @@
 	display: block !important;
 	margin-top: 2px !important;
 	padding: 2px !important;
+}
+
+.calendar-header {
+	display: flex !important;
+	justify-content: space-between !important;
+	align-items: center !important;
+	margin-bottom: 25px !important;
+	position: relative !important;
+	height: 40px !important;
+}
+
+.calendar-card .card-title {
+	margin: 0 !important;
+	font-size: 16px !important;
+	font-weight: 600 !important;
+	color: #333 !important;
+	flex: 0 0 auto;
+}
+
+#calendar-title {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+	font-size: 20px !important;
+	font-weight: 700 !important;
+	color: #333 !important;
+	pointer-events: none;
+}
+
+.calendar-header .project-nav-wrap {
+	display: flex !important;
+	gap: 6px !important;
+	flex: 0 0 auto;
+}
+
+/* -------------------- 반응형 -------------------- */
+
+/* 992px 이하: 태블릿 */
+@media (max-width: 992px) {
+	.top-row {
+		flex-direction: column !important;
+	}
+	.profile-card, .todo-card {
+		flex: 1 1 100% !important;
+	}
+	.middle-row {
+		flex-wrap: wrap;
+	}
+	.middle-row > .card {
+		flex: 1 1 48% !important;
+		margin-bottom: 15px;
+	}
+	.todo-grid {
+		grid-template-columns: 1fr !important;
+		gap: 10px 0 !important;
+	}
+	.calendar-card {
+		width: 100% !important;
+	}
+}
+
+/* 768px 이하: 모바일 */
+@media (max-width: 768px) {
+	.dashboard {
+		margin-left: 0 !important;
+		width: 100% !important;
+		padding: 15px;
+	}
+	.top-row, .middle-row {
+		flex-direction: column !important;
+	}
+	.profile-card, .todo-card, .middle-row > .card {
+		flex: 1 1 100% !important;
+		margin-bottom: 15px;
+	}
+	.project-slide {
+		gap: 10px !important;
+	}
+	.approval-grid {
+		flex-wrap: wrap !important;
+	}
+	.approval-box {
+		flex: 1 1 48% !important;
+		margin-bottom: 10px;
+	}
+	.fc .fc-daygrid-day-frame {
+		min-height: 90px !important;
+	}
+	.fc-daygrid-event .fc-event-title {
+		font-size: 12px !important;
+	}
+	.fc .fc-daygrid-more-link {
+		font-size: 10px !important;
+	}
+}
+
+/* 480px 이하: 작은 모바일 */
+@media (max-width: 480px) {
+	.dashboard {
+		padding: 10px !important;
+	}
+	.profile-name {
+		font-size: 16px !important;
+	}
+	.profile-grade {
+		font-size: 12px !important;
+	}
+	.todo-date, .todo-project, .todo-title {
+		font-size: 12px !important;
+	}
+	.project-top {
+		font-size: 12px !important;
+	}
+	.calendar-header {
+		flex-direction: column !important;
+		height: auto !important;
+		gap: 10px;
+	}
+	#calendar-title {
+		font-size: 18px !important;
+		position: static;
+		transform: none;
+	}
+	.project-nav-wrap {
+		justify-content: flex-start !important;
+	}
+	.approval-box {
+		flex: 1 1 100% !important;
+	}
 }
