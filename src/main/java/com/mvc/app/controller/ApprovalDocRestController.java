@@ -15,11 +15,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.mvc.app.common.StorageService;
 import com.mvc.app.domain.dto.ApprovalDocDto;
+import com.mvc.app.domain.dto.ApprovalFileDto;
 import com.mvc.app.domain.dto.SessionInfo;
+import com.mvc.app.mapper.ApprovalDocMapper;
 import com.mvc.app.security.LoginMemberUtil;
 import com.mvc.app.service.ApprovalDocService;
 
+import org.springframework.beans.factory.annotation.Value;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,6 +33,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/api/approval/doc")
 public class ApprovalDocRestController {
     private final ApprovalDocService service;
+    private final ApprovalDocMapper mapper;
+    private final StorageService storageService;
+
+    @Value("${file.upload-root}/approval")
+    private String uploadPath;
 
     // 임시저장
     @PostMapping
@@ -399,6 +408,21 @@ public class ApprovalDocRestController {
         } catch (Exception e) {
             log.info("markRead : ", e);
             return ResponseEntity.badRequest().body(Map.of("msg", "읽음 처리에 실패했습니다."));
+        }
+    }
+
+    // ── 첨부파일 다운로드 ──
+    @GetMapping("/file/{fileId}")
+    public ResponseEntity<?> downloadFile(@PathVariable("fileId") long fileId) {
+        try {
+            ApprovalFileDto file = mapper.getFileById(fileId);
+            if (file == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return storageService.downloadFile(uploadPath, file.getSaveFilename(), file.getOriFilename());
+        } catch (Exception e) {
+            log.error("downloadFile : ", e);
+            return ResponseEntity.internalServerError().body(Map.of("msg", "파일 다운로드에 실패했습니다."));
         }
     }
 }

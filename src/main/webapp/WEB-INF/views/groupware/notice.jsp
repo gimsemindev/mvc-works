@@ -71,8 +71,8 @@
                         <td class="td-hit" style="text-align:center;">{{ item.hitcount }}</td>
                         <td class="td-file" @click.stop>
                             <a v-if="item.fileCount > 0"
-                               :href="ctx + '/api/notice/file/' + item.firstFilenum"
-                               @click.stop>
+                               href="javascript:void(0)"
+                               @click.stop="downloadFile(item.firstFilenum)">
                                 <span class="material-symbols-outlined" style="color:#9aa0b4;">attach_file</span>
                             </a>
                         </td>
@@ -117,8 +117,8 @@
             <div class="detail-files" v-if="detail.files && detail.files.length > 0">
                 <div class="detail-files-title">첨부파일</div>
                 <a v-for="file in detail.files" :key="file.filenum"
-                   :href="ctx + '/api/notice/file/' + file.filenum"
-                   class="file-item" target="_blank">
+                   href="javascript:void(0)"
+                   class="file-item" @click="downloadFile(file.filenum)">
                     <span class="material-symbols-outlined">attach_file</span>
                     {{ file.originalfilename }}
                 </a>
@@ -302,6 +302,33 @@ const app = createApp({
             form.value.existingFiles = form.value.existingFiles.filter(f => f.filenum !== filenum);
         };
 
+        const downloadFile = async (filenum) => {
+            try {
+                const res = await fetch(`${ctx}/api/notice/file/${filenum}`);
+                if (!res.ok) {
+                    alert('파일을 찾을 수 없습니다.');
+                    return;
+                }
+                // 정상 응답 → Blob으로 변환 후 다운로드
+                const blob = await res.blob();
+                const disposition = res.headers.get('Content-Disposition') || '';
+                let filename = '첨부파일';
+                const match = disposition.match(/filename\*?=(?:UTF-8'')?([^;]+)/i);
+                if (match) filename = decodeURIComponent(match[1]);
+
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                alert('파일 다운로드 중 오류가 발생했습니다.');
+            }
+        };
+
         const deleteNotice = async (noticenum) => {
             if (!confirm('공지사항을 삭제하시겠습니까?')) return;
             const res = await fetch(`\${ctx}/api/notice/\${noticenum}`, { method: 'DELETE' });
@@ -398,7 +425,7 @@ const app = createApp({
             ctx, isAdmin, myEmpId, view, noticeList, total, pageNo, pageSize, keyword,
             totalPages, pageRange, detail, form,
             fetchList, searchNotice, changePage, openDetail, openForm, cancelForm,
-            submitForm, deleteNotice, onFileChange, removeExistingFile
+            submitForm, deleteNotice, downloadFile, onFileChange, removeExistingFile
         };
     }
 });
