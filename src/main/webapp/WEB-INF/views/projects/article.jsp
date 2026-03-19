@@ -59,7 +59,7 @@
 		            <span class="text-dark">${dto.progress}%</span>
 		        </div>
 		    </div>
-		    <div class="progress" style="cursor: pointer;" onclick="location.href='${pageContext.request.contextPath}/projects/task?projectId=${dto.projectId}&readOnly=true'">
+		    <div class="progress" style="cursor: pointer;">
 		        <c:set var="progressClass" value="range-low"/>
 		        <c:if test="${dto.progress == 0}"><c:set var="progressClass" value=""/></c:if>
 		        <c:if test="${dto.progress > 30}"><c:set var="progressClass" value="range-mid"/></c:if>

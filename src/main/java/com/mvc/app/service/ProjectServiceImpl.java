@@ -12,7 +12,6 @@ import com.mvc.app.common.MyUtil;
 import com.mvc.app.domain.dto.ProjectsDto;
 import com.mvc.app.mapper.ProjectNoticeMapper;
 import com.mvc.app.mapper.ProjectsMapper;
-import com.mvc.app.mapper.TaskMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -193,6 +192,30 @@ public class ProjectServiceImpl implements ProjectService {
 	        log.info("myProjectsList : ", e);
 	    }
 	    return list;
+	}
+
+	@Override
+	public List<ProjectsDto> statusCount(Map<String, Object> map) {
+		List<ProjectsDto> list = null;
+		
+		try {
+			list = mapper.statusCount(map);
+		} catch (Exception e) {
+			log.info("statusCount : ", e);
+		}
+		return list;
+	}
+
+	@Override
+	public List<ProjectsDto> myProjectstatusCount(String empId) {
+		List<ProjectsDto> list = null;
+		
+		try {
+			list = mapper.myProjectstatusCount(empId);
+		} catch (Exception e) {
+			log.info("myProjectstatusCount : ", e);
+		}
+		return list;
 	}
 
 }

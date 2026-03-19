@@ -75,20 +75,23 @@ public class ProjectController {
 
 			List<ProjectsDto> list = service.projectslist(map);
 
-			long totalProjects = dataCount;
-			long activeProjects = list.stream().filter(p -> "2".equals(p.getStatus())).count();
-			long finishedProjects = list.stream().filter(p -> "4".equals(p.getStatus())).count();
-			long delayedProjects = list.stream().filter(p -> "5".equals(p.getStatus())).count();
+			Map<String, Object> emptyMap = new HashMap<>();
+			List<ProjectsDto> allList = service.statusCount(emptyMap);
+
+			long totalProjects = allList.size();
+			long activeProjects = allList.stream().filter(p -> "2".equals(p.getStatus())).count();
+			long finishedProjects = allList.stream().filter(p -> "4".equals(p.getStatus())).count();
+			long delayedProjects = allList.stream().filter(p -> "5".equals(p.getStatus())).count();
 			
 			String cp = RequestUtils.getContextPath();
 			String query = "";
 			String listUrl = cp + "/projects/list";
 			String articleUrl = cp + "/projects/article?page=" + current_page;
 
-			if (!kwd.isBlank() || !status.isBlank()) {  // status 조건 추가
+			if (!kwd.isBlank() || !status.isBlank()) { 
 			    query = "schType=" + schType + "&kwd=" + myUtil.encodeUrl(kwd);
 			    if (!status.isBlank()) {
-			        query += "&status=" + status;  // status 추가
+			        query += "&status=" + status;  
 			    }
 			    listUrl += "?" + query;
 			    articleUrl += "&" + query;
@@ -422,20 +425,22 @@ public class ProjectController {
 			// ✅ 프로젝트 리스트 조회
 			List<ProjectsDto> list = service.myProjectsList(map);
 
-			long totalProjects = dataCount;
-			long activeProjects = list.stream().filter(p -> "2".equals(p.getStatus())).count();
-			long finishedProjects = list.stream().filter(p -> "4".equals(p.getStatus())).count();
-			long delayedProjects = list.stream().filter(p -> "5".equals(p.getStatus())).count();
+			List<ProjectsDto> myList = service.myProjectstatusCount(info.getEmpId());
+
+			long totalProjects = myList.size();
+			long activeProjects = myList.stream().filter(p -> "2".equals(p.getStatus())).count();
+			long finishedProjects = myList.stream().filter(p -> "4".equals(p.getStatus())).count();
+			long delayedProjects = myList.stream().filter(p -> "5".equals(p.getStatus())).count();
 
 			String cp = RequestUtils.getContextPath();
 			String query = "";
 			String listUrl = cp + "/projects/myProjectList";
 			String articleUrl = cp + "/projects/article?page=" + current_page;
 
-			if (!kwd.isBlank() || !status.isBlank()) {  // status 조건 추가
+			if (!kwd.isBlank() || !status.isBlank()) { 
 			    query = "schType=" + schType + "&kwd=" + myUtil.encodeUrl(kwd);
 			    if (!status.isBlank()) {
-			        query += "&status=" + status;  // status 추가
+			        query += "&status=" + status;
 			    }
 			    listUrl += "?" + query;
 			    articleUrl += "&" + query;

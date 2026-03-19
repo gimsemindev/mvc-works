@@ -27,4 +27,6 @@ public interface ProjectService {
 	public int myProjectsCount(Map<String, Object> map);
 
 	public List<ProjectsDto> myProjectsList(Map<String, Object> map);
+	public List<ProjectsDto> statusCount(Map<String, Object> map);
+	public List<ProjectsDto> myProjectstatusCount(String empId);
 }

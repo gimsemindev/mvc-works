@@ -374,4 +374,31 @@
 	        GROUP BY p.PROJECTID
 	    )
 	</select>
+	
+	<select id="statusCount" parameterType="map" resultType="com.mvc.app.domain.dto.ProjectsDto">
+	    SELECT
+	    CASE
+	        WHEN p.ENDDATE &lt;= TRUNC(SYSDATE) THEN '4'
+	        WHEN p.STARTDATE &lt;= TRUNC(SYSDATE) AND p.ENDDATE &gt;= TRUNC(SYSDATE) THEN '2'
+	        ELSE p.STATUS
+	    END AS status
+	    FROM PROJECT p
+	    JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
+	    WHERE ep.ROLE = 'M'
+	    GROUP BY p.PROJECTID, p.STARTDATE, p.ENDDATE, p.STATUS
+	</select>
+	
+	
+	<select id="myProjectstatusCount" parameterType="string" resultType="com.mvc.app.domain.dto.ProjectsDto">
+	    SELECT
+	    CASE
+	        WHEN p.ENDDATE &lt;= TRUNC(SYSDATE) THEN '4'
+	        WHEN p.STARTDATE &lt;= TRUNC(SYSDATE) AND p.ENDDATE &gt;= TRUNC(SYSDATE) THEN '2'
+	        ELSE p.STATUS
+	    END AS status
+	    FROM PROJECT p
+	    JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
+	    WHERE ep.EMPID = #{empId}
+	    GROUP BY p.PROJECTID, p.STARTDATE, p.ENDDATE, p.STATUS
+	</select>
 </mapper>

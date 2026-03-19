@@ -22,6 +22,7 @@ public interface ProjectsMapper {
 
 	
 	public List<ProjectsDto> projectslist(Map<String, Object> map);
+	// 필터 적용 시 사용하는 카운트
 	public int dataCount(Map<String, Object> map);	
 	public ProjectsDto findById(Long projectId);
 	public ProjectsDto projectarticle(long projectId);
@@ -32,4 +33,8 @@ public interface ProjectsMapper {
 
 	List<ProjectsDto> myProjectsList(Map<String, Object> map);
 	int myProjectsCount(Map<String, Object> map);
+	
+	public List<ProjectsDto> statusCount(Map<String, Object> map);
+	public List<ProjectsDto> myProjectstatusCount(String empId);
+	
 }
