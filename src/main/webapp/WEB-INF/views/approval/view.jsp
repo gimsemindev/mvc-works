@@ -204,7 +204,7 @@
                         <span class="file-item-name">{{ file.oriFilename }}</span>
                         <span class="file-item-size">{{ store.formatSize(file.fileSize) }}</span>
                         <button class="file-item-btn"
-                                @click="download(file.saveFilename, file.oriFilename)">
+                                @click="download(file.fileId)">
                             다운로드
                         </button>
                     </div>
@@ -370,11 +370,30 @@
                 if (ok) location.href = ctx + '/approval/list';
             };
 
-            const download = (saveFilename, oriFilename) => {
-                const a = document.createElement('a');
-                a.href     = ctx + '/api/approval/file/' + saveFilename;
-                a.download = oriFilename;
-                a.click();
+            const download = async (fileId) => {
+                try {
+                    const res = await fetch(ctx + '/api/approval/doc/file/' + fileId);
+                    if (!res.ok) {
+                        alert('파일을 찾을 수 없습니다.');
+                        return;
+                    }
+                    const blob = await res.blob();
+                    const disposition = res.headers.get('Content-Disposition') || '';
+                    let filename = '첨부파일';
+                    const match = disposition.match(/filename="([^"]+)"/);
+                    if (match) filename = decodeURIComponent(escape(match[1]));
+
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                } catch (e) {
+                    alert('파일 다운로드 중 오류가 발생했습니다.');
+                }
             };
 
             onMounted(async () => {

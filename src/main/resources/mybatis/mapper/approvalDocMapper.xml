@@ -487,6 +487,13 @@
         FROM approvalFile
         WHERE docId = #{docId}
         ORDER BY fileId ASC
+    </select>
+
+    <!-- 첨부파일 단건 조회 -->
+    <select id="getFileById" parameterType="long" resultType="com.mvc.app.domain.dto.ApprovalFileDto">
+        SELECT fileId, docId, oriFilename, saveFilename, fileSize
+        FROM approvalFile
+        WHERE fileId = #{fileId}
     </select> 
 
     <!-- 참조자 조회 -->
