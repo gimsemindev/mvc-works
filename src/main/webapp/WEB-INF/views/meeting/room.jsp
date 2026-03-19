@@ -10,7 +10,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/meetingroom.css?v=3" type="text/css">
 <meta name="ctx" content="${pageContext.request.contextPath}">
-<style>[v-cloak] { display: none; }</style>
+<style>
+[v-cloak] { display: none; }
+.sortable-ghost { opacity: 0.4; }
+.drag-handle { cursor: grab; color: #bfc4ce; font-size: 18px; user-select: none; position: absolute; top: 8px; left: 10px; z-index: 2; }
+.drag-handle:hover { color: #4e73df; }
+</style>
 </head>
 <body>
 
@@ -58,7 +63,9 @@
                 등록된 회의실이 없습니다.
             </div>
 
-            <div class="room-card" v-for="room in store.list" :key="room.roomId">
+            <div class="room-card" v-for="room in store.list" :key="room.roomId"
+                 style="position:relative;">
+                <span class="drag-handle">⠿</span>
                 <!-- 사진 영역 -->
                 <div class="room-card-img">
                     <img v-if="room.photos && room.photos.length > 0"
@@ -133,7 +140,9 @@
                             </div>
                             <div style="flex:1;">
                                 <label>정렬순서</label>
-                                <input type="number" v-model.number="store.form.sortOrder" min="0">
+                                <input type="number" :value="store.form.sortOrder" readonly
+                                       style="background:#f8f9fc; color:#9aa0b4;">
+                                <div style="font-size:11px; color:#9aa0b4; margin-top:4px;">드래그앤드롭으로 변경</div>
                             </div>
                         </div>
 
@@ -194,7 +203,7 @@
 {
     "imports": {
         "http": "/dist/util/http.js?v=2",
-        "meetingRoomStore": "/dist/js/meetingRoomStore.js?v=2",
+        "meetingRoomStore": "/dist/js/meetingRoomStore.js?v=3",
         "commonCodeStore": "/dist/util/store/commonCodeStore.js"
     }
 }
@@ -286,6 +295,20 @@
                 await codeStore.fetchCodes('EQUIPMENT');
                 await store.fetchList();
 
+                // 드래그앤드롭 정렬
+                const grid = document.querySelector('.room-card-grid');
+                new Sortable(grid, {
+                    handle: '.drag-handle',
+                    animation: 200,
+                    ghostClass: 'sortable-ghost',
+                    onEnd(evt) {
+                        const moved = store.list.splice(evt.oldIndex, 1)[0];
+                        store.list.splice(evt.newIndex, 0, moved);
+                        store.list.forEach((item, i) => item.sortOrder = i + 1);
+                        store.saveSortOrders();
+                    }
+                });
+
                 // 모달 열릴 때 히스토리 추가
                 document.addEventListener('shown.bs.modal', () => {
                     history.pushState({ modal: true }, '');
@@ -313,5 +336,6 @@
     app.mount('#vue-app');
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
 </body>
 </html>

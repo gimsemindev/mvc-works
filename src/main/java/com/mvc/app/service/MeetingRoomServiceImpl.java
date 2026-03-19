@@ -71,6 +71,14 @@ public class MeetingRoomServiceImpl implements MeetingRoomService {
 
     @Override
     @Transactional
+    public void updateSortOrders(List<MeetingRoomDto> list) {
+        for (MeetingRoomDto dto : list) {
+            mapper.updateSortOrder(dto);
+        }
+    }
+
+    @Override
+    @Transactional
     public void deleteRoom(long roomId) {
         mapper.deletePhotoByRoom(roomId);
         mapper.deleteEquipByRoom(roomId);

@@ -11,7 +11,11 @@
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/approvallist.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/approvaldoctype.css" type="text/css">
 <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
-<style>[v-cloak] { display: none; }</style>
+<style>
+[v-cloak] { display: none; }
+.sortable-ghost { background: #eef2ff !important; }
+.drag-handle:hover { color: #4e73df !important; }
+</style>
 </head>
 <body>
 
@@ -59,7 +63,7 @@
             <table class="doctype-table">
                 <thead>
                     <tr>
-                        <th style="width:60px; text-align:center;">순서</th>
+                        <th style="width:50px; text-align:center;"></th>
                         <th style="width:120px;">유형코드</th>
                         <th style="width:160px;">유형명</th>
                         <th>설명</th>
@@ -71,7 +75,9 @@
                 <tbody>
                     <tr v-for="(item, idx) in list" :key="item.docTypeId"
                         :class="{ 'row-disabled': item.useYn === 'N' }">
-                        <td style="text-align:center; color:#9aa0b4;">{{ item.sortOrder }}</td>
+                        <td style="text-align:center;">
+                            <span class="drag-handle" style="cursor:grab; color:#bfc4ce; font-size:16px; user-select:none;">⠿</span>
+                        </td>
                         <td><span class="type-code-badge">{{ item.typeCode }}</span></td>
                         <td style="font-weight:500;">{{ item.typeName }}</td>
                         <td style="color:#667085; font-size:12px;">{{ item.description || '-' }}</td>
@@ -140,7 +146,7 @@
                               <label>정렬순서</label>
                               <input type="number" :value="store.form.sortOrder" readonly
                                      style="background:#f8f9fc; color:#9aa0b4;">
-                              <div style="font-size:11px; color:#9aa0b4; margin-top:6px;">정렬순서는 자동 부여됩니다.</div>
+                              <div style="font-size:11px; color:#9aa0b4; margin-top:6px;">정렬순서는 드래그앤드롭으로 변경할 수 있습니다.</div>
                           </div>
                           <div class="mb-3">
                               <label>참고사항</label>
@@ -176,7 +182,7 @@
 {
 	"imports": {
 		"http": "/dist/util/http.js?v=2",
-		"docTypeStore": "/dist/util/store/docTypeStore.js?v=2"
+		"docTypeStore": "/dist/util/store/docTypeStore.js?v=5"
 	}
 }
 </script>
@@ -195,6 +201,20 @@
 
             onMounted(() => {
                 store.fetchList();
+
+                // 드래그앤드롭 정렬
+                const tbody = document.querySelector('.doctype-table tbody');
+                new Sortable(tbody, {
+                    handle: '.drag-handle',
+                    animation: 200,
+                    ghostClass: 'sortable-ghost',
+                    onEnd(evt) {
+                        const moved = store.list.splice(evt.oldIndex, 1)[0];
+                        store.list.splice(evt.newIndex, 0, moved);
+                        store.list.forEach((item, i) => item.sortOrder = i + 1);
+                        store.saveSortOrders();
+                    }
+                });
 
                 document.getElementById('formModal').addEventListener('shown.bs.modal', () => {
                     if (!quill) {
@@ -219,10 +239,20 @@
                 if (quill) {
                     store.form.notice = quill.root.innerHTML;
                 }
+                const isAdd = store.formMode === 'ADD';
                 const result = await store.saveForm();
                 if (result) {
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('formModal'));
-                    if (modal) modal.hide();
+                    const modalEl = document.getElementById('formModal');
+                    modalEl.classList.remove('show');
+                    modalEl.style.display = 'none';
+                    modalEl.removeAttribute('aria-modal');
+                    modalEl.removeAttribute('role');
+                    modalEl.setAttribute('aria-hidden', 'true');
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                    document.body.classList.remove('modal-open');
+                    document.body.style.removeProperty('overflow');
+                    document.body.style.removeProperty('padding-right');
+                    alert(isAdd ? '등록되었습니다.' : '수정되었습니다.');
                 }
             };
 
@@ -234,6 +264,7 @@
     app.mount('#vue-app');
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 

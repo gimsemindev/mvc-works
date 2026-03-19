@@ -14,6 +14,7 @@ public interface MeetingRoomMapper {
     MeetingRoomDto getRoom(long roomId);
     void insertRoom(MeetingRoomDto dto);
     void updateRoom(MeetingRoomDto dto);
+    void updateSortOrder(MeetingRoomDto dto);
     void deleteRoom(long roomId);
 
     List<String> listEquipByRoom(long roomId);

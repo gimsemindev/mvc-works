@@ -57,6 +57,18 @@ public class DocTypeServiceImpl implements DocTypeService {
     }
 
     @Override
+    public void updateSortOrders(List<DocTypeDto> list) throws Exception {
+        try {
+            for (DocTypeDto dto : list) {
+                mapper.updateSortOrder(dto);
+            }
+        } catch (Exception e) {
+            log.info("updateSortOrders : ", e);
+            throw e;
+        }
+    }
+
+    @Override
     public void deleteDocType(long docTypeId) throws Exception {
         try {
             mapper.deleteDocType(docTypeId);

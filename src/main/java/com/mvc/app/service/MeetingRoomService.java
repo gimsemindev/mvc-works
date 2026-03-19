@@ -10,5 +10,6 @@ public interface MeetingRoomService {
     MeetingRoomDto getRoom(long roomId);
     void insertRoom(MeetingRoomDto dto, MultipartFile[] photos);
     void updateRoom(MeetingRoomDto dto, MultipartFile[] photos);
+    void updateSortOrders(List<MeetingRoomDto> list);
     void deleteRoom(long roomId);
 }

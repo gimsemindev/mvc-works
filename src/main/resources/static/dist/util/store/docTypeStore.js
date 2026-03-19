@@ -74,18 +74,29 @@ export const useDocTypeStore = defineStore('docType', {
             try {
                 if (this.formMode === 'ADD') {
                     await http.post('/approval/doctype', this.form);
-                    alert('등록되었습니다.');
                 } else {
                     await http.put('/approval/doctype/' + this.form.docTypeId, this.form);
-                    alert('수정되었습니다.');
                 }
 
-                this.fetchList();
+                await this.fetchList();
                 return true;
             } catch (error) {
                 console.error('저장 실패:', error);
                 alert('저장 중 오류가 발생했습니다.');
                 return false;
+            }
+        },
+
+        async saveSortOrders() {
+            try {
+                const payload = this.list.map((item, i) => ({
+                    docTypeId: item.docTypeId,
+                    sortOrder: i + 1
+                }));
+                await http.put('/approval/doctype/sort', payload);
+            } catch (e) {
+                console.error('순서 변경 실패:', e);
+                await this.fetchList();
             }
         },
 

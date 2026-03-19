@@ -41,6 +41,17 @@ public class MeetingRoomRestController {
         }
     }
 
+    @PutMapping("/sort")
+    public ResponseEntity<?> updateSort(@RequestBody List<MeetingRoomDto> list) {
+        try {
+            meetingRoomService.updateSortOrders(list);
+            return ResponseEntity.ok(Map.of("msg", "순서 변경 완료"));
+        } catch (Exception e) {
+            log.info("updateSort : ", e);
+            return ResponseEntity.internalServerError().body(Map.of("msg", "순서 변경 실패"));
+        }
+    }
+
     @PostMapping
     public ResponseEntity<?> insert(
             @RequestPart("data") MeetingRoomDto dto,

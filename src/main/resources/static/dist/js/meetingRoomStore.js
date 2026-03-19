@@ -85,6 +85,20 @@ export const useMeetingRoomStore = defineStore('meetingRoom', {
             await this.fetchList();
         },
 
+        // 순서 일괄 저장
+        async saveSortOrders() {
+            try {
+                const payload = this.list.map((item, i) => ({
+                    roomId: item.roomId,
+                    sortOrder: i + 1
+                }));
+                await http.put('/meeting/room/sort', payload);
+            } catch (e) {
+                console.error('순서 변경 실패:', e);
+                await this.fetchList();
+            }
+        },
+
         // 삭제
         async deleteRoom(roomId) {
             await http.delete('/meeting/room/' + roomId);

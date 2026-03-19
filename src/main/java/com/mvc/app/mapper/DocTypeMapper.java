@@ -13,5 +13,6 @@ public interface DocTypeMapper {
     public List<DocTypeDto> listDocType();
     public DocTypeDto findById(long docTypeId);
     public void updateDocType(DocTypeDto dto) throws SQLException;
+    public void updateSortOrder(DocTypeDto dto) throws SQLException;
     public void deleteDocType(long docTypeId) throws SQLException;
 }

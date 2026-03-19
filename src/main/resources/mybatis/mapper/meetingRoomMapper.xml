@@ -41,6 +41,11 @@
         WHERE roomId = #{roomId}
     </update>
 
+    <!-- 순서 변경 -->
+    <update id="updateSortOrder" parameterType="com.mvc.app.domain.dto.MeetingRoomDto">
+        UPDATE meetingRoom SET sortOrder = #{sortOrder} WHERE roomId = #{roomId}
+    </update>
+
     <!-- 회의실 삭제 -->
     <delete id="deleteRoom" parameterType="long">
         DELETE FROM meetingRoom WHERE roomId = #{roomId}

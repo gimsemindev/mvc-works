@@ -55,6 +55,18 @@ public class DocTypeRestController {
         }
     }
 
+    // 순서 변경 (일괄)
+    @PutMapping("/sort")
+    public ResponseEntity<?> updateSort(@RequestBody List<DocTypeDto> list) {
+        try {
+            service.updateSortOrders(list);
+            return ResponseEntity.ok(Map.of("msg", "순서 변경 완료"));
+        } catch (Exception e) {
+            log.info("updateSort : ", e);
+            return ResponseEntity.internalServerError().body(Map.of("msg", "순서 변경 실패"));
+        }
+    }
+
     // 수정
     @PutMapping("/{docTypeId}")
     public ResponseEntity<?> update(@PathVariable("docTypeId") long docTypeId,

@@ -5,7 +5,7 @@
 
     <!-- 등록 (typeCode, sortOrder 자동생성) -->
     <insert id="insertDocType" parameterType="com.mvc.app.domain.dto.DocTypeDto">
-        INSERT INTO approvalDocType (docTypeId, typeName, typeCode, description, sortOrder, useYn, regEmpId, regDate)
+        INSERT INTO approvalDocType (docTypeId, typeName, typeCode, description, sortOrder, useYn, regEmpId, regDate, formCode, notice)
         VALUES (
             approvalDocType_seq.NEXTVAL,
             #{typeName},
@@ -14,7 +14,9 @@
             (SELECT NVL(MAX(sortOrder), 0) + 1 FROM approvalDocType),
             #{useYn},
             #{regEmpId},
-            SYSDATE
+            SYSDATE,
+            #{formCode},
+            #{notice}
         )
     </insert>
 
@@ -46,6 +48,11 @@
             formCode = #{formCode},
             notice = #{notice}
         WHERE docTypeId = #{docTypeId}
+    </update>
+
+    <!-- 순서 변경 -->
+    <update id="updateSortOrder" parameterType="com.mvc.app.domain.dto.DocTypeDto">
+        UPDATE approvalDocType SET sortOrder = #{sortOrder} WHERE docTypeId = #{docTypeId}
     </update>
 
     <!-- 삭제 -->

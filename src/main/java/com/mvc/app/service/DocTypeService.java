@@ -9,5 +9,6 @@ public interface DocTypeService {
     public List<DocTypeDto> listDocType();
     public DocTypeDto findById(long docTypeId);
     public void updateDocType(DocTypeDto dto) throws Exception;
+    public void updateSortOrders(List<DocTypeDto> list) throws Exception;
     public void deleteDocType(long docTypeId) throws Exception;
 }
