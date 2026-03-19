@@ -1,0 +1,256 @@
+#main-content {
+    margin-left: 260px;
+    min-height: 100vh;
+    background: #f4f7fe;
+    padding: 2rem;
+}
+
+.gz-wrap {
+    max-width: 960px;
+}
+
+.gz-header {
+    margin-bottom: 2rem;
+}
+.gz-header h4 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 4px 0;
+}
+.gz-header h4 i { color: #0061ff; }
+.gz-desc {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+.game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+}
+
+.game-card {
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid #eaecf0;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+.game-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+}
+.game-card:nth-child(1)::after { background: #E24B4A; }
+.game-card:nth-child(2)::after { background: #378ADD; }
+.game-card:nth-child(3)::after { background: #1D9E75; }
+.game-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.game-icon {
+    width: 50px; height: 50px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+}
+.ladder-icon   { background: #fff0f0; color: #E24B4A; }
+.roulette-icon { background: #eff6ff; color: #378ADD; }
+.lucky-icon    { background: #ecfdf5; color: #1D9E75; }
+
+.game-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 4px;
+}
+.game-desc {
+    font-size: 0.82rem;
+    color: #6b7280;
+    line-height: 1.5;
+}
+.game-badge {
+    display: inline-block;
+    background: #f3f4f6;
+    color: #374151;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    align-self: flex-start;
+}
+
+/* -- Modal shared -- */
+.ll-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,.45);
+    align-items: center; justify-content: center;
+}
+.ll-modal {
+    background: #fff;
+    border-radius: 16px;
+    width: min(560px, 94vw);
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: llPop .25s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes llPop {
+    from { opacity:0; transform:translateY(16px) scale(.97); }
+    to   { opacity:1; transform:none; }
+}
+.ll-mheader {
+    display: flex; align-items: flex-start;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem 0;
+}
+.ll-mtitle { font-size: 17px; font-weight: 700; color: #111827; }
+.ll-msub   { font-size: 13px; color: #6b7280; margin-top: 2px; }
+.ll-mclose {
+    background: none; border: none; cursor: pointer;
+    color: #9ca3af; font-size: 18px; line-height: 1; padding: 2px 8px;
+}
+.ll-mclose:hover { color: #374151; }
+.ll-mbody {
+    padding: 1.25rem 1.5rem 1.5rem;
+    display: flex; flex-direction: column; gap: 12px;
+}
+.ll-section {
+    background: #f9fafb; border-radius: 10px;
+    border: 1px solid #e5e7eb; padding: 1rem 1.125rem;
+}
+.ll-slabel {
+    font-size: 11px; font-weight: 700; color: #6b7280;
+    text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.ll-slabel span { font-weight: 400; text-transform: none; color: #9ca3af; letter-spacing: 0; }
+.ll-tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-bottom: 10px; min-height: 28px;
+}
+.ll-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: #fff; border: 1px solid #d1d5db;
+    border-radius: 20px; padding: 4px 10px;
+    font-size: 13px; color: #374151; cursor: pointer;
+    transition: border-color .15s;
+}
+.ll-tag:hover { border-color: #E24B4A; }
+.ll-tagx { font-size: 10px; color: #9ca3af; }
+.ll-irow { display: flex; gap: 6px; }
+.ll-irow input {
+    flex: 1; padding: 7px 10px; font-size: 13px;
+    border: 1px solid #d1d5db; border-radius: 8px;
+    background: #fff; color: #111827; outline: none;
+    transition: border-color .15s;
+}
+.ll-irow input:focus { border-color: #E24B4A; }
+.ll-badd {
+    padding: 7px 14px; font-size: 13px; font-weight: 600;
+    background: #E24B4A; color: #fff;
+    border: none; border-radius: 8px; cursor: pointer;
+}
+.ll-badd:hover { background: #c0392b; }
+.ll-bprimary {
+    width: 100%; padding: 11px; font-size: 15px; font-weight: 600;
+    background: #E24B4A; color: #fff; border: none;
+    border-radius: 10px; cursor: pointer; transition: background .15s;
+}
+.ll-bprimary:hover:not(:disabled) { background: #c0392b; }
+.ll-bprimary:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; }
+.ll-brow { display: flex; gap: 8px; }
+.ll-bsec {
+    flex: 1; padding: 10px; font-size: 14px;
+    background: #f3f4f6; color: #374151;
+    border: 1px solid #e5e7eb; border-radius: 10px; cursor: pointer;
+}
+.ll-bsec:hover { background: #e5e7eb; }
+.ll-cwrap {
+    background: #f9fafb; border-radius: 10px;
+    border: 1px solid #e5e7eb; padding: 6px; overflow: hidden;
+}
+.ll-cwrap canvas { display: block; width: 100%; }
+.ll-result {
+    background: #fff5f5; border: 1px solid #fecaca;
+    border-radius: 12px; padding: 1.25rem; text-align: center;
+    animation: llPop .3s cubic-bezier(.34,1.56,.64,1);
+}
+.ll-rlabel { font-size: 12px; color: #9ca3af; margin-bottom: 6px; }
+.ll-rname  { font-size: 28px; font-weight: 700; color: #E24B4A; margin-bottom: 4px; }
+.ll-rmsg   { font-size: 14px; color: #6b7280; }
+
+/* -- Roulette -- */
+.roulette-wrap {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 1rem; padding: 0.5rem 0;
+}
+#rouletteCanvas { display: block; max-width: 280px; width: 100%; }
+.spin-btn {
+    padding: 10px 32px; font-size: 15px; font-weight: 600;
+    background: #378ADD; color: #fff; border: none;
+    border-radius: 10px; cursor: pointer; transition: background .15s;
+}
+.spin-btn:hover:not(:disabled) { background: #185FA5; }
+.spin-btn:disabled { background: #e5e7eb; color: #9ca3af; cursor: not-allowed; }
+.roulette-result {
+    background: #eff6ff; border: 1px solid #bfdbfe;
+    border-radius: 12px; padding: 1rem 1.5rem; text-align: center; width: 100%;
+    animation: llPop .3s cubic-bezier(.34,1.56,.64,1);
+}
+.roulette-result .ll-rname { color: #185FA5; }
+
+/* -- Lucky Draw -- */
+.card-grid {
+    display: flex; flex-wrap: wrap;
+    gap: 10px; justify-content: center; padding: 0.5rem 0;
+}
+.draw-card {
+    width: 80px; height: 110px;
+    border-radius: 10px; cursor: pointer;
+    perspective: 600px;
+}
+.draw-card-inner {
+    width: 100%; height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(.34,1.56,.64,1);
+}
+.draw-card.flipped .draw-card-inner { transform: rotateY(180deg); }
+.draw-card-front, .draw-card-back {
+    position: absolute; inset: 0; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    backface-visibility: hidden;
+}
+.draw-card-front {
+    background: #1D9E75; color: #fff;
+    font-size: 24px; font-weight: 700;
+    border: 2px solid #0F6E56;
+}
+.draw-card-back {
+    transform: rotateY(180deg);
+    font-size: 12px; font-weight: 700;
+    text-align: center; padding: 8px;
+    border: 2px solid transparent;
+}
+.draw-card-back.winner { background: #fff0f0; color: #E24B4A; border-color: #fca5a5; }
+.draw-card-back.safe   { background: #f0fdf4; color: #1D9E75; border-color: #86efac; }
+.lucky-result {
+    background: #ecfdf5; border: 1px solid #6ee7b7;
+    border-radius: 12px; padding: 1rem 1.5rem; text-align: center; width: 100%;
+    animation: llPop .3s cubic-bezier(.34,1.56,.64,1);
+}
+.lucky-result .ll-rname { color: #1D9E75; }

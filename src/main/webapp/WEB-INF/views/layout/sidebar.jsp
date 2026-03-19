@@ -75,8 +75,10 @@
         <i class="fas fa-bullhorn"></i> 공지사항
     </a>
     
-    <%@ include file="/WEB-INF/views/layout/lunchLadder_v2.jsp" %>
-    
+    <a href="${pageContext.request.contextPath}/layout/lunchLadder" class="nav-link">
+    <i class="fa-solid fa-gamepad"></i> Game Zone
+	</a>
+
 </aside>
 
 <%-- sidebar 전용 Js --%>

@@ -80,4 +80,9 @@ public class HomeController {
 
 	    return "main/home";
 	}
+	
+	@GetMapping("/layout/lunchLadder")
+	public String lunchLadder() {
+	    return "layout/lunchLadder";
+	}
 }
