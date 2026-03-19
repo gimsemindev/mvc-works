@@ -61,10 +61,10 @@
 	<sql id="where-project">
 		<choose>
 			<when test="schType == 'title'">
-				INSTR(p.TITLE, #{kwd}) &gt; 0
+				INSTR(p.title, #{kwd}) &gt; 0
 			</when>
 			<when test="schType == 'manager'">
-				INSTR(e.NAME, #{kwd}) &gt; 0
+				INSTR(e.name, #{kwd}) &gt; 0
 			</when>
 			<when test="schType == 'startDate'">
 				(INSTR(TO_CHAR(p.STARTDATE, 'YYYY/MM/DD'), #{kwd})
@@ -74,14 +74,17 @@
 				INSTR(TO_CHAR(p.STARTDATE, 'YYYYMMDD'), #{kwd}) &gt; 0)
 			</when>
 			<when test="schType == 'endDate'">
-				(INSTR(TO_CHAR(p.ENDDATE, 'YYYY/MM/DD'), #{kwd}) &gt;
-				0
+				(INSTR(TO_CHAR(p.ENDDATE, 'YYYY/MM/DD'), #{kwd}) &gt; 0
 				OR INSTR(TO_CHAR(p.ENDDATE, 'YYYY-MM-DD'), #{kwd}) &gt; 0
-				OR
-				INSTR(TO_CHAR(p.ENDDATE, 'YYYYMMDD'), #{kwd}) &gt; 0)
+				OR INSTR(TO_CHAR(p.ENDDATE, 'YYYYMMDD'), #{kwd}) &gt; 0)
 			</when>
 			<otherwise>
-				INSTR(${schType}, #{kwd}) &gt; 0
+			    (INSTR(p.title, #{kwd}) &gt; 0
+			    OR INSTR(e.name, #{kwd}) &gt; 0
+			    OR INSTR(TO_CHAR(p.STARTDATE, 'YYYY/MM/DD'), #{kwd}) &gt; 0
+			    OR INSTR(TO_CHAR(p.STARTDATE, 'YYYYMMDD'), #{kwd}) &gt; 0
+			    OR INSTR(TO_CHAR(p.ENDDATE, 'YYYY/MM/DD'), #{kwd}) &gt; 0
+			    OR INSTR(TO_CHAR(p.ENDDATE, 'YYYYMMDD'), #{kwd}) &gt; 0)
 			</otherwise>
 		</choose>
 	</sql>
@@ -107,8 +110,7 @@
 		TASKCREATEDDATE
 		)
 		SELECT
-		'TSK' ||
-		LPAD(TASK_SEQ.NEXTVAL, 8, '0'),
+		'TSK' || LPAD(TASK_SEQ.NEXTVAL, 8, '0'),
 		#{stageId},
 		jt.taskTitle,
 		'',
@@ -141,14 +143,14 @@
 		startDate,
 		TO_CHAR(p.ENDDATE, 'YYYY/MM/DD') AS endDate,
 		TRUNC(p.ENDDATE
-		- p.STARTDATE) AS totalDays,
+		- p.STARTDATE + 1) AS totalDays,
 		CASE
 		WHEN p.STARTDATE &gt; TRUNC(SYSDATE)
 		THEN '시작 전'
 		WHEN p.ENDDATE &lt; TRUNC(SYSDATE) THEN '종료'
 		ELSE
-		TO_CHAR(GREATEST(TRUNC(p.ENDDATE - SYSDATE), 0)) || ' / ' ||
-		TO_CHAR(TRUNC(p.ENDDATE - p.STARTDATE))
+		TO_CHAR(GREATEST(p.ENDDATE - TRUNC(SYSDATE) + 1, 0)) || ' / ' ||
+		TO_CHAR(TRUNC(p.ENDDATE - p.STARTDATE + 1))
 		END AS remainDays,
 		p.PROGRESS,
 		CASE
@@ -184,11 +186,9 @@
 	<select id="dataCount" parameterType="map" resultType="Integer">
 		SELECT NVL(COUNT(*), 0)
 		FROM PROJECT p
-		JOIN EMPPROJECT ep ON p.PROJECTID
-		= ep.PROJECTID
+		JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
 		JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
-		WHERE ep.ROLE =
-		'M'
+		WHERE ep.ROLE = 'M'
 		<if test="kwd != null and kwd != ''">
 			AND
 			<include refid="where-project" />
@@ -204,14 +204,14 @@
 		TO_CHAR(p.STARTDATE, 'YYYY/MM/DD') AS startDate,
 		TO_CHAR(p.ENDDATE, 'YYYY/MM/DD') AS endDate,
 		TRUNC(p.ENDDATE -
-		p.STARTDATE) AS totalDays,
+		p.STARTDATE + 1) AS totalDays,
 		CASE
 		WHEN p.STARTDATE &gt; TRUNC(SYSDATE)
 		THEN '시작 전'
-		WHEN p.ENDDATE &lt; TRUNC(SYSDATE) THEN '0'
+		WHEN p.ENDDATE &lt; TRUNC(SYSDATE) THEN '종료'
 		ELSE
-		TO_CHAR(GREATEST(TRUNC(p.ENDDATE - SYSDATE), 0)) || ' / ' ||
-		TO_CHAR(TRUNC(p.ENDDATE - p.STARTDATE))
+		ELSE TO_CHAR(GREATEST(TRUNC(p.ENDDATE - SYSDATE) + 1, 0)) || ' / ' ||
+		TO_CHAR(TRUNC(p.ENDDATE - p.STARTDATE + 1))
 		END AS remainDays,
 		p.PROGRESS,
 		p.STATUS,
@@ -237,8 +237,7 @@
 		SELECT ep.EMPID AS empId, e.NAME AS name, ep.ROLE AS role
 		FROM EMPPROJECT ep
 		JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
-		WHERE
-		ep.PROJECTID = #{projectId}
+		WHERE ep.PROJECTID = #{projectId}
 	</select>
 
 	<select id="findById" parameterType="long"
@@ -287,18 +286,19 @@
 		p.TITLE,
 		p.PROJECTTYPE,
 		CASE
-		WHEN COUNT(e_m.NAME) &gt; 1 THEN MIN(e_m.NAME) || ' 외 ' ||
-		(COUNT(e_m.NAME) - 1) || '명'
-		ELSE MIN(e_m.NAME)
+		WHEN COUNT(e.NAME) > 1 THEN MIN(e.NAME) || ' 외 ' || (COUNT(e.NAME) - 1) ||
+		'명'
+		ELSE MIN(e.NAME)
 		END AS managerName,
 		TO_CHAR(p.STARTDATE, 'YYYY/MM/DD') AS startDate,
 		TO_CHAR(p.ENDDATE, 'YYYY/MM/DD') AS endDate,
-		TRUNC(p.ENDDATE - p.STARTDATE) AS totalDays,
+		TRUNC(p.ENDDATE - p.STARTDATE + 1) AS totalDays,
 		CASE
 		WHEN p.STARTDATE &gt; TRUNC(SYSDATE) THEN '시작 전'
-		WHEN p.ENDDATE &lt; TRUNC(SYSDATE) THEN '0'
-		ELSE TO_CHAR(GREATEST(TRUNC(p.ENDDATE - SYSDATE), 0)) || ' / ' ||
-		TO_CHAR(TRUNC(p.ENDDATE - p.STARTDATE))
+		WHEN p.ENDDATE &lt; TRUNC(SYSDATE) THEN '종료'
+		ELSE
+		TO_CHAR(GREATEST(p.ENDDATE - TRUNC(SYSDATE) + 1, 0)) || ' / ' ||
+		TO_CHAR(TRUNC(p.ENDDATE - p.STARTDATE + 1))
 		END AS remainDays,
 		p.PROGRESS,
 		CASE
@@ -308,18 +308,14 @@
 		ELSE p.STATUS
 		END AS status
 		FROM PROJECT p
-		JOIN EMPPROJECT ep_user
-		ON p.PROJECTID = ep_user.PROJECTID
-		AND ep_user.EMPID = #{empId}
-		JOIN EMPPROJECT ep_m
-		ON p.PROJECTID = ep_m.PROJECTID
-		AND ep_m.ROLE = 'M'
-		JOIN EMPLOYEE2 e_m
-		ON ep_m.EMPID = e_m.EMPID
+		JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
+		JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
+		WHERE ep.EMPID = #{empId}  <!-- 나의 프로젝트만 조회 -->
 		GROUP BY
 		p.PROJECTID, p.TITLE, p.PROJECTTYPE, p.STARTDATE, p.ENDDATE, p.PROGRESS, p.STATUS
 		ORDER BY p.PROJECTID DESC
-		OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+		OFFSET #{offset} ROWS
+		FETCH FIRST #{size} ROWS ONLY
 	</select>
 
 	<!-- 나의 프로젝트 개수 조회 -->
@@ -327,8 +323,7 @@
 		resultType="int">
 		SELECT NVL(COUNT(*), 0)
 		FROM PROJECT p
-		JOIN EMPPROJECT ep ON
-		p.PROJECTID = ep.PROJECTID
+		JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
 		WHERE ep.EMPID = #{empId}
 	</select>
 </mapper>

@@ -30,7 +30,6 @@
                 <div class="stat-card">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="stat-icon bg-primaryblue bg-opacity-10 text-primary"><i class="fas fa-list-check"></i></div>
-                        <span class="stat-trend bg-success bg-opacity-10 text-success">+12%</span>
                     </div>
                     <div class="stat-label">Total Projects</div>
                     <div class="stat-value">${totalProjects}</div>
@@ -40,7 +39,6 @@
                 <div class="stat-card">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="stat-icon bg-warning bg-opacity-10 text-warning"><i class="fas fa-clock"></i></div>
-                        <span class="stat-trend bg-light text-muted">Stable</span>
                     </div>
                     <div class="stat-label">Active Projects</div>
                     <div class="stat-value">${activeProjects}</div>
@@ -50,7 +48,6 @@
                 <div class="stat-card">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="stat-icon bg-success bg-opacity-10 text-success"><i class="fas fa-check-circle"></i></div>
-                        <span class="stat-trend bg-success bg-opacity-10 text-success">+5</span>
                     </div>
                     <div class="stat-label">Finished</div>
                     <div class="stat-value">${finishedProjects}</div>
@@ -60,7 +57,6 @@
                 <div class="stat-card">
                     <div class="d-flex justify-content-between align-items-start">
                         <div class="stat-icon bg-danger bg-opacity-10 text-danger"><i class="fas fa-exclamation-triangle"></i></div>
-                        <span class="stat-trend bg-danger bg-opacity-10 text-danger">+2</span>
                     </div>
                     <div class="stat-label">Delayed</div>
                     <div class="stat-value">${delayedProjects}</div>
@@ -75,13 +71,14 @@
 
                     <%-- 검색폼 --%>
 					<form method="get" action="${pageContext.request.contextPath}/projects/list" class="d-flex gap-2 align-items-center">
+					    <input type="hidden" name="page" value="1">
 					    <div class="search-box">
 					        <select name="schType">
+					        	<option value="all" ${schType == 'all' ? 'selected' : ''}>전체</option>
 					            <option value="title" ${schType == 'title' ? 'selected' : ''}>프로젝트명</option>
-					            <option value="manager" ${schType == 'manager' ? 'selected' : ''}>매니저</option>
+					            <option value="manager" ${schType == 'manager' ? 'selected' : ''}>멤버</option>
 					            <option value="startDate" ${schType == 'startDate' ? 'selected' : ''}>시작일</option>
 					            <option value="endDate" ${schType == 'endDate' ? 'selected' : ''}>종료일</option>
-					            <option value="status" ${schType == 'status' ? 'selected' : ''}>상태</option>
 					        </select>
 					        <input type="text" name="kwd" placeholder="검색어를 입력하세요.." value="${kwd}">
 					        <i class="fas fa-search"></i>

@@ -3,29 +3,57 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterBtn = document.getElementById('myFilterBtn');
     const filterMenu = document.getElementById('myFilterMenu');
     const filterItems = filterMenu.querySelectorAll('.dropdown-item');
-    const tableRows = document.querySelectorAll('tbody tr');
 
     let currentStatus = "";
 
 
-    function applyFilters() {
-        const searchTerm = searchInput.value.toLowerCase().trim();
+	function applyFilters() {
+	    const searchTerm = searchInput.value.toLowerCase().trim();
+	    const schType = document.querySelector('select[name="schType"]').value;
+	    const rows = document.querySelectorAll('tbody tr');
 
-        tableRows.forEach(row => {
-            const projectName = row.cells[1].textContent.toLowerCase();
-            const rowStatusClean = row.cells[7].textContent.replace(/\s/g, "").trim();
-            const selectedStatusClean = currentStatus.replace(/\s/g, "").trim();
+	    rows.forEach(row => {
+	        if (row.cells.length < 8) return;
 
-            const matchesSearch = projectName.includes(searchTerm);
-            const matchesStatus = (currentStatus === "") || rowStatusClean.includes(selectedStatusClean);
+	        const projectName = row.cells[1].textContent.toLowerCase();
+	        const managerName = row.cells[2].textContent.toLowerCase();
+	        const startDate = row.cells[3].textContent.toLowerCase();
+	        const endDate = row.cells[4].textContent.toLowerCase();
+	        const rowStatusClean = row.cells[7].textContent.replace(/\s/g, "").trim();
+	        const selectedStatusClean = currentStatus.replace(/\s/g, "").trim();
 
-            if (matchesSearch && matchesStatus) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        });
-    }
+	        let matchesSearch = false;
+			if (searchTerm === '') {
+			    matchesSearch = true;
+			} else if (schType === 'all') {
+			    const normalizedStart = startDate.replace(/[-\/]/g, '');
+			    const normalizedEnd = endDate.replace(/[-\/]/g, '');
+			    const normalizedTerm = searchTerm.replace(/[-\/]/g, '');
+			    matchesSearch = projectName.includes(searchTerm) ||
+			                    managerName.includes(searchTerm) ||
+			                    normalizedStart.includes(normalizedTerm) ||
+			                    normalizedEnd.includes(normalizedTerm);
+			} else if (schType === 'title') {
+			    matchesSearch = projectName.includes(searchTerm);
+			} else if (schType === 'manager') {
+			    matchesSearch = managerName.includes(searchTerm);
+			} else if (schType === 'startDate') {
+			    const normalizedStart = startDate.replace(/[-\/]/g, '');
+			    const normalizedTerm = searchTerm.replace(/[-\/]/g, '');
+			    matchesSearch = normalizedStart.includes(normalizedTerm);
+			} else if (schType === 'endDate') {
+			    const normalizedEnd = endDate.replace(/[-\/]/g, '');
+			    const normalizedTerm = searchTerm.replace(/[-\/]/g, '');
+			    matchesSearch = normalizedEnd.includes(normalizedTerm);
+			} else if (schType === 'status') {
+			    matchesSearch = rowStatusClean.includes(searchTerm);
+			}
+
+	        const matchesStatus = (currentStatus === "") || rowStatusClean.includes(selectedStatusClean);
+
+	        row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
+	    });
+	}
 
 
     searchInput.addEventListener('input', applyFilters);

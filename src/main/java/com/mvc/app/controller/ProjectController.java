@@ -58,9 +58,11 @@ public class ProjectController {
 			map.put("empId", info.getEmpId());
 			map.put("schType", schType);
 			map.put("kwd", kwd);
+			log.info("schType={}, kwd={}", schType, kwd);
 
 			int dataCount = service.dataCount(map);
-
+			log.info("dataCount={}", dataCount);
+			
 			dataCount = service.dataCount(map);
 			if (dataCount != 0) {
 				total_page = dataCount / size + (dataCount % size > 0 ? 1 : 0);

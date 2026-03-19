@@ -28,7 +28,7 @@
 			<ol class="breadcrumb">
 				<li class="breadcrumb-item text-muted">Projects</li>
 				<li class="breadcrumb-item text-muted">Home</li>
-				<li class="breadcrumb-item active fw-bold">Projects List</li>
+				<li class="breadcrumb-item active fw-bold">My Projects List</li>
 			</ol>
 		</div>
 
@@ -82,29 +82,27 @@
 
 		<div class="project-container">
 			<div class="table-header">
-				<h5 class="mb-0 fw-bold">Project List</h5>
+				<h5 class="mb-0 fw-bold">My Projects List</h5>
 				<div class="d-flex gap-2 align-items-center">
 
 					<%-- 검색폼 --%>
 					<form method="get"
-						action="${pageContext.request.contextPath}/projects/list"
+						action="${pageContext.request.contextPath}/projects/myProjectList"
 						class="d-flex gap-2 align-items-center">
+						<input type="hidden" name="page" value="1">
 						<div class="search-box">
 							<select name="schType">
 								<option value="title" ${schType == 'title' ? 'selected' : ''}>프로젝트명</option>
-								<option value="manager"
-									${schType == 'manager' ? 'selected' : ''}>매니저</option>
 								<option value="startDate"
 									${schType == 'startDate' ? 'selected' : ''}>시작일</option>
 								<option value="endDate"
 									${schType == 'endDate' ? 'selected' : ''}>종료일</option>
-								<option value="status" ${schType == 'status' ? 'selected' : ''}>상태</option>
 							</select> <input type="text" name="kwd" placeholder="검색어를 입력하세요.."
 								value="${kwd}"> <i class="fas fa-search"></i>
 						</div>
 						<button type="submit" class="btn btn-primary">검색</button>
 						<button type="button" class="btn btn-secondary"
-							onclick="location.href='${pageContext.request.contextPath}/projects/list'">↺</button>
+							onclick="location.href='${pageContext.request.contextPath}/projects/myProjectList'">↺</button>
 					</form>
 
 					<%-- 상태 필터 --%>
@@ -159,9 +157,11 @@
 						<c:forEach var="p" items="${list}" varStatus="status">
 							<tr>
 								<td>${dataCount - ((page-1) * size) - status.index}</td>
-								<td class="fw-medium"><a
-									href="${pageContext.request.contextPath}/projects/article?projectId=${p.projectId}"
-									class="project-title-link"> ${p.title} </a></td>
+								<td class="fw-medium">
+									<a href="${pageContext.request.contextPath}/projects/task?projectId=${p.projectId}" class="project-title-link"> 
+										${p.title} 
+									</a>
+								</td>
 								<td><span class="member-badge">${p.managerName}</span></td>
 								<td>${p.startDate}</td>
 								<td>${p.endDate}</td>
