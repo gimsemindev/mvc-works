@@ -147,14 +147,14 @@
 		CASE
 		WHEN p.STARTDATE &gt; TRUNC(SYSDATE)
 		THEN '시작 전'
-		WHEN p.ENDDATE &lt; TRUNC(SYSDATE) THEN '종료'
+		WHEN p.ENDDATE &lt;= TRUNC(SYSDATE) THEN '종료'
 		ELSE
 		TO_CHAR(GREATEST(p.ENDDATE - TRUNC(SYSDATE) + 1, 0)) || ' / ' ||
 		TO_CHAR(TRUNC(p.ENDDATE - p.STARTDATE + 1))
 		END AS remainDays,
 		p.PROGRESS,
 		CASE
-		WHEN p.ENDDATE &lt; TRUNC(SYSDATE) THEN '4'
+		WHEN p.ENDDATE &lt;= TRUNC(SYSDATE) THEN '4'
 		WHEN p.STARTDATE &lt;=
 		TRUNC(SYSDATE) AND p.ENDDATE &gt;= TRUNC(SYSDATE)
 		THEN '2'
@@ -168,6 +168,15 @@
 		<if test="kwd != null and kwd != ''">
 			AND
 			<include refid="where-project" />
+		</if>
+		<if test="status != null and status != ''">
+		    AND (
+		        CASE
+		            WHEN p.ENDDATE &lt;= TRUNC(SYSDATE) THEN '4'
+		            WHEN p.STARTDATE &lt;= TRUNC(SYSDATE) AND p.ENDDATE &gt;= TRUNC(SYSDATE) THEN '2'
+		            ELSE p.STATUS
+		        END
+		    ) = #{status}
 		</if>
 		GROUP BY
 		p.PROJECTID,
@@ -184,15 +193,27 @@
 
 
 	<select id="dataCount" parameterType="map" resultType="Integer">
-		SELECT NVL(COUNT(*), 0)
-		FROM PROJECT p
-		JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
-		JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
-		WHERE ep.ROLE = 'M'
-		<if test="kwd != null and kwd != ''">
-			AND
-			<include refid="where-project" />
-		</if>
+	    SELECT NVL(COUNT(*), 0)
+	    FROM (
+	        SELECT p.PROJECTID
+	        FROM PROJECT p
+	        JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
+	        JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
+	        WHERE ep.ROLE = 'M'
+	        <if test="kwd != null and kwd != ''">
+	            AND <include refid="where-project" />
+	        </if>
+	        <if test="status != null and status != ''">
+	            AND (
+	                CASE
+	                    WHEN p.ENDDATE &lt;= TRUNC(SYSDATE) THEN '4'
+	                    WHEN p.STARTDATE &lt;= TRUNC(SYSDATE) AND p.ENDDATE &gt;= TRUNC(SYSDATE) THEN '2'
+	                    ELSE p.STATUS
+	                END
+	            ) = #{status}
+	        </if>
+	        GROUP BY p.PROJECTID
+	    )
 	</select>
 
 	<!-- 프로젝트 단건 조회 -->
@@ -210,7 +231,7 @@
 		THEN '시작 전'
 		WHEN p.ENDDATE &lt; TRUNC(SYSDATE) THEN '종료'
 		ELSE
-		ELSE TO_CHAR(GREATEST(TRUNC(p.ENDDATE - SYSDATE) + 1, 0)) || ' / ' ||
+		TO_CHAR(GREATEST(TRUNC(p.ENDDATE - SYSDATE) + 1, 0)) || ' / ' ||
 		TO_CHAR(TRUNC(p.ENDDATE - p.STARTDATE + 1))
 		END AS remainDays,
 		p.PROGRESS,
@@ -302,7 +323,7 @@
 		END AS remainDays,
 		p.PROGRESS,
 		CASE
-		WHEN p.ENDDATE &lt; TRUNC(SYSDATE) THEN '4'
+		WHEN p.ENDDATE &lt;= TRUNC(SYSDATE) THEN '4'
 		WHEN p.STARTDATE &lt;= TRUNC(SYSDATE) AND p.ENDDATE &gt;= TRUNC(SYSDATE)
 		THEN '2'
 		ELSE p.STATUS
@@ -311,6 +332,18 @@
 		JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
 		JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
 		WHERE ep.EMPID = #{empId}  <!-- 나의 프로젝트만 조회 -->
+		<if test="kwd != null and kwd != ''">
+	        AND <include refid="where-project" />
+	    </if>
+	    <if test="status != null and status != ''">
+	        AND (
+	            CASE
+	                WHEN p.ENDDATE &lt;= TRUNC(SYSDATE) THEN '4'
+	                WHEN p.STARTDATE &lt;= TRUNC(SYSDATE) AND p.ENDDATE &gt;= TRUNC(SYSDATE) THEN '2'
+	                ELSE p.STATUS
+	            END
+	        ) = #{status}
+	    </if>
 		GROUP BY
 		p.PROJECTID, p.TITLE, p.PROJECTTYPE, p.STARTDATE, p.ENDDATE, p.PROGRESS, p.STATUS
 		ORDER BY p.PROJECTID DESC
@@ -318,12 +351,27 @@
 		FETCH FIRST #{size} ROWS ONLY
 	</select>
 
-	<!-- 나의 프로젝트 개수 조회 -->
-	<select id="myProjectsCount" parameterType="map"
-		resultType="int">
-		SELECT NVL(COUNT(*), 0)
-		FROM PROJECT p
-		JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
-		WHERE ep.EMPID = #{empId}
+	<select id="myProjectsCount" parameterType="map" resultType="int">
+    SELECT NVL(COUNT(*), 0)
+	    FROM (
+	        SELECT p.PROJECTID
+	        FROM PROJECT p
+	        JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
+	        JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
+	        WHERE ep.EMPID = #{empId}
+	        <if test="kwd != null and kwd != ''">
+	            AND <include refid="where-project" />
+	        </if>
+	        <if test="status != null and status != ''">
+	            AND (
+	                CASE
+	                    WHEN p.ENDDATE &lt;= TRUNC(SYSDATE) THEN '4'
+	                    WHEN p.STARTDATE &lt;= TRUNC(SYSDATE) AND p.ENDDATE &gt;= TRUNC(SYSDATE) THEN '2'
+	                    ELSE p.STATUS
+	                END
+	            ) = #{status}
+	        </if>
+	        GROUP BY p.PROJECTID
+	    )
 	</select>
 </mapper>

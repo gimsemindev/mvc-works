@@ -78,7 +78,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	        const statusText = this.querySelector('.status-badge').innerText.trim();
 
-	        // 상태 텍스트 → status 코드 매핑
 	        const statusMap = {
 	            '진행중': '2',
 	            '승인대기': '3',
@@ -89,10 +88,8 @@ document.addEventListener('DOMContentLoaded', function() {
 	        };
 
 	        const statusCode = statusMap[statusText] || '';
-
-	        // 현재 폼에 status 값 추가해서 서버로 제출
 	        const form = document.querySelector('.search-box').closest('form');
-	        
+
 	        let statusInput = form.querySelector('input[name="status"]');
 	        if (!statusInput) {
 	            statusInput = document.createElement('input');
@@ -100,11 +97,19 @@ document.addEventListener('DOMContentLoaded', function() {
 	            statusInput.name = 'status';
 	            form.appendChild(statusInput);
 	        }
-	        statusInput.value = statusCode;
-	        form.submit();
+
+	        // 같은 거 누르면 해제 (토글)
+	        const currentStatus = form.querySelector('input[name="status"]')?.value || '';
+	        if (currentStatus === statusCode) {
+	            statusInput.value = '';
+	            filterBtn.classList.remove('active');
+	        } else {
+	            statusInput.value = statusCode;
+	            filterBtn.classList.add('active');
+	        }
 
 	        filterMenu.classList.remove('show');
-	        filterBtn.style.color = "#4e73df";
+	        form.submit();
 	    });
 	});
 

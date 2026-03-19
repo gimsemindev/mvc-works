@@ -72,6 +72,7 @@
                     <%-- 검색폼 --%>
 					<form method="get" action="${pageContext.request.contextPath}/projects/list" class="d-flex gap-2 align-items-center">
 					    <input type="hidden" name="page" value="1">
+					    <input type="hidden" name="status" value="${status}">
 					    <div class="search-box">
 					        <select name="schType">
 					        	<option value="all" ${schType == 'all' ? 'selected' : ''}>전체</option>

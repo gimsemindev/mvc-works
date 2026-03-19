@@ -90,6 +90,7 @@
 						action="${pageContext.request.contextPath}/projects/myProjectList"
 						class="d-flex gap-2 align-items-center">
 						<input type="hidden" name="page" value="1">
+						<input type="hidden" name="status" value="${status}">
 						<div class="search-box">
 							<select name="schType">
 								<option value="title" ${schType == 'title' ? 'selected' : ''}>프로젝트명</option>

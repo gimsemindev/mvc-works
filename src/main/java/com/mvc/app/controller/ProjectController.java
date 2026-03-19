@@ -44,6 +44,7 @@ public class ProjectController {
 	@GetMapping("list")
 	public String projectlist(@RequestParam(name = "page", defaultValue = "1") int current_page,
 			@RequestParam(name = "schType", defaultValue = "all") String schType,
+			@RequestParam(name = "status", defaultValue = "") String status,
 			@RequestParam(name = "kwd", defaultValue = "") String kwd, Model model) throws Exception {
 
 		try {
@@ -58,11 +59,9 @@ public class ProjectController {
 			map.put("empId", info.getEmpId());
 			map.put("schType", schType);
 			map.put("kwd", kwd);
-			log.info("schType={}, kwd={}", schType, kwd);
+			map.put("status", status);
 
 			int dataCount = service.dataCount(map);
-			log.info("dataCount={}", dataCount);
-			
 			dataCount = service.dataCount(map);
 			if (dataCount != 0) {
 				total_page = dataCount / size + (dataCount % size > 0 ? 1 : 0);
@@ -86,11 +85,13 @@ public class ProjectController {
 			String listUrl = cp + "/projects/list";
 			String articleUrl = cp + "/projects/article?page=" + current_page;
 
-			if (!kwd.isBlank()) {
-				query = "schType=" + schType + "&kwd=" + myUtil.encodeUrl(kwd);
-
-				listUrl += "?" + query;
-				articleUrl += "&" + query;
+			if (!kwd.isBlank() || !status.isBlank()) {  // status 조건 추가
+			    query = "schType=" + schType + "&kwd=" + myUtil.encodeUrl(kwd);
+			    if (!status.isBlank()) {
+			        query += "&status=" + status;  // status 추가
+			    }
+			    listUrl += "?" + query;
+			    articleUrl += "&" + query;
 			}
 
 			String paging = paginateUtil.paging(current_page, total_page, listUrl);
@@ -106,6 +107,7 @@ public class ProjectController {
 
 			model.addAttribute("schType", schType);
 			model.addAttribute("kwd", kwd);
+			model.addAttribute("status", status);
 			
 			
 			model.addAttribute("totalProjects", totalProjects);
@@ -384,6 +386,7 @@ public class ProjectController {
 	@GetMapping("/myProjectList")
 	public String myProjectList(@RequestParam(name = "page", defaultValue = "1") int current_page,
 			@RequestParam(name = "schType", defaultValue = "all") String schType,
+			@RequestParam(name = "status", defaultValue = "") String status,
 			@RequestParam(name = "kwd", defaultValue = "") String kwd, Model model) throws Exception {
 
 		try {
@@ -398,6 +401,7 @@ public class ProjectController {
 			map.put("empId", info.getEmpId());
 			map.put("schType", schType);
 			map.put("kwd", kwd);
+			map.put("status", status);
 
 			// ✅ DB에서 총 프로젝트 수
 			int dataCount = service.myProjectsCount(map);
@@ -428,12 +432,14 @@ public class ProjectController {
 			String listUrl = cp + "/projects/myProjectList";
 			String articleUrl = cp + "/projects/article?page=" + current_page;
 
-			if (!kwd.isBlank()) {
-				query = "schType=" + schType + "&kwd=" + myUtil.encodeUrl(kwd);
-				listUrl += "?" + query;
-				articleUrl += "&" + query;
+			if (!kwd.isBlank() || !status.isBlank()) {  // status 조건 추가
+			    query = "schType=" + schType + "&kwd=" + myUtil.encodeUrl(kwd);
+			    if (!status.isBlank()) {
+			        query += "&status=" + status;  // status 추가
+			    }
+			    listUrl += "?" + query;
+			    articleUrl += "&" + query;
 			}
-
 			String paging = paginateUtil.paging(current_page, total_page, listUrl);
 
 			// ✅ 모델에 담기
@@ -447,6 +453,7 @@ public class ProjectController {
 
 			model.addAttribute("schType", schType);
 			model.addAttribute("kwd", kwd);
+			model.addAttribute("status", status);
 
 			// ✅ 통계 모델 추가
 			model.addAttribute("totalProjects", totalProjects);
