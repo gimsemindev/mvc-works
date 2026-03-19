@@ -23,4 +23,8 @@ public interface ProjectService {
 
 	// 프로젝트 조회
 	public ProjectsDto findById(long projectId);
+
+	public int myProjectsCount(Map<String, Object> map);
+
+	public List<ProjectsDto> myProjectsList(Map<String, Object> map);
 }

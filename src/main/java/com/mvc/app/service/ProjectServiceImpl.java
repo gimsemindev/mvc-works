@@ -173,4 +173,26 @@ public class ProjectServiceImpl implements ProjectService {
 		}
 	}
 
+	@Override
+	public int myProjectsCount(Map<String, Object> map) {
+	    int count = 0;
+	    try {
+	        count = mapper.myProjectsCount(map);
+	    } catch (Exception e) {
+	        log.info("myProjectsCount : ", e);
+	    }
+	    return count;
+	}
+
+	@Override
+	public List<ProjectsDto> myProjectsList(Map<String, Object> map) {
+	    List<ProjectsDto> list = null;
+	    try {
+	        list = mapper.myProjectsList(map);
+	    } catch (Exception e) {
+	        log.info("myProjectsList : ", e);
+	    }
+	    return list;
+	}
+
 }

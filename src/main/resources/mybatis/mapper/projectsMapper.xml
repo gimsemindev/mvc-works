@@ -4,7 +4,8 @@
 <mapper namespace="com.mvc.app.mapper.ProjectsMapper">
 
 	<!-- 프로젝트 생성 -->
-	<insert id="insertProject" parameterType="com.mvc.app.domain.dto.ProjectsDto">
+	<insert id="insertProject"
+		parameterType="com.mvc.app.domain.dto.ProjectsDto">
 		<selectKey keyProperty="projectId" resultType="long"
 			order="BEFORE">
 			SELECT PROJECTS_SEQ .NEXTVAL FROM DUAL
@@ -95,33 +96,33 @@
 		ORDER BY sequence
 	</select>
 
-<insert id="insertTasks">
-INSERT INTO TASK (
-    TASKID,
-    STAGEID,
-    TASKTITLE,
-    TASKDESCRIPTION,
-    TASKCREATOR,
-    TASKSTATUS,
-    TASKCREATEDDATE
-)
-SELECT
-    'TSK' || LPAD(TASK_SEQ.NEXTVAL, 8, '0'),
-    #{stageId},
-    jt.taskTitle,
-    '',
-    #{creator},
-    '1',
-    SYSDATE
-FROM JSON_TABLE(
-    #{tasks,jdbcType=VARCHAR},
-    '$[*]'
-    COLUMNS (
-        taskTitle VARCHAR2(200) PATH '$.taskTitle'
-    )
-) jt
-</insert>
-	
+	<insert id="insertTasks">
+		INSERT INTO TASK (
+		TASKID,
+		STAGEID,
+		TASKTITLE,
+		TASKDESCRIPTION,
+		TASKCREATOR,
+		TASKSTATUS,
+		TASKCREATEDDATE
+		)
+		SELECT
+		'TSK' || LPAD(TASK_SEQ.NEXTVAL, 8, '0'),
+		#{stageId},
+		jt.taskTitle,
+		'',
+		#{creator},
+		'1',
+		SYSDATE
+		FROM JSON_TABLE(
+		#{tasks,jdbcType=VARCHAR},
+		'$[*]'
+		COLUMNS (
+		taskTitle VARCHAR2(200) PATH '$.taskTitle'
+		)
+		) jt
+	</insert>
+
 	<!-- 프로젝트 리스트 -->
 	<select id="projectslist" parameterType="map"
 		resultType="com.mvc.app.domain.dto.ProjectsDto">
@@ -229,12 +230,13 @@ FROM JSON_TABLE(
 		p.STARTDATE, p.ENDDATE,
 		p.PROGRESS, p.STATUS
 	</select>
-	
-	<select id="projectMembers" parameterType="long" resultType="com.mvc.app.domain.dto.ProjectsDto">
-	    SELECT ep.EMPID AS empId, e.NAME AS name, ep.ROLE AS role
-	    FROM EMPPROJECT ep
-	    JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
-	    WHERE ep.PROJECTID = #{projectId}
+
+	<select id="projectMembers" parameterType="long"
+		resultType="com.mvc.app.domain.dto.ProjectsDto">
+		SELECT ep.EMPID AS empId, e.NAME AS name, ep.ROLE AS role
+		FROM EMPPROJECT ep
+		JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
+		WHERE ep.PROJECTID = #{projectId}
 	</select>
 
 	<select id="findById" parameterType="long"
@@ -265,12 +267,61 @@ FROM JSON_TABLE(
 		p.PROGRESS
 	</select>
 
-	<select id="findProjectsByEmpId" parameterType="string" resultType="com.mvc.app.domain.dto.ProjectsDto">
+	<select id="findProjectsByEmpId" parameterType="string"
+		resultType="com.mvc.app.domain.dto.ProjectsDto">
 		SELECT p.*
 		FROM PROJECT p
 		JOIN EMPPROJECT ep
 		ON p.projectId =
 		ep.projectId
 		WHERE ep.empId = #{empId}
-	</select>	
+	</select>
+
+	<!-- 나의 프로젝트 리스트 조회 -->
+	<select id="myProjectsList" parameterType="map"
+		resultType="com.mvc.app.domain.dto.ProjectsDto">
+		SELECT
+		p.PROJECTID,
+		p.TITLE,
+		p.PROJECTTYPE,
+		CASE
+		WHEN COUNT(e.NAME) > 1 THEN MIN(e.NAME) || ' 외 ' || (COUNT(e.NAME) - 1) ||
+		'명'
+		ELSE MIN(e.NAME)
+		END AS managerName,
+		TO_CHAR(p.STARTDATE, 'YYYY/MM/DD') AS startDate,
+		TO_CHAR(p.ENDDATE, 'YYYY/MM/DD') AS endDate,
+		TRUNC(p.ENDDATE - p.STARTDATE) AS totalDays,
+		CASE
+		WHEN p.STARTDATE &gt; TRUNC(SYSDATE) THEN '시작 전'
+		WHEN p.ENDDATE &lt; TRUNC(SYSDATE) THEN '0'
+		ELSE TO_CHAR(GREATEST(TRUNC(p.ENDDATE - SYSDATE), 0)) || ' / ' ||
+		TO_CHAR(TRUNC(p.ENDDATE - p.STARTDATE))
+		END AS remainDays,
+		p.PROGRESS,
+		CASE
+		WHEN p.ENDDATE &lt; TRUNC(SYSDATE) THEN '4'
+		WHEN p.STARTDATE &lt;= TRUNC(SYSDATE) AND p.ENDDATE &gt;= TRUNC(SYSDATE)
+		THEN '2'
+		ELSE p.STATUS
+		END AS status
+		FROM PROJECT p
+		JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
+		JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
+		WHERE ep.EMPID = #{empId}  <!-- 나의 프로젝트만 조회 -->
+		GROUP BY
+		p.PROJECTID, p.TITLE, p.PROJECTTYPE, p.STARTDATE, p.ENDDATE, p.PROGRESS, p.STATUS
+		ORDER BY p.PROJECTID DESC
+		OFFSET #{offset} ROWS
+		FETCH FIRST #{size} ROWS ONLY
+	</select>
+
+	<!-- 나의 프로젝트 개수 조회 -->
+	<select id="myProjectsCount" parameterType="map"
+		resultType="int">
+		SELECT NVL(COUNT(*), 0)
+		FROM PROJECT p
+		JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
+		WHERE ep.EMPID = #{empId}
+	</select>
 </mapper>

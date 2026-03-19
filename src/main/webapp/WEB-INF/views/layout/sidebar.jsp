@@ -57,6 +57,7 @@
     <ul class="sub-menu" id="projectSubMenu">
         <li><a href="${pageContext.request.contextPath}/projects/create">프로젝트 생성</a></li>
     	<li><a href="${pageContext.request.contextPath}/projects/projectNotice">프로젝트 공지사항</a></li>
+        <li><a href="${pageContext.request.contextPath}/projects/myProjectList">프로젝트 리스트</a></li>
         <li><a href="${pageContext.request.contextPath}/projects/gantt">프로젝트 태스크 관리</a></li>
     </ul>
 

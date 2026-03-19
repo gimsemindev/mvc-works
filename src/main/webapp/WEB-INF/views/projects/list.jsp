@@ -21,9 +21,7 @@
 	<main id="main-content">
         <div aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item text-muted">Projects</li>
-                <li class="breadcrumb-item text-muted">Home</li>
-                <li class="breadcrumb-item active fw-bold">Projects List</li>
+                <li class="breadcrumb-item active fw-bold">All Projects</li>
             </ol>
         </div>
 

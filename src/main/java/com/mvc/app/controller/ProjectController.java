@@ -44,8 +44,7 @@ public class ProjectController {
 	@GetMapping("list")
 	public String projectlist(@RequestParam(name = "page", defaultValue = "1") int current_page,
 			@RequestParam(name = "schType", defaultValue = "all") String schType,
-			@RequestParam(name = "kwd", defaultValue = "") String kwd, 
-			Model model) throws Exception {
+			@RequestParam(name = "kwd", defaultValue = "") String kwd, Model model) throws Exception {
 
 		try {
 			int size = 10;
@@ -228,37 +227,37 @@ public class ProjectController {
 			int total_page = 0;
 
 			kwd = myUtil.decodeUrl(kwd);
-			
+
 			Map<String, Object> map = new HashMap<>();
 			map.put("projectId", projectId);
 			map.put("schType", schType);
 			map.put("kwd", kwd);
-			
+
 			int taskDataCount = taskService.taskDataCount(map);
 			if (taskDataCount != 0) {
 				total_page = taskDataCount / size + (taskDataCount % size > 0 ? 1 : 0);
 			}
-			
+
 			current_page = Math.min(current_page, total_page);
-			
+
 			int offset = (current_page - 1) * size;
 			if (offset < 0)
 				offset = 0;
 			map.put("offset", offset);
 			map.put("size", size);
-			
+
 			List<ProjectsDto> members = service.projectMembers(projectId);
-			List<ProjectsDto> stages  = taskService.findStagesByProjectId(projectId);
+			List<ProjectsDto> stages = taskService.findStagesByProjectId(projectId);
 
 			SessionInfo info = LoginMemberUtil.getSessionInfo();
 			String loginEmpId = info.getEmpId();
-			
+
 			boolean isManager = members.stream()
-				    .anyMatch(m -> m.getEmpId().equals(loginEmpId) && "M".equals(m.getRole()));
-			
+					.anyMatch(m -> m.getEmpId().equals(loginEmpId) && "M".equals(m.getRole()));
+
 			model.addAttribute("isManager", isManager);
 			model.addAttribute("loginEmpId", loginEmpId);
-			
+
 			String cp = RequestUtils.getContextPath();
 			String query = "";
 			String listUrl = cp + "/projects/task?projectId=" + projectId;
@@ -282,54 +281,53 @@ public class ProjectController {
 
 			model.addAttribute("paging", paging);
 			model.addAttribute("articleUrl", articleUrl);
-			
+
 			model.addAttribute("projectId", projectId);
 			model.addAttribute("schType", schType);
 			model.addAttribute("kwd", kwd);
 			model.addAttribute("stages", stages);
 			model.addAttribute("members", members);
-			
+
 			ProjectsDto dto = service.projectarticle(projectId);
 			String projectStart = dto.getStartDate() != null ? dto.getStartDate().replace("/", "-") : "";
 			String projectEnd = dto.getEndDate() != null ? dto.getEndDate().replace("/", "-") : "";
 			model.addAttribute("projectStart", projectStart);
 			model.addAttribute("projectEnd", projectEnd);
 			model.addAttribute("projectTitle", dto.getTitle());
-			
-			
+
 		} catch (Exception e) {
 			log.info("projecttask : ", e);
 		}
 
 		return "projects/task";
 	}
-	
+
 	@PostMapping("task/insert")
 	@ResponseBody
 	public ResponseEntity<?> insertTask(@RequestBody ProjectsDto dto, HttpServletRequest req) throws Exception {
 		try {
 			SessionInfo info = LoginMemberUtil.getSessionInfo();
 			dto.setTaskCreator(info.getEmpId());
-			
+
 			taskService.insertProjectTask(dto);
 			return ResponseEntity.ok().build();
-			
+
 		} catch (Exception e) {
 			log.info("insertTask : ", e);
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		}
 	}
-	
+
 	@PostMapping("task/update")
 	@ResponseBody
 	public ResponseEntity<?> updateTask(@RequestBody List<ProjectsDto> list, HttpServletRequest req) throws Exception {
 		try {
-			
-			for(ProjectsDto dto : list) {
+
+			for (ProjectsDto dto : list) {
 				taskService.updateProjectTask(dto);
 			}
 			return ResponseEntity.ok().build();
-			
+
 		} catch (Exception e) {
 			log.info("updateTask : ", e);
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -342,32 +340,113 @@ public class ProjectController {
 		try {
 			SessionInfo info = LoginMemberUtil.getSessionInfo();
 			dto.setEmpId(info.getEmpId());
-			
+
 			taskService.insertTaskDailylog(dto);
 			return ResponseEntity.ok().build();
-			
+
 		} catch (Exception e) {
 			log.info("insertTaskDailylog : ", e);
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
 		}
 	}
-	
+
 	@GetMapping("task/dailylist")
 	@ResponseBody
 	public ResponseEntity<?> taskDailylist(@RequestParam("empTaskId") String empTaskId) {
-	    try {
-	        List<ProjectsDto> logs = taskService.taskDailylist(empTaskId);
-	        return ResponseEntity.ok(logs);
-	        
-	    } catch (Exception e) {
-	        log.info("getDailyLogs : ", e);
-	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-	    }
+		try {
+			List<ProjectsDto> logs = taskService.taskDailylist(empTaskId);
+			return ResponseEntity.ok(logs);
+
+		} catch (Exception e) {
+			log.info("getDailyLogs : ", e);
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+		}
 	}
-	
+
 	@GetMapping("ganttarticle")
 	public String projectganttarticle() {
 		return "projects/ganttarticle";
+	}
+
+	@GetMapping("/myProjectList")
+	public String myProjectList(@RequestParam(name = "page", defaultValue = "1") int current_page,
+			@RequestParam(name = "schType", defaultValue = "all") String schType,
+			@RequestParam(name = "kwd", defaultValue = "") String kwd, Model model) throws Exception {
+
+		try {
+			int size = 10;
+			int total_page = 0;
+
+			kwd = myUtil.decodeUrl(kwd);
+
+			SessionInfo info = LoginMemberUtil.getSessionInfo();
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("empId", info.getEmpId());
+			map.put("schType", schType);
+			map.put("kwd", kwd);
+
+			// ✅ DB에서 총 프로젝트 수
+			int dataCount = service.myProjectsCount(map);
+
+			if (dataCount != 0) {
+				total_page = dataCount / size + (dataCount % size > 0 ? 1 : 0);
+			}
+
+			current_page = Math.min(current_page, total_page);
+
+			int offset = (current_page - 1) * size;
+			if (offset < 0)
+				offset = 0;
+
+			map.put("offset", offset);
+			map.put("size", size);
+
+			// ✅ 프로젝트 리스트 조회
+			List<ProjectsDto> list = service.myProjectsList(map);
+
+			// ✅ 통계 계산
+			long totalProjects = dataCount;
+			long activeProjects = list.stream().filter(p -> "2".equals(p.getStatus())).count();
+			long finishedProjects = list.stream().filter(p -> "4".equals(p.getStatus())).count();
+			long delayedProjects = list.stream().filter(p -> "5".equals(p.getStatus())).count();
+
+			String cp = RequestUtils.getContextPath();
+			String query = "";
+			String listUrl = cp + "/projects/myProjectList";
+			String articleUrl = cp + "/projects/article?page=" + current_page;
+
+			if (!kwd.isBlank()) {
+				query = "schType=" + schType + "&kwd=" + myUtil.encodeUrl(kwd);
+				listUrl += "?" + query;
+				articleUrl += "&" + query;
+			}
+
+			String paging = paginateUtil.paging(current_page, total_page, listUrl);
+
+			// ✅ 모델에 담기
+			model.addAttribute("list", list);
+			model.addAttribute("dataCount", dataCount);
+			model.addAttribute("size", size);
+			model.addAttribute("total_page", total_page);
+			model.addAttribute("page", current_page);
+			model.addAttribute("paging", paging);
+			model.addAttribute("articleUrl", articleUrl);
+
+			model.addAttribute("schType", schType);
+			model.addAttribute("kwd", kwd);
+
+			// ✅ 통계 모델 추가
+			model.addAttribute("totalProjects", totalProjects);
+			model.addAttribute("activeProjects", activeProjects);
+			model.addAttribute("finishedProjects", finishedProjects);
+			model.addAttribute("delayedProjects", delayedProjects);
+
+		} catch (Exception e) {
+			log.info("myProjectList : ", e);
+		}
+
+		return "projects/myProjectList";
 	}
 
 }
