@@ -33,7 +33,7 @@
                         <span class="stat-trend bg-success bg-opacity-10 text-success">+12%</span>
                     </div>
                     <div class="stat-label">Total Projects</div>
-                    <div class="stat-value">128</div>
+                    <div class="stat-value">${totalProjects}</div>
                 </div>
             </div>
             <div class="col-md-3">
@@ -43,7 +43,7 @@
                         <span class="stat-trend bg-light text-muted">Stable</span>
                     </div>
                     <div class="stat-label">Active Projects</div>
-                    <div class="stat-value">45</div>
+                    <div class="stat-value">${activeProjects}</div>
                 </div>
             </div>
             <div class="col-md-3">
@@ -53,7 +53,7 @@
                         <span class="stat-trend bg-success bg-opacity-10 text-success">+5</span>
                     </div>
                     <div class="stat-label">Finished</div>
-                    <div class="stat-value">73</div>
+                    <div class="stat-value">${finishedProjects}</div>
                 </div>
             </div>
             <div class="col-md-3">
@@ -63,7 +63,7 @@
                         <span class="stat-trend bg-danger bg-opacity-10 text-danger">+2</span>
                     </div>
                     <div class="stat-label">Delayed</div>
-                    <div class="stat-value">10</div>
+                    <div class="stat-value">${delayedProjects}</div>
                 </div>
             </div>
         </div>

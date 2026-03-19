@@ -74,6 +74,11 @@ public class ProjectController {
 
 			List<ProjectsDto> list = service.projectslist(map);
 
+			long totalProjects = dataCount;
+			long activeProjects = list.stream().filter(p -> "2".equals(p.getStatus())).count();
+			long finishedProjects = list.stream().filter(p -> "4".equals(p.getStatus())).count();
+			long delayedProjects = list.stream().filter(p -> "5".equals(p.getStatus())).count();
+			
 			String cp = RequestUtils.getContextPath();
 			String query = "";
 			String listUrl = cp + "/projects/list";
@@ -99,6 +104,12 @@ public class ProjectController {
 
 			model.addAttribute("schType", schType);
 			model.addAttribute("kwd", kwd);
+			
+			
+			model.addAttribute("totalProjects", totalProjects);
+			model.addAttribute("activeProjects", activeProjects);
+			model.addAttribute("finishedProjects", finishedProjects);
+			model.addAttribute("delayedProjects", delayedProjects);
 
 		} catch (Exception e) {
 			log.info("projectlist : ", e);
