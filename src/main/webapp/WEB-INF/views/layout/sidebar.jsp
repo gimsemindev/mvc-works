@@ -10,7 +10,7 @@
 	<a href="${pageContext.request.contextPath}/home" class="sidebar-brand">
 		<img src="${pageContext.request.contextPath}/dist/images/logo_full.png"
 		alt="MVC" class="sidebar-logo">
-	</a> 
+	</a>
 	
 	<a href="${pageContext.request.contextPath}/home" class="nav-link"><i
 		class="fas fa-th-large"></i> 대시보드</a> <a
@@ -104,6 +104,11 @@
 	</a>
 
 </aside>
+
+<!-- 사이드바 토글 버튼 (접기/펼치기 하나로 통합) -->
+<button class="sidebar-edge-btn" id="sidebarEdgeBtn" title="사이드바 토글">
+	<i class="fas fa-chevron-left"></i>
+</button>
 
 <%-- sidebar 전용 Js --%>
 <script src="${pageContext.request.contextPath}/dist/js/main-sidebar.js"></script>
