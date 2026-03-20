@@ -106,8 +106,6 @@
 	</a>
 	<ul class="sub-menu" id="surveySubMenu">
 		<li><a href="${pageContext.request.contextPath}/survey/list">설문 목록</a></li>
-		<li><a href="${pageContext.request.contextPath}/survey/respond">설문 응답</a></li>
-		<li><a href="${pageContext.request.contextPath}/survey/result">결과 통계</a></li>
 	</ul>
 
 	<a href="${pageContext.request.contextPath}/qnaBot" class="nav-link">
@@ -124,5 +122,5 @@
 </button>
 
 <%-- sidebar 전용 Js --%>
-<script src="${pageContext.request.contextPath}/dist/js/main-sidebar.js"></script>
+<script src="${pageContext.request.contextPath}/dist/js/main-sidebar.js?v=2"></script>
 

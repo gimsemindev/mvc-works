@@ -1,0 +1,233 @@
+@charset "UTF-8";
+
+/* ── 레이아웃 ── */
+#main-content {
+    margin-left: 260px !important;
+    padding: 24px 32px !important;
+    box-sizing: border-box;
+    min-height: 100vh;
+    background: #f8f9fc;
+}
+
+/* ── 설문 안내 영역 ── */
+.respond-header {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e6eaf4;
+    padding: 28px;
+    margin-bottom: 20px;
+}
+
+.respond-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1d2939;
+    margin: 0 0 8px 0;
+}
+
+.respond-header .respond-desc {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0 0 12px 0;
+}
+
+.respond-header .respond-meta {
+    display: flex;
+    gap: 20px;
+    font-size: 12px;
+    color: #9aa0b4;
+}
+
+.respond-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ── 질문 카드 ── */
+.respond-question {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e6eaf4;
+    padding: 24px;
+    margin-bottom: 16px;
+}
+
+.respond-question .q-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1d2939;
+    margin-bottom: 4px;
+}
+
+.respond-question .q-type-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-bottom: 14px;
+}
+.q-type-badge.SINGLE { background: #eef1fd; color: #4e73df; }
+.q-type-badge.MULTI  { background: #e0f5ef; color: #1a9660; }
+.q-type-badge.TEXT   { background: #fff4e0; color: #d97706; }
+.q-type-badge.SCORE  { background: #fef3f2; color: #e74c3c; }
+
+/* 라디오 / 체크박스 선택지 */
+.respond-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.respond-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid #e6eaf4;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+.respond-option:hover {
+    background: #f6f8ff;
+    border-color: #4e73df;
+}
+.respond-option.selected {
+    background: #eef1fd;
+    border-color: #4e73df;
+}
+
+.respond-option input[type="radio"],
+.respond-option input[type="checkbox"] {
+    accent-color: #4e73df;
+    width: 16px;
+    height: 16px;
+}
+
+.respond-option label {
+    font-size: 13px;
+    color: #3a3f51;
+    cursor: pointer;
+}
+
+/* 서술형 입력 */
+.respond-textarea {
+    width: 100%;
+    border: 1px solid #d8dde6;
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 13px;
+    resize: vertical;
+    min-height: 100px;
+    outline: none;
+    box-sizing: border-box;
+}
+.respond-textarea:focus { border-color: #4e73df; }
+
+/* 점수 선택 */
+.respond-score {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.score-btn {
+    width: 44px;
+    height: 44px;
+    border: 2px solid #e6eaf4;
+    border-radius: 50%;
+    background: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    color: #7b82a0;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.score-btn:hover {
+    border-color: #4e73df;
+    color: #4e73df;
+}
+.score-btn.selected {
+    background: #4e73df;
+    border-color: #4e73df;
+    color: #fff;
+}
+
+.score-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+    font-size: 11px;
+    color: #9aa0b4;
+}
+
+/* ── 제출 영역 ── */
+.respond-footer {
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
+}
+
+.btn-submit {
+    background: #4e73df;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 14px 48px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.18s;
+}
+.btn-submit:hover { background: #3a5abf; }
+.btn-submit:disabled {
+    background: #d8dde6;
+    cursor: not-allowed;
+}
+
+/* ── 이미 응답 완료 안내 ── */
+.respond-done {
+    text-align: center;
+    padding: 60px 20px;
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e6eaf4;
+}
+
+.respond-done .done-icon {
+    font-size: 48px;
+    color: #1a9660;
+    margin-bottom: 16px;
+}
+
+.respond-done h3 {
+    font-size: 18px;
+    color: #1d2939;
+    margin: 0 0 8px 0;
+}
+
+.respond-done p {
+    font-size: 14px;
+    color: #64748b;
+}
+
+/* ── 뒤로가기 버튼 ── */
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    border: 1px solid #d8dde6;
+    border-radius: 6px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #3a3f51;
+    cursor: pointer;
+    transition: background 0.18s;
+    margin-bottom: 20px;
+}
+.btn-back:hover { background: #f0f3ff; }

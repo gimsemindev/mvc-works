@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mvc.app.mapper.SurveyMapper">
+
+    <select id="listSurvey" parameterType="map" resultType="com.mvc.app.domain.dto.SurveyDto">
+        SELECT *
+        FROM (
+            SELECT ROWNUM rn, t.*
+            FROM (
+                SELECT s.surveyId, s.title, s.anonymousYn, s.status,
+                       TO_CHAR(s.startDate, 'YYYY-MM-DD') AS startDate,
+                       TO_CHAR(s.endDate, 'YYYY-MM-DD') AS endDate,
+                       s.writerEmpId,
+                       TO_CHAR(s.regDate, 'YYYY-MM-DD') AS regDate,
+                       e.name AS writerName,
+                       (SELECT COUNT(*) FROM surveyQuestion q WHERE q.surveyId = s.surveyId) AS questionCount,
+                       (SELECT COUNT(*) FROM surveyResponse r WHERE r.surveyId = s.surveyId) AS responseCount
+                FROM survey s
+                LEFT JOIN employee2 e ON s.writerEmpId = e.empId
+                <where>
+                    <if test="keyword != null and keyword != ''">
+                        AND s.title LIKE '%' || #{keyword} || '%'
+                    </if>
+                    <if test="status != null and status != ''">
+                        AND s.status = #{status}
+                    </if>
+                </where>
+                ORDER BY s.regDate DESC
+            ) t
+            WHERE ROWNUM &lt;= #{pageNo} * #{pageSize}
+        )
+        WHERE rn > (#{pageNo} - 1) * #{pageSize}
+    </select>
+
+    <select id="countSurvey" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM survey s
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND s.title LIKE '%' || #{keyword} || '%'
+            </if>
+            <if test="status != null and status != ''">
+                AND s.status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="findById" parameterType="long" resultType="com.mvc.app.domain.dto.SurveyDto">
+        SELECT s.surveyId, s.title, s.description, s.anonymousYn, s.status,
+               TO_CHAR(s.startDate, 'YYYY-MM-DD') AS startDate,
+               TO_CHAR(s.endDate, 'YYYY-MM-DD') AS endDate,
+               s.writerEmpId,
+               TO_CHAR(s.regDate, 'YYYY-MM-DD') AS regDate,
+               TO_CHAR(s.updateDate, 'YYYY-MM-DD') AS updateDate,
+               e.name AS writerName,
+               (SELECT COUNT(*) FROM surveyQuestion q WHERE q.surveyId = s.surveyId) AS questionCount,
+               (SELECT COUNT(*) FROM surveyResponse r WHERE r.surveyId = s.surveyId) AS responseCount
+        FROM survey s
+        LEFT JOIN employee2 e ON s.writerEmpId = e.empId
+        WHERE s.surveyId = #{surveyId}
+    </select>
+
+    <insert id="insertSurvey" parameterType="com.mvc.app.domain.dto.SurveyDto">
+        <selectKey keyProperty="surveyId" resultType="long" order="BEFORE">
+            SELECT survey_seq.NEXTVAL FROM dual
+        </selectKey>
+        INSERT INTO survey (surveyId, title, description, anonymousYn, status,
+                            startDate, endDate, writerEmpId, regDate, updateDate)
+        VALUES (#{surveyId}, #{title}, #{description, jdbcType=VARCHAR}, #{anonymousYn}, #{status},
+                TO_DATE(#{startDate, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
+                TO_DATE(#{endDate, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
+                #{writerEmpId}, SYSDATE, SYSDATE)
+    </insert>
+
+    <update id="updateSurvey" parameterType="com.mvc.app.domain.dto.SurveyDto">
+        UPDATE survey
+        SET title = #{title},
+            description = #{description, jdbcType=VARCHAR},
+            anonymousYn = #{anonymousYn},
+            startDate = TO_DATE(#{startDate, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
+            endDate = TO_DATE(#{endDate, jdbcType=VARCHAR}, 'YYYY-MM-DD'),
+            updateDate = SYSDATE
+        WHERE surveyId = #{surveyId}
+    </update>
+
+    <update id="updateStatus" parameterType="map">
+        UPDATE survey
+        SET status = #{status}, updateDate = SYSDATE
+        WHERE surveyId = #{surveyId}
+    </update>
+
+    <delete id="deleteSurvey" parameterType="long">
+        DELETE FROM survey WHERE surveyId = #{surveyId}
+    </delete>
+
+
+    <select id="listQuestion" parameterType="long" resultType="com.mvc.app.domain.dto.SurveyQuestionDto">
+        SELECT questionId, surveyId, questionText, questionType, sortOrder
+        FROM surveyQuestion
+        WHERE surveyId = #{surveyId}
+        ORDER BY sortOrder
+    </select>
+    
+    <insert id="insertQuestion" parameterType="com.mvc.app.domain.dto.SurveyQuestionDto">
+        <selectKey keyProperty="questionId" resultType="long" order="BEFORE">
+            SELECT surveyQuestion_seq.NEXTVAL FROM dual
+        </selectKey>
+        INSERT INTO surveyQuestion (questionId, surveyId, questionText, questionType, sortOrder)
+        VALUES (#{questionId}, #{surveyId}, #{questionText}, #{questionType}, #{sortOrder})
+    </insert>
+    
+    <delete id="deleteQuestionsBySurveyId" parameterType="long">
+        DELETE FROM surveyQuestion WHERE surveyId = #{surveyId}
+    </delete>
+    
+    <select id="listOption" parameterType="long" resultType="com.mvc.app.domain.dto.SurveyOptionDto">
+        SELECT optionId, questionId, optionText, sortOrder
+        FROM surveyOption
+        WHERE questionId = #{questionId}
+        ORDER BY sortOrder
+    </select>
+    
+    <insert id="insertOption" parameterType="com.mvc.app.domain.dto.SurveyOptionDto">
+        <selectKey keyProperty="optionId" resultType="long" order="BEFORE">
+            SELECT surveyOption_seq.NEXTVAL FROM dual
+        </selectKey>
+        INSERT INTO surveyOption (optionId, questionId, optionText, sortOrder)
+        VALUES (#{optionId}, #{questionId}, #{optionText}, #{sortOrder})
+    </insert>
+    
+    <delete id="deleteOptionsByQuestionId" parameterType="long">
+        DELETE FROM surveyOption WHERE questionId = #{questionId}
+    </delete>
+    
+    <select id="listTarget" parameterType="long" resultType="com.mvc.app.domain.dto.SurveyTargetDto">
+        SELECT t.targetId, t.surveyId, t.targetType, t.targetValue,
+               CASE t.targetType
+                   WHEN 'ALL'  THEN '전체'
+                   WHEN 'DEPT' THEN (SELECT deptName FROM department WHERE deptCode = t.targetValue)
+                   WHEN 'EMP'  THEN (SELECT name FROM employee2 WHERE empId = t.targetValue)
+               END AS targetName
+        FROM surveyTarget t
+        WHERE t.surveyId = #{surveyId}
+    </select>
+    
+    <insert id="insertTarget" parameterType="com.mvc.app.domain.dto.SurveyTargetDto">
+        <selectKey keyProperty="targetId" resultType="long" order="BEFORE">
+            SELECT surveyTarget_seq.NEXTVAL FROM dual
+        </selectKey>
+        INSERT INTO surveyTarget (targetId, surveyId, targetType, targetValue)
+        VALUES (#{targetId}, #{surveyId}, #{targetType}, #{targetValue})
+    </insert>
+    
+    <delete id="deleteTargetsBySurveyId" parameterType="long">
+        DELETE FROM surveyTarget WHERE surveyId = #{surveyId}
+    </delete>
+    
+    <select id="checkTarget" parameterType="map" resultType="int">
+        SELECT CASE
+            WHEN (SELECT COUNT(*) FROM surveyTarget WHERE surveyId = #{surveyId}) = 0 THEN 1
+            ELSE (
+                SELECT COUNT(*)
+                FROM surveyTarget
+                WHERE surveyId = #{surveyId}
+                  AND (
+                      targetType = 'ALL'
+                      OR (targetType = 'DEPT' AND targetValue = #{deptCode})
+                      OR (targetType = 'EMP'  AND targetValue = #{empId})
+                  )
+            )
+        END
+        FROM dual
+    </select>
+
+
+      <insert id="insertResponse" parameterType="com.mvc.app.domain.dto.SurveyResponseDto">
+          <selectKey keyProperty="responseId" resultType="long" order="BEFORE">
+              SELECT surveyResponse_seq.NEXTVAL FROM dual
+          </selectKey>
+          INSERT INTO surveyResponse (responseId, surveyId, empId, respondedDate)
+          VALUES (#{responseId}, #{surveyId}, #{empId}, SYSDATE)
+      </insert>
+
+      <select id="checkResponse" parameterType="map" resultType="int">
+          SELECT COUNT(*)
+          FROM surveyResponse
+          WHERE surveyId = #{surveyId}
+            AND empId = #{empId}
+      </select>
+
+      <insert id="insertAnswer" parameterType="com.mvc.app.domain.dto.SurveyAnswerDto">
+          <selectKey keyProperty="answerId" resultType="long" order="BEFORE">
+              SELECT surveyAnswer_seq.NEXTVAL FROM dual
+          </selectKey>
+          INSERT INTO surveyAnswer (answerId, responseId, questionId, optionId, answerText, scoreValue)
+          VALUES (#{answerId}, #{responseId}, #{questionId},
+                  #{optionId, jdbcType=NUMERIC},
+                  #{answerText, jdbcType=VARCHAR},
+                  #{scoreValue, jdbcType=NUMERIC})
+      </insert>
+
+      <select id="countResponse" parameterType="long" resultType="int">
+          SELECT COUNT(*)
+          FROM surveyResponse
+          WHERE surveyId = #{surveyId}
+      </select>
+
+      <select id="statOptionCount" parameterType="long" resultType="com.mvc.app.domain.dto.SurveyOptionDto">
+          SELECT o.optionId, o.questionId, o.optionText, o.sortOrder,
+                 (SELECT COUNT(*) FROM surveyAnswer a WHERE a.optionId = o.optionId) AS selectCount
+          FROM surveyOption o
+          WHERE o.questionId = #{questionId}
+          ORDER BY o.sortOrder
+      </select>
+
+      <select id="statTextAnswers" parameterType="long" resultType="com.mvc.app.domain.dto.SurveyAnswerDto">
+          SELECT answerId, responseId, questionId, answerText
+          FROM surveyAnswer
+          WHERE questionId = #{questionId}
+            AND answerText IS NOT NULL
+          ORDER BY answerId
+      </select>
+
+      <select id="statScoreAvg" parameterType="long" resultType="double">
+          SELECT NVL(AVG(scoreValue), 0)
+          FROM surveyAnswer
+          WHERE questionId = #{questionId}
+            AND scoreValue IS NOT NULL
+      </select>
+
+</mapper>
