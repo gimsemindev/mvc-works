@@ -74,17 +74,19 @@
 				INSTR(TO_CHAR(p.STARTDATE, 'YYYYMMDD'), #{kwd}) &gt; 0)
 			</when>
 			<when test="schType == 'endDate'">
-				(INSTR(TO_CHAR(p.ENDDATE, 'YYYY/MM/DD'), #{kwd}) &gt; 0
+				(INSTR(TO_CHAR(p.ENDDATE, 'YYYY/MM/DD'), #{kwd}) &gt;
+				0
 				OR INSTR(TO_CHAR(p.ENDDATE, 'YYYY-MM-DD'), #{kwd}) &gt; 0
-				OR INSTR(TO_CHAR(p.ENDDATE, 'YYYYMMDD'), #{kwd}) &gt; 0)
+				OR
+				INSTR(TO_CHAR(p.ENDDATE, 'YYYYMMDD'), #{kwd}) &gt; 0)
 			</when>
 			<otherwise>
-			    (INSTR(p.title, #{kwd}) &gt; 0
-			    OR INSTR(e.name, #{kwd}) &gt; 0
-			    OR INSTR(TO_CHAR(p.STARTDATE, 'YYYY/MM/DD'), #{kwd}) &gt; 0
-			    OR INSTR(TO_CHAR(p.STARTDATE, 'YYYYMMDD'), #{kwd}) &gt; 0
-			    OR INSTR(TO_CHAR(p.ENDDATE, 'YYYY/MM/DD'), #{kwd}) &gt; 0
-			    OR INSTR(TO_CHAR(p.ENDDATE, 'YYYYMMDD'), #{kwd}) &gt; 0)
+				(INSTR(p.title, #{kwd}) &gt; 0
+				OR INSTR(e.name, #{kwd}) &gt; 0
+				OR INSTR(TO_CHAR(p.STARTDATE, 'YYYY/MM/DD'), #{kwd}) &gt; 0
+				OR INSTR(TO_CHAR(p.STARTDATE, 'YYYYMMDD'), #{kwd}) &gt; 0
+				OR INSTR(TO_CHAR(p.ENDDATE, 'YYYY/MM/DD'), #{kwd}) &gt; 0
+				OR INSTR(TO_CHAR(p.ENDDATE, 'YYYYMMDD'), #{kwd}) &gt; 0)
 			</otherwise>
 		</choose>
 	</sql>
@@ -110,7 +112,8 @@
 		TASKCREATEDDATE
 		)
 		SELECT
-		'TSK' || LPAD(TASK_SEQ.NEXTVAL, 8, '0'),
+		'TSK' ||
+		LPAD(TASK_SEQ.NEXTVAL, 8, '0'),
 		#{stageId},
 		jt.taskTitle,
 		'',
@@ -145,7 +148,8 @@
 		TRUNC(p.ENDDATE
 		- p.STARTDATE + 1) AS totalDays,
 		CASE
-		WHEN p.STARTDATE &gt; TRUNC(SYSDATE)
+		WHEN p.STARTDATE &gt;
+		TRUNC(SYSDATE)
 		THEN '시작 전'
 		WHEN p.ENDDATE &lt;= TRUNC(SYSDATE) THEN '종료'
 		ELSE
@@ -155,15 +159,17 @@
 		p.PROGRESS,
 		p.STATUS AS status
 		FROM PROJECT p
-		JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
+		JOIN EMPPROJECT ep ON
+		p.PROJECTID = ep.PROJECTID
 		JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
-		WHERE ep.ROLE = 'M'
+		WHERE
+		ep.ROLE = 'M'
 		<if test="kwd != null and kwd != ''">
 			AND
 			<include refid="where-project" />
 		</if>
 		<if test="status != null and status != ''">
-		    AND p.STATUS = #{status}
+			AND p.STATUS = #{status}
 		</if>
 		GROUP BY
 		p.PROJECTID,
@@ -180,21 +186,22 @@
 
 
 	<select id="dataCount" parameterType="map" resultType="Integer">
-	    SELECT NVL(COUNT(*), 0)
-	    FROM (
-	        SELECT p.PROJECTID
-	        FROM PROJECT p
-	        JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
-	        JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
-	        WHERE ep.ROLE = 'M'
-	        <if test="kwd != null and kwd != ''">
-	            AND <include refid="where-project" />
-	        </if>
-			<if test="status != null and status != ''">
-			    AND p.STATUS = #{status}
-			</if>
-	        GROUP BY p.PROJECTID
-	    )
+		SELECT NVL(COUNT(*), 0)
+		FROM (
+		SELECT p.PROJECTID
+		FROM PROJECT p
+		JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
+		JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
+		WHERE ep.ROLE = 'M'
+		<if test="kwd != null and kwd != ''">
+			AND
+			<include refid="where-project" />
+		</if>
+		<if test="status != null and status != ''">
+			AND p.STATUS = #{status}
+		</if>
+		GROUP BY p.PROJECTID
+		)
 	</select>
 
 	<!-- 프로젝트 단건 조회 -->
@@ -217,7 +224,8 @@
 		END AS remainDays,
 		p.PROGRESS,
 		p.STATUS,
-		LISTAGG(e.NAME, ', ') WITHIN GROUP (ORDER BY e.NAME) AS
+		LISTAGG(e.NAME, ', ') WITHIN GROUP (ORDER BY
+		e.NAME) AS
 		managerName
 		FROM PROJECT p
 		JOIN EMPPROJECT ep ON p.PROJECTID =
@@ -239,7 +247,8 @@
 		SELECT ep.EMPID AS empId, e.NAME AS name, ep.ROLE AS role
 		FROM EMPPROJECT ep
 		JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
-		WHERE ep.PROJECTID = #{projectId}
+		WHERE
+		ep.PROJECTID = #{projectId}
 	</select>
 
 	<select id="findById" parameterType="long"
@@ -281,143 +290,160 @@
 	</select>
 
 	<!-- 나의 프로젝트 리스트 조회 -->
-	<select id="myProjectsList" parameterType="map" resultType="com.mvc.app.domain.dto.ProjectsDto">
-	    SELECT
-	        p.PROJECTID,
-	        p.TITLE,
-	        p.PROJECTTYPE,
-	        CASE
-	            WHEN COUNT(e.NAME) &gt; 1 THEN MIN(e.NAME) || ' 외 ' || (COUNT(e.NAME) - 1) || '명'
-	            ELSE MIN(e.NAME)
-	        END AS managerName,
-	        TO_CHAR(p.STARTDATE, 'YYYY/MM/DD') AS startDate,
-	        TO_CHAR(p.ENDDATE, 'YYYY/MM/DD') AS endDate,
-	        TRUNC(p.ENDDATE - p.STARTDATE + 1) AS totalDays,
-	        CASE
-	            WHEN p.STARTDATE &gt; TRUNC(SYSDATE) THEN '시작 전'
-	            WHEN p.ENDDATE &lt; TRUNC(SYSDATE) THEN '종료'
-	            ELSE TO_CHAR(GREATEST(p.ENDDATE - TRUNC(SYSDATE) + 1, 0)) || ' / ' ||
-	                 TO_CHAR(TRUNC(p.ENDDATE - p.STARTDATE + 1))
-	        END AS remainDays,
-	        p.STATUS AS status,
-	        p.PROGRESS,
-	        (SELECT ep2.ROLE FROM EMPPROJECT ep2
-	         WHERE ep2.PROJECTID = p.PROJECTID
-	         AND ep2.EMPID = #{empId}) AS role
-	    FROM PROJECT p
-	    JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
-	    JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
-	    WHERE ep.EMPID = #{empId}
-	    <if test="kwd != null and kwd != ''">
-	        AND <include refid="where-project" />
-	    </if>
-		<if test="status != null and status != ''">
-		    AND p.STATUS = #{status}
+	<select id="myProjectsList" parameterType="map"
+		resultType="com.mvc.app.domain.dto.ProjectsDto">
+		SELECT
+		p.PROJECTID,
+		p.TITLE,
+		p.PROJECTTYPE,
+		(
+		SELECT
+		CASE
+		WHEN COUNT(e2.NAME) > 1
+		THEN MIN(e2.NAME) || ' 외 ' || (COUNT(e2.NAME) - 1) || '명'
+		ELSE MIN(e2.NAME)
+		END
+		FROM EMPPROJECT ep2
+		JOIN EMPLOYEE2 e2 ON ep2.EMPID = e2.EMPID
+		WHERE ep2.PROJECTID = p.PROJECTID
+		AND ep2.ROLE = 'M'
+		) AS managerName,
+		TO_CHAR(p.STARTDATE, 'YYYY/MM/DD') AS startDate,
+		TO_CHAR(p.ENDDATE, 'YYYY/MM/DD') AS endDate,
+		TRUNC(p.ENDDATE - p.STARTDATE + 1) AS totalDays,
+		CASE
+		WHEN p.STARTDATE &gt; TRUNC(SYSDATE) THEN '시작 전'
+		WHEN p.ENDDATE &lt; TRUNC(SYSDATE) THEN '종료'
+		ELSE TO_CHAR(GREATEST(p.ENDDATE - TRUNC(SYSDATE) + 1, 0)) || ' / ' ||
+		TO_CHAR(TRUNC(p.ENDDATE - p.STARTDATE + 1))
+		END AS remainDays,
+		p.STATUS AS status,
+		p.PROGRESS,
+		(SELECT ep2.ROLE FROM EMPPROJECT ep2
+		WHERE ep2.PROJECTID = p.PROJECTID
+		AND ep2.EMPID = #{empId}) AS role
+		FROM PROJECT p
+		JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
+		JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
+		WHERE ep.EMPID = #{empId}
+		<if test="kwd != null and kwd != ''">
+			AND
+			<include refid="where-project" />
 		</if>
-	    GROUP BY p.PROJECTID, p.TITLE, p.PROJECTTYPE, p.STARTDATE, p.ENDDATE, p.PROGRESS, p.STATUS
-	    ORDER BY p.PROJECTID DESC
-	    OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+		<if test="status != null and status != ''">
+			AND p.STATUS = #{status}
+		</if>
+		GROUP BY p.PROJECTID, p.TITLE, p.PROJECTTYPE, p.STARTDATE, p.ENDDATE,
+		p.PROGRESS, p.STATUS
+		ORDER BY p.PROJECTID DESC
+		OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
 	</select>
 
-	<select id="myProjectsCount" parameterType="map" resultType="int">
-    SELECT NVL(COUNT(*), 0)
-	    FROM (
-	        SELECT p.PROJECTID
-	        FROM PROJECT p
-	        JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
-	        JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
-	        WHERE ep.EMPID = #{empId}
-	        <if test="kwd != null and kwd != ''">
-	            AND <include refid="where-project" />
-	        </if>
-			<if test="status != null and status != ''">
-			    AND p.STATUS = #{status}
-			</if>
-	        GROUP BY p.PROJECTID
-	    )
+	<select id="myProjectsCount" parameterType="map"
+		resultType="int">
+		SELECT NVL(COUNT(*), 0)
+		FROM (
+		SELECT p.PROJECTID
+		FROM PROJECT p
+		JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
+		JOIN EMPLOYEE2 e ON ep.EMPID = e.EMPID
+		WHERE ep.EMPID = #{empId}
+		<if test="kwd != null and kwd != ''">
+			AND
+			<include refid="where-project" />
+		</if>
+		<if test="status != null and status != ''">
+			AND p.STATUS = #{status}
+		</if>
+		GROUP BY p.PROJECTID
+		)
 	</select>
-	
-	<select id="statusCount" parameterType="map" resultType="com.mvc.app.domain.dto.ProjectsDto">
-	    SELECT
-	    CASE
-	        WHEN p.ENDDATE &lt;= TRUNC(SYSDATE) THEN '4'
-	        WHEN p.STARTDATE &lt;= TRUNC(SYSDATE) AND p.ENDDATE &gt;= TRUNC(SYSDATE) THEN '2'
-	        ELSE p.STATUS
-	    END AS status
-	    FROM PROJECT p
-	    JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
-	    WHERE ep.ROLE = 'M'
-	    GROUP BY p.PROJECTID, p.STARTDATE, p.ENDDATE, p.STATUS
+
+	<select id="statusCount" parameterType="map"
+		resultType="com.mvc.app.domain.dto.ProjectsDto">
+		SELECT
+		CASE
+		WHEN p.ENDDATE &lt;= TRUNC(SYSDATE) THEN '4'
+		WHEN p.STARTDATE &lt;= TRUNC(SYSDATE) AND p.ENDDATE &gt;= TRUNC(SYSDATE)
+		THEN '2'
+		ELSE p.STATUS
+		END AS status
+		FROM PROJECT p
+		JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
+		WHERE ep.ROLE = 'M'
+		GROUP BY p.PROJECTID, p.STARTDATE, p.ENDDATE, p.STATUS
 	</select>
-	
-	
-	<select id="myProjectstatusCount" parameterType="string" resultType="com.mvc.app.domain.dto.ProjectsDto">
-	    SELECT
-	    CASE
-	        WHEN p.ENDDATE &lt;= TRUNC(SYSDATE) THEN '4'
-	        WHEN p.STARTDATE &lt;= TRUNC(SYSDATE) AND p.ENDDATE &gt;= TRUNC(SYSDATE) THEN '2'
-	        ELSE p.STATUS
-	    END AS status
-	    FROM PROJECT p
-	    JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
-	    WHERE ep.EMPID = #{empId}
-	    GROUP BY p.PROJECTID, p.STARTDATE, p.ENDDATE, p.STATUS
+
+
+	<select id="myProjectstatusCount" parameterType="string"
+		resultType="com.mvc.app.domain.dto.ProjectsDto">
+		SELECT
+		CASE
+		WHEN p.ENDDATE &lt;= TRUNC(SYSDATE) THEN '4'
+		WHEN p.STARTDATE &lt;= TRUNC(SYSDATE) AND p.ENDDATE &gt;= TRUNC(SYSDATE)
+		THEN '2'
+		ELSE p.STATUS
+		END AS status
+		FROM PROJECT p
+		JOIN EMPPROJECT ep ON p.PROJECTID = ep.PROJECTID
+		WHERE ep.EMPID = #{empId}
+		GROUP BY p.PROJECTID, p.STARTDATE, p.ENDDATE, p.STATUS
 	</select>
-	
-	
+
+
 	<!-- 1. 프로젝트 시작일 됐으면 자동 진행중 -->
 	<update id="projectAutoStart" parameterType="string">
-	    UPDATE PROJECT
-	    SET status = '2'
-	    WHERE status = '1'
-	    AND TRUNC(startDate) &lt;= TRUNC(SYSDATE)
+		UPDATE PROJECT
+		SET status = '2'
+		WHERE status = '1'
+		AND TRUNC(startDate) &lt;= TRUNC(SYSDATE)
 	</update>
-	
+
 	<!-- 2. 프로젝트 종료일 지났으면 자동 지연 -->
 	<update id="projectAutoDelay" parameterType="string">
-	    UPDATE PROJECT
-	    SET status = '5'
-	    WHERE TRUNC(SYSDATE) &gt; TRUNC(endDate)
-	    AND status NOT IN ('4', '6')
+		UPDATE PROJECT
+		SET status = '5'
+		WHERE TRUNC(SYSDATE) &gt; TRUNC(endDate)
+		AND status NOT IN ('4', '6')
 	</update>
-	
+
 	<!-- 프로젝트 강제 중단 시 → project status 6 -->
 	<update id="projectForceStop" parameterType="long">
-	    UPDATE PROJECT
-	    SET status = '6'
-	    WHERE projectId = #{projectId}
+		UPDATE PROJECT
+		SET status = '6'
+		WHERE projectId = #{projectId}
 	</update>
-	
-	
+
+
 	<!-- 해당 구성원 EMPTASK 전부 새 구성원으로 교체 -->
 	<update id="changeEmpTask" parameterType="map">
-	    UPDATE EMPTASK
-	    SET empId = #{newEmpId}
-	    WHERE empId = #{oldEmpId}
-	    AND taskId IN (
-	        SELECT t.taskId
-	        FROM task t
-	        JOIN stage s ON t.stageId = s.stageId
-	        WHERE s.projectId = #{projectId}
-	    )
+		UPDATE EMPTASK
+		SET empId = #{newEmpId}
+		WHERE empId = #{oldEmpId}
+		AND taskId IN (
+		SELECT t.taskId
+		FROM task t
+		JOIN stage s ON t.stageId = s.stageId
+		WHERE s.projectId = #{projectId}
+		)
 	</update>
-	
+
 	<update id="updatePredecessor" parameterType="map">
-	    UPDATE EMPPROJECT
-	    SET predecessor = (
-	        SELECT empprojId 
-	        FROM EMPPROJECT 
-	        WHERE projectId = #{projectId}
-	        AND empId = #{oldEmpId}
-	    )
-	    WHERE projectId = #{projectId}
-	    AND empId = #{oldEmpId}
+		UPDATE EMPPROJECT
+		SET predecessor = (
+		SELECT empprojId
+		FROM EMPPROJECT
+		WHERE projectId = #{projectId}
+		AND empId = #{oldEmpId}
+		)
+		WHERE projectId = #{projectId}
+		AND empId = #{oldEmpId}
 	</update>
-	
+
 	<update id="updateNewEmpId" parameterType="map">
-	    UPDATE EMPPROJECT
-	    SET empId = #{newEmpId}
-	    WHERE projectId = #{projectId}
-	    AND empId = #{oldEmpId}
+		UPDATE EMPPROJECT
+		SET empId = #{newEmpId}
+		WHERE projectId = #{projectId}
+		AND empId = #{oldEmpId}
 	</update>
 </mapper>
