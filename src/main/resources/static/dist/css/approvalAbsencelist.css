@@ -268,9 +268,9 @@
 }
 
 .btn-cancel-form {
-    background: #f1f3f9;
+    background: #fff;
     color: #3a3f51;
-    border: none;
+    border: 1px solid #d8dde6;
     border-radius: 6px;
     padding: 8px 20px;
     font-size: 12px;
@@ -625,3 +625,15 @@
 /* ── 상태 뱃지 활성/비활성 ── */
 .status-active   { background: #e0f5ef; color: #1a9660; }
 .status-inactive { background: #f0f0f0; color: #6b7280; }
+
+/* 컬럼 정렬: 부재기간(1), 부재사유(2), 상태(5), 관리(6) */
+.absence-table thead th:nth-child(1),
+.absence-table thead th:nth-child(2),
+.absence-table thead th:nth-child(5),
+.absence-table thead th:nth-child(6),
+.absence-table tbody td:nth-child(1),
+.absence-table tbody td:nth-child(2),
+.absence-table tbody td:nth-child(5),
+.absence-table tbody td:nth-child(6) {
+    text-align: center;
+}

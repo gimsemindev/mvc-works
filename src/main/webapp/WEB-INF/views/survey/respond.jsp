@@ -7,7 +7,7 @@
 <title>MVC - 설문 응답</title>
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp"/>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/surveyRespond.css" type="text/css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/surveyRespond.css?v=2" type="text/css">
 <meta name="ctx" content="${pageContext.request.contextPath}">
 <style>[v-cloak] { display: none; }</style>
 </head>
@@ -74,7 +74,7 @@
 
             <!-- 설문 안내 헤더 -->
             <div class="respond-header">
-                <h2>{{ store.survey.title }}</h2>
+                <h4>{{ store.survey.title }}</h4>
                 <p class="respond-desc" v-if="store.survey.description">{{ store.survey.description }}</p>
                 <div class="respond-meta">
                     <span><i class="far fa-calendar"></i> {{ store.survey.startDate || '-' }} ~ {{ store.survey.endDate || '-' }}</span>

@@ -8,7 +8,7 @@
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/meetingroom.css?v=12" type="text/css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/meetingroom.css?v=13" type="text/css">
 <meta name="ctx" content="${pageContext.request.contextPath}">
 <meta name="empId" content="${sessionScope.member.empId}">
 <style>[v-cloak] { display: none; }</style>

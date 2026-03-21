@@ -18,10 +18,10 @@
     margin-bottom: 20px;
 }
 
-.respond-header h2 {
-    font-size: 20px;
+.respond-header h4 {
+    font-size: 18px;
     font-weight: 700;
-    color: #1d2939;
+    color: #3a3f51;
     margin: 0 0 8px 0;
 }
 
@@ -175,10 +175,10 @@
     background: #4e73df;
     color: #fff;
     border: none;
-    border-radius: 8px;
-    padding: 14px 48px;
-    font-size: 15px;
-    font-weight: 700;
+    border-radius: 6px;
+    padding: 10px 32px;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
     transition: background 0.18s;
 }

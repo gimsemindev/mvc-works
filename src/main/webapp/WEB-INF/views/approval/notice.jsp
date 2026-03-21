@@ -58,7 +58,7 @@
                         <th>제목</th>
                         <th style="width:120px; text-align:center;">작성자</th>
                         <th style="width:140px; text-align:center;">작성일</th>
-                        <th style="width:80px; text-align:center;">조회수</th>
+                        <th style="width:80px; text-align:right;">조회수</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -74,7 +74,7 @@
                         <td class="td-title">{{ item.title }}</td>
                         <td style="text-align:center;">{{ item.writerName }}</td>
                         <td style="text-align:center; color:#9aa0b4; font-size:12px;">{{item.regDate }}</td>
-                        <td style="text-align:center; color:#9aa0b4;">{{ item.hitCount }}</td>
+                        <td style="text-align:right; color:#9aa0b4;">{{ item.hitCount }}</td>
                     </tr>
                 </tbody>
             </table>

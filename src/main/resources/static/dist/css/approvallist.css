@@ -342,3 +342,13 @@
 }
 .read-badge.unread { background: #e0ecff; color: #2563eb; }
 .read-badge.read   { background: #f0f0f0; color: #9aa0b4; }
+
+/* 컬럼 정렬: 작성일(2), 결재분류(3), 결재상태(6) */
+.approval-table thead th:nth-child(2),
+.approval-table thead th:nth-child(3),
+.approval-table thead th:nth-child(6),
+.approval-table tbody td:nth-child(2),
+.approval-table tbody td:nth-child(3),
+.approval-table tbody td:nth-child(6) {
+    text-align: center;
+}

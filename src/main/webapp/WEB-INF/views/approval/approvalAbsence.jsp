@@ -8,7 +8,7 @@
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/approvalAbsencelist.css" type="text/css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/approvalAbsencelist.css?v=2" type="text/css">
 <meta name="ctx" content="${pageContext.request.contextPath}">
 <style>
 [v-cloak] { display: none; }

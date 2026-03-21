@@ -8,7 +8,7 @@
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/survey.css"
+<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/survey.css?v=2"
 type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/paginate.css"
 type="text/css">
@@ -28,7 +28,7 @@ type="text/css">
         <div v-if="viewMode === 'list'">
 
             <div class="survey-header">
-                <h2>설문 관리</h2>
+                <h4>설문 관리</h4>
                 <div class="btn-group" v-if="isAdmin">
                     <button class="btn-primary" @click="goCreate">
                         <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">add</span>
@@ -57,7 +57,7 @@ type="text/css">
             <table class="survey-table">
                 <thead>
                     <tr>
-                        <th style="width:50px;">No.</th>
+                        <th style="width:50px;text-align:center;">No.</th>
                         <th style="width:250px;">제목</th>
                         <th style="width:80px;text-align:center;">상태</th>
                         <th style="width:60px;text-align:center;">익명</th>
@@ -78,7 +78,7 @@ type="text/css">
                         </td>
                     </tr>
                     <tr v-for="(item, index) in store.list" :key="item.surveyId">
-                        <td>{{ store.totalCount - ((store.pageNo - 1) * store.pageSize) - index }}</td>
+                        <td style="text-align:center;">{{ store.totalCount - ((store.pageNo - 1) * store.pageSize) - index }}</td>
                         <td style="cursor:pointer;" @click="goDetail(item)">{{ item.title }}</td>
                         <td style="text-align:center;"><span class="survey-status" :class="item.status">{{ statusName(item.status) }}</span></td>
                         <td style="text-align:center;">{{ item.anonymousYn === 'Y' ? '익명' : '실명' }}</td>
@@ -122,7 +122,7 @@ type="text/css">
         <div v-if="isAdmin && (viewMode === 'create' || viewMode === 'edit')">
 
             <div class="survey-header">
-                <h2>{{ viewMode === 'create' ? '새 설문 만들기' : '설문 수정' }}</h2>
+                <h4>{{ viewMode === 'create' ? '새 설문 만들기' : '설문 수정' }}</h4>
                 <div class="btn-group">
                     <button class="btn-secondary" @click="goList">목록으로</button>
                     <button class="btn-danger" v-if="viewMode === 'edit'" @click="doDelete">삭제</button>

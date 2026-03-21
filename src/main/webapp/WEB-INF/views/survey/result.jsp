@@ -7,7 +7,7 @@
 <title>MVC - 설문 결과</title>
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp"/>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/surveyResult.css" type="text/css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/surveyResult.css?v=2" type="text/css">
 <meta name="ctx" content="${pageContext.request.contextPath}">
 <style>[v-cloak] { display: none; }</style>
 </head>
@@ -33,7 +33,7 @@
 
             <!-- 결과 헤더 -->
             <div class="result-header">
-                <h2>{{ store.survey.title }}</h2>
+                <h4>{{ store.survey.title }}</h4>
                 <div class="result-meta">
                     <span><i class="far fa-calendar"></i> {{ store.survey.startDate || '-' }} ~ {{ store.survey.endDate || '-' }}</span>
                     <span><i class="fas fa-users"></i> 총 응답: <strong class="response-count">{{ store.responseCount }}명</strong></span>

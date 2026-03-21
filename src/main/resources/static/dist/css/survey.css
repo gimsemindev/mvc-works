@@ -17,10 +17,10 @@
     margin-bottom: 24px;
 }
 
-.survey-header h2 {
-    font-size: 20px;
+.survey-header h4 {
+    font-size: 18px;
     font-weight: 700;
-    color: #1d2939;
+    color: #3a3f51;
     margin: 0;
 }
 

@@ -8,7 +8,7 @@
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
-<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/approvallist.css" type="text/css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/approvallist.css?v=4" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/approvaldoctype.css" type="text/css">
 <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
 <style>
