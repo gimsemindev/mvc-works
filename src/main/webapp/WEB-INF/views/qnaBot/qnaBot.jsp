@@ -39,7 +39,8 @@
 					<div class="avatar">🤖</div>
 
 					<div class="bubble">
-						<div class="message-content">${sessionScope.member.name} ${sessionScope.member.gradeName}님<br>무엇을 도와드릴까요?</div>
+						<div class="message-content">안녕하세요, ${sessionScope.member.name} ${sessionScope.member.gradeName}님. 
+						<br>무엇을 도와드릴까요?</div>
 					</div>
 				</div>
 			</div>
