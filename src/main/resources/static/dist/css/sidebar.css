@@ -59,6 +59,10 @@ body.sidebar-collapsed .sidebar-edge-btn {
 body.sidebar-collapsed .sidebar-edge-btn i {
 	transform: rotate(180deg);
 }
+/* 모달 열릴 때 토글 버튼 숨김 */
+body.modal-open .sidebar-edge-btn {
+	display: none;
+}
 
 /* ── body.sidebar-collapsed 일 때 ── */
 body.sidebar-collapsed #sidebar {

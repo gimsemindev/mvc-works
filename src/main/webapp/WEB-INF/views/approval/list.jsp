@@ -85,6 +85,9 @@
                 if (item.docStatus === 'REJECTED' && item.totalLineCount > 0) {
                     return '반려 (' + item.approvedCount + '/' + item.totalLineCount + ')';
                 }
+                if (item.docStatus === 'ON_HOLD' && item.totalLineCount > 0) {
+                    return '보류 (' + item.approvedCount + '/' + item.totalLineCount + ')';
+                }
                 const found = codeStore.getCodes('DOCSTATUS').find(c => c.code === item.docStatus);
                 return found ? found.name : item.docStatus;
             };

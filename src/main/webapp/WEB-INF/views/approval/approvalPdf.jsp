@@ -257,7 +257,7 @@
         "@vue/devtools-api": "https://unpkg.com/@vue/devtools-api@6/lib/esm/index.js",
         "axios": "https://unpkg.com/axios@1/dist/esm/axios.js",
         "http": "/dist/util/http.js?v=2",
-        "approvalViewStore": "/dist/util/store/approvalViewStore.js?v=7",
+        "approvalViewStore": "/dist/util/store/approvalViewStore.js?v=8",
         "commonCodeStore": "/dist/util/store/commonCodeStore.js"
     }
 }

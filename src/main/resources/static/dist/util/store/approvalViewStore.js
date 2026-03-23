@@ -88,6 +88,10 @@ export const useApprovalViewStore = defineStore('approvalView', {
                 const approvedCount = lines.filter(l => l.apprStatus === 'APPROVED').length;
                 return '반려 (' + approvedCount + '/' + totalCount + ')';
             }
+            if (code === 'ON_HOLD' && totalCount > 0) {
+                const approvedCount = lines.filter(l => l.apprStatus === 'APPROVED').length;
+                return '보류 (' + approvedCount + '/' + totalCount + ')';
+            }
             const found = codeStore.getCodes('DOCSTATUS').find(c => c.code === code);
             return found ? found.name : code;
         },

@@ -286,7 +286,7 @@
 {
     "imports": {
         "http":              "/dist/util/http.js",
-        "approvalViewStore": "/dist/util/store/approvalViewStore.js?v=7",
+        "approvalViewStore": "/dist/util/store/approvalViewStore.js?v=8",
         "commonCodeStore":   "/dist/util/store/commonCodeStore.js"
     }
 }
