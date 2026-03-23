@@ -38,8 +38,7 @@
 	</a>
 	<ul class="sub-menu" id="groupSubMenu">
 		<li><a href="${pageContext.request.contextPath}/report/list">주간보고서</a></li>
-		<li><a href="${pageContext.request.contextPath}/chat">채팅 - 구현
-				중</a></li>
+		<li><a href="${pageContext.request.contextPath}/chat">채팅</a></li>
 	</ul>
 
 	<%-- 인사관리 토글 메뉴 --%>
@@ -50,10 +49,8 @@
 	<ul class="sub-menu" id="hrmSubMenu">
 		<li><a href="${pageContext.request.contextPath}/hrm">직원 정보통합
 				관리</a></li>
-		<li><a href="${pageContext.request.contextPath}/">직원 조직 관리 -
-				미구현</a></li>
 		<li><a href="${pageContext.request.contextPath}/hrm/performance">직원
-				성과 관리 - 구현 중</a></li>
+				성과 관리</a></li>
 		<li><a href="${pageContext.request.contextPath}/activity-log">인사관리
 				기록</a></li>
 	</ul>
@@ -80,7 +77,7 @@
 	<%-- 프로젝트관리 토글 메뉴 --%>
 	<a href="#" class="nav-link nav-toggle" id="projectToggle"><i
 		class="fa-solid fa-chart-gantt"></i>프로젝트관리 <i
-		class="fas fa-chevron-down toggle-icon" id="projectArrow"></i> </i> </a>
+		class="fas fa-chevron-down toggle-icon" id="projectArrow"></i></a>
 	<ul class="sub-menu" id="projectSubMenu">
 		<li><a href="${pageContext.request.contextPath}/projects/create">프로젝트
 				생성</a></li>
@@ -115,7 +112,11 @@
 	<a href="${pageContext.request.contextPath}/layout/lunchLadder"
 		class="nav-link"> <i class="fa-solid fa-gamepad"></i> 쉬어가기
 	</a>
-
+	
+	<a href="${pageContext.request.contextPath}/snack" class="nav-link">
+        <i class="fas fa-cookie-bite"></i> 탕비실 신청
+    </a>
+    
 </aside>
 
 <!-- 사이드바 토글 버튼 (접기/펼치기 하나로 통합) -->

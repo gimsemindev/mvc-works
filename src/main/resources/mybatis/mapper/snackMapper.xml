@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mvc.app.mapper.SnackMapper">
+
+    <!-- ── 신청 등록 ── -->
+    <insert id="insertSnack" parameterType="com.mvc.app.domain.dto.SnackDto">
+        <selectKey keyProperty="snackId" resultType="long" order="BEFORE">
+            SELECT SNACKSEQ.NEXTVAL FROM dual
+        </selectKey>
+        INSERT INTO snackRequest (
+            snackId, itemName, quantity, reason,
+            status, regDate, requesterEmpId
+        ) VALUES (
+            #{snackId},
+            #{itemName,        jdbcType=VARCHAR},
+            #{quantity},
+            #{reason,          jdbcType=VARCHAR},
+            'PENDING',
+            SYSDATE,
+            #{requesterEmpId,  jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <!-- ── 상태 변경 (관리자 승인/반려) ── -->
+    <update id="updateSnackStatus" parameterType="map">
+        UPDATE snackRequest
+        SET status       = #{status,       jdbcType=VARCHAR},
+            adminComment = #{adminComment, jdbcType=VARCHAR},
+            updateDate   = SYSDATE
+        WHERE snackId = #{snackId}
+    </update>
+
+    <!-- ── 소프트 삭제 ── -->
+    <update id="deleteSnack" parameterType="long">
+        UPDATE snackRequest
+        SET status = 'DELETED'
+        WHERE snackId = #{snackId}
+    </update>
+
+    <!-- ── 목록 조회 ── -->
+    <select id="listSnack" parameterType="map" resultType="com.mvc.app.domain.dto.SnackDto">
+        SELECT s.snackId,
+               s.itemName,
+               s.quantity,
+               s.reason,
+               s.status,
+               TO_CHAR(s.regDate,    'YYYY-MM-DD') AS regDate,
+               TO_CHAR(s.updateDate, 'YYYY-MM-DD') AS updateDate,
+               s.requesterEmpId,
+               e.name             AS requesterName,
+               s.adminComment,
+               (SELECT COUNT(*) FROM snackVote v
+                WHERE v.snackId = s.snackId) AS voteCount,
+               (SELECT COUNT(*) FROM snackVote v2
+                WHERE v2.snackId = s.snackId
+                  AND v2.empId = #{empId, jdbcType=VARCHAR}) AS voted
+        FROM snackRequest s
+        LEFT JOIN employee2 e ON s.requesterEmpId = e.empId
+        WHERE s.status != 'DELETED'
+        <if test="status != null and status != ''">
+            AND s.status = #{status, jdbcType=VARCHAR}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (s.itemName LIKE '%' || #{keyword} || '%'
+              OR s.reason   LIKE '%' || #{keyword} || '%')
+        </if>
+        ORDER BY s.snackId DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{pageSize} ROWS ONLY
+    </select>
+
+    <!-- ── 건수 ── -->
+    <select id="countSnack" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM snackRequest
+        WHERE status != 'DELETED'
+        <if test="status != null and status != ''">
+            AND status = #{status, jdbcType=VARCHAR}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (itemName LIKE '%' || #{keyword} || '%'
+              OR reason   LIKE '%' || #{keyword} || '%')
+        </if>
+    </select>
+
+    <!-- ── 단건 조회 ── -->
+    <select id="getSnack" parameterType="map" resultType="com.mvc.app.domain.dto.SnackDto">
+        SELECT s.snackId,
+               s.itemName,
+               s.quantity,
+               s.reason,
+               s.status,
+               TO_CHAR(s.regDate,    'YYYY-MM-DD') AS regDate,
+               TO_CHAR(s.updateDate, 'YYYY-MM-DD') AS updateDate,
+               s.requesterEmpId,
+               e.name             AS requesterName,
+               s.adminComment,
+               (SELECT COUNT(*) FROM snackVote v
+                WHERE v.snackId = s.snackId) AS voteCount,
+               (SELECT COUNT(*) FROM snackVote v2
+                WHERE v2.snackId = s.snackId
+                  AND v2.empId = #{empId, jdbcType=VARCHAR}) AS voted
+        FROM snackRequest s
+        LEFT JOIN employee2 e ON s.requesterEmpId = e.empId
+        WHERE s.snackId = #{snackId}
+    </select>
+
+    <!-- ── 공감 등록 ── -->
+    <insert id="insertVote" parameterType="map">
+        INSERT INTO snackVote (snackId, empId, regDate)
+        VALUES (#{snackId}, #{empId, jdbcType=VARCHAR}, SYSDATE)
+    </insert>
+
+    <!-- ── 공감 취소 ── -->
+    <delete id="deleteVote" parameterType="map">
+        DELETE FROM snackVote
+        WHERE snackId = #{snackId}
+          AND empId = #{empId, jdbcType=VARCHAR}
+    </delete>
+
+    <!-- ── 공감 수 ── -->
+    <select id="countVote" parameterType="long" resultType="int">
+        SELECT COUNT(*) FROM snackVote WHERE snackId = #{snackId}
+    </select>
+
+    <!-- ── 공감 여부 ── -->
+    <select id="existsVote" parameterType="map" resultType="int">
+        SELECT COUNT(*) FROM snackVote
+        WHERE snackId = #{snackId}
+          AND empId = #{empId, jdbcType=VARCHAR}
+    </select>
+
+    <!-- ── 댓글 등록 ── -->
+    <insert id="insertComment" parameterType="com.mvc.app.domain.dto.SnackCommentDto">
+        <selectKey keyProperty="commentId" resultType="long" order="BEFORE">
+            SELECT SNACKCOMMENTSEQ.NEXTVAL FROM dual
+        </selectKey>
+        INSERT INTO snackComment (commentId, snackId, content, authorEmpId, regDate)
+        VALUES (
+            #{commentId},
+            #{snackId},
+            #{content,     jdbcType=VARCHAR},
+            #{authorEmpId, jdbcType=VARCHAR},
+            SYSDATE
+        )
+    </insert>
+
+    <!-- ── 댓글 삭제 ── -->
+    <delete id="deleteComment" parameterType="long">
+        DELETE FROM snackComment WHERE commentId = #{commentId}
+    </delete>
+
+    <!-- ── 댓글 목록 ── -->
+    <select id="listComment" parameterType="long" resultType="com.mvc.app.domain.dto.SnackCommentDto">
+        SELECT c.commentId,
+               c.snackId,
+               c.content,
+               TO_CHAR(c.regDate, 'YYYY-MM-DD HH24:MI') AS regDate,
+               c.authorEmpId,
+               e.name AS authorName
+        FROM snackComment c
+        LEFT JOIN employee2 e ON c.authorEmpId = e.empId
+        WHERE c.snackId = #{snackId}
+        ORDER BY c.commentId ASC
+    </select>
+
+</mapper>
