@@ -47,13 +47,15 @@ public class ApprovalDeputyRestController {
         }
     }
 
-    // 부재 수정
+    // 부재 수정 (본인 등록 건만)
     @PutMapping("/{deputyRegId}")
     public ResponseEntity<?> updateDeputy(
             @PathVariable("deputyRegId") long deputyRegId,
             @RequestBody ApprovalDeputyDto dto) {
         try {
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
             dto.setDeputyRegId(deputyRegId);
+            dto.setDelegatorEmpId(info.getEmpId());
             service.updateDeputy(dto);
             return ResponseEntity.ok(Map.of("msg", "부재 수정 완료"));
         } catch (Exception e) {

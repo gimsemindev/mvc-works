@@ -194,6 +194,8 @@
              AND l.stepOrder = fw.minOrder)
             OR
             (l.lineStatusCode = 'APPROVED')
+            OR
+            (d.docStatus = 'ON_HOLD' AND l.lineStatusCode = 'HOLD')
         )
       <include refid="statusFilter"/>
       <if test="keyword != null and keyword != ''">
@@ -226,6 +228,8 @@
              AND l.stepOrder = fw.minOrder)
             OR
             (l.lineStatusCode = 'APPROVED')
+            OR
+            (d.docStatus = 'ON_HOLD' AND l.lineStatusCode = 'HOLD')
         )
       <include refid="statusFilter"/>
       <if test="keyword != null and keyword != ''">
@@ -239,15 +243,15 @@
       </if>
   </select>
 
-  <!-- 미결재 문서 (내 차례 WAIT + 대결 대상 WAIT) -->
+  <!-- 미결재 문서 (내 차례 WAIT + 보류 HOLD + 대결 대상) -->
   <select id="listPendingInbox" parameterType="map" resultType="com.mvc.app.domain.dto.ApprovalDocDto">
-      WITH firstWait AS (
+      WITH firstAction AS (
           SELECT docId, apprEmpId
           FROM (
               SELECT docId, apprEmpId,
                      ROW_NUMBER() OVER (PARTITION BY docId ORDER BY stepOrder) AS rn
               FROM approvalLine
-              WHERE lineStatusCode = 'WAIT'
+              WHERE lineStatusCode IN ('WAIT', 'HOLD')
           )
           WHERE rn = 1
       )
@@ -256,11 +260,11 @@
              d.regDate, t.typeName
       FROM approvalDoc d
       LEFT JOIN approvalDocType t ON d.docTypeId = t.docTypeId
-      INNER JOIN firstWait fw ON d.docId = fw.docId
-      WHERE d.docStatus = 'PENDING'
+      INNER JOIN firstAction fa ON d.docId = fa.docId
+      WHERE d.docStatus IN ('PENDING', 'ON_HOLD')
         AND (
-            fw.apprEmpId = #{empId}
-            OR fw.apprEmpId IN (
+            fa.apprEmpId = #{empId}
+            OR fa.apprEmpId IN (
                 SELECT delegatorEmpId FROM approvalDeputyReg
                 WHERE deputyEmpId = #{empId}
                   AND isActive = 'Y'
@@ -281,23 +285,23 @@
   </select>
 
   <select id="countPendingInbox" parameterType="map" resultType="int">
-      WITH firstWait AS (
+      WITH firstAction AS (
           SELECT docId, apprEmpId
           FROM (
               SELECT docId, apprEmpId,
                      ROW_NUMBER() OVER (PARTITION BY docId ORDER BY stepOrder) AS rn
               FROM approvalLine
-              WHERE lineStatusCode = 'WAIT'
+              WHERE lineStatusCode IN ('WAIT', 'HOLD')
           )
           WHERE rn = 1
       )
       SELECT COUNT(*)
       FROM approvalDoc d
-      INNER JOIN firstWait fw ON d.docId = fw.docId
-      WHERE d.docStatus = 'PENDING'
+      INNER JOIN firstAction fa ON d.docId = fa.docId
+      WHERE d.docStatus IN ('PENDING', 'ON_HOLD')
         AND (
-            fw.apprEmpId = #{empId}
-            OR fw.apprEmpId IN (
+            fa.apprEmpId = #{empId}
+            OR fa.apprEmpId IN (
                 SELECT delegatorEmpId FROM approvalDeputyReg
                 WHERE deputyEmpId = #{empId}
                   AND isActive = 'Y'
@@ -568,6 +572,13 @@
               WHERE docId = #{docId}
                 AND lineStatusCode != 'WAIT'
           )
+    </update>
+
+    <!-- 결재취소 시 결재선도 CANCELED 처리 -->
+    <update id="cancelLines" parameterType="long">
+        UPDATE approvalLine
+        SET lineStatusCode = 'CANCELED'
+        WHERE docId = #{docId}
     </update>
 
     <!-- 승인 처리 (현재 순위 결재자 또는 보류한 본인) -->

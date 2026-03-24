@@ -45,6 +45,11 @@ public class ApprovalDocServiceImpl implements ApprovalDocService {
 
             if (dto.getOldDocId() > 0) {
                 // 편집 모드: 결재선/참조자/파일 삭제 후 재생성, 문서는 UPDATE
+                // 물리 파일 먼저 삭제
+                List<ApprovalFileDto> oldFiles = mapper.getFiles(dto.getOldDocId());
+                for (ApprovalFileDto f : oldFiles) {
+                    storageService.deleteFile(uploadPath, f.getSaveFilename());
+                }
                 mapper.deleteFiles(dto.getOldDocId());
                 mapper.deleteRefs(dto.getOldDocId());
                 mapper.deleteLines(dto.getOldDocId());
@@ -151,11 +156,15 @@ public class ApprovalDocServiceImpl implements ApprovalDocService {
     }
 
     @Override
+    @Transactional
     public boolean cancelDoc(long docId, String empId) throws Exception {
         Map<String, Object> map = new HashMap<>();
         map.put("docId", docId);
         map.put("empId", empId);
         int cnt = mapper.cancelDoc(map);
+        if (cnt > 0) {
+            mapper.cancelLines(docId);
+        }
         return cnt > 0;
     }
     

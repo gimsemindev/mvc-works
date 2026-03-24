@@ -42,6 +42,9 @@ public class SurveyServiceImpl implements SurveyService {
     @Override
     public Map<String, Object> findById(long surveyId) throws Exception {
         SurveyDto survey = mapper.findById(surveyId);
+        if (survey == null) {
+            throw new IllegalArgumentException("존재하지 않는 설문입니다.");
+        }
 
         // 질문 목록 + 각 질문의 선택지
         List<SurveyQuestionDto> questions = mapper.listQuestion(surveyId);
@@ -99,6 +102,11 @@ public class SurveyServiceImpl implements SurveyService {
     @Transactional
     public void updateSurvey(SurveyDto dto, List<SurveyQuestionDto> questions, List<SurveyTargetDto> targets, MultipartFile[] files) throws Exception {
         long surveyId = dto.getSurveyId();
+
+        // 응답이 있으면 수정 차단
+        if (mapper.countResponse(surveyId) > 0) {
+            throw new IllegalStateException("이미 응답이 있는 설문은 수정할 수 없습니다.");
+        }
 
         // 1. 기존 자식 삭제 (선택지 → 질문 → 대상자)
         List<SurveyQuestionDto> oldQuestions = mapper.listQuestion(surveyId);

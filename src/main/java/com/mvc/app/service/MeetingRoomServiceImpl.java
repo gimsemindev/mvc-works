@@ -80,6 +80,9 @@ public class MeetingRoomServiceImpl implements MeetingRoomService {
     @Override
     @Transactional
     public void deleteRoom(long roomId) {
+        if (mapper.countActiveReserve(roomId) > 0) {
+            throw new IllegalStateException("활성 예약이 있는 회의실은 삭제할 수 없습니다.");
+        }
         mapper.deletePhotoByRoom(roomId);
         mapper.deleteEquipByRoom(roomId);
         mapper.deleteRoom(roomId);

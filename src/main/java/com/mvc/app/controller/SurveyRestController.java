@@ -190,6 +190,8 @@ public class SurveyRestController {
 
             service.updateSurvey(dto, questions, targets, files);
             return ResponseEntity.ok(Map.of("result", "ok"));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("msg", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
         }
@@ -218,8 +220,15 @@ public class SurveyRestController {
             if (!isAdmin(info)) {
                 return ResponseEntity.status(403).body(Map.of("msg", "관리자만 배포할 수 있습니다."));
             }
+            Map<String, Object> detail = service.findById(surveyId);
+            SurveyDto survey = (SurveyDto) detail.get("survey");
+            if (!"DRAFT".equals(survey.getStatus())) {
+                return ResponseEntity.badRequest().body(Map.of("msg", "DRAFT 상태의 설문만 배포할 수 있습니다."));
+            }
             service.updateStatus(surveyId, "ACTIVE");
             return ResponseEntity.ok(Map.of("result", "ok"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("msg", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
         }
@@ -233,8 +242,15 @@ public class SurveyRestController {
             if (!isAdmin(info)) {
                 return ResponseEntity.status(403).body(Map.of("msg", "관리자만 마감할 수 있습니다."));
             }
+            Map<String, Object> detail = service.findById(surveyId);
+            SurveyDto survey = (SurveyDto) detail.get("survey");
+            if (!"ACTIVE".equals(survey.getStatus())) {
+                return ResponseEntity.badRequest().body(Map.of("msg", "ACTIVE 상태의 설문만 마감할 수 있습니다."));
+            }
             service.updateStatus(surveyId, "CLOSED");
             return ResponseEntity.ok(Map.of("result", "ok"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("msg", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
         }
@@ -259,9 +275,19 @@ public class SurveyRestController {
         try {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
 
-            // 날짜 검증
+            // 설문 조회 + 상태 검증
             Map<String, Object> detail = service.findById(surveyId);
             SurveyDto survey = (SurveyDto) detail.get("survey");
+            if (!"ACTIVE".equals(survey.getStatus())) {
+                return ResponseEntity.badRequest().body(Map.of("msg", "응답 가능한 상태가 아닙니다."));
+            }
+
+            // 대상자 검증
+            if (!service.checkTarget(surveyId, info.getEmpId(), info.getDeptCode())) {
+                return ResponseEntity.status(403).body(Map.of("msg", "설문 대상자가 아닙니다."));
+            }
+
+            // 날짜 검증
             LocalDate today = LocalDate.now();
             try {
                 if (survey.getStartDate() != null && !survey.getStartDate().isEmpty()) {

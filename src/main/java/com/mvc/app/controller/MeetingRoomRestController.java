@@ -104,6 +104,8 @@ public class MeetingRoomRestController {
             }
             meetingRoomService.deleteRoom(roomId);
             return ResponseEntity.ok(Map.of("msg", "삭제 완료"));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("msg", e.getMessage()));
         } catch (Exception e) {
             log.info("delete : ", e);
             return ResponseEntity.badRequest().body(Map.of("msg", "삭제에 실패했습니다."));

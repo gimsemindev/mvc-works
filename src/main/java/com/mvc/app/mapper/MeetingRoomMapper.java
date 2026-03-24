@@ -25,4 +25,5 @@ public interface MeetingRoomMapper {
     void insertPhoto(RoomPhotoDto dto);
     void deletePhoto(long photoId);
     void deletePhotoByRoom(long roomId);
+    int countActiveReserve(long roomId);
 }

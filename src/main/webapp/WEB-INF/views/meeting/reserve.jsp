@@ -525,7 +525,7 @@
                     hideModal();
 
                 } catch (e) {
-                    alert(e.response?.data?.message || '예약 실패');
+                    alert(e.response?.data?.msg || '예약 실패');
                 }
             };
 

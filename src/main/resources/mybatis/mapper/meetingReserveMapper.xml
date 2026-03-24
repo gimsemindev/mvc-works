@@ -94,25 +94,28 @@
           AND endTime &gt; #{startTime}
     </select>
 
-    <!-- 오늘 예약 수 -->
+    <!-- 오늘 예약 수 (본인) -->
     <select id="countToday" parameterType="string" resultType="int">
         SELECT COUNT(*) FROM meetingReserve
         WHERE reserveDate = TRUNC(SYSDATE)
           AND status = 'ACTIVE'
+          AND reserveEmpId = #{empId}
     </select>
 
-    <!-- 이번주 예약 수 -->
+    <!-- 이번주 예약 수 (본인) -->
     <select id="countWeek" parameterType="string" resultType="int">
         SELECT COUNT(*) FROM meetingReserve
         WHERE reserveDate BETWEEN TRUNC(SYSDATE, 'IW') AND TRUNC(SYSDATE, 'IW') + 6
           AND status = 'ACTIVE'
+          AND reserveEmpId = #{empId}
     </select>
 
-    <!-- 이번달 예약 수 -->
+    <!-- 이번달 예약 수 (본인) -->
     <select id="countMonth" parameterType="string" resultType="int">
         SELECT COUNT(*) FROM meetingReserve
         WHERE TO_CHAR(reserveDate, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
           AND status = 'ACTIVE'
+          AND reserveEmpId = #{empId}
     </select>
 
 </mapper>

@@ -96,4 +96,10 @@
         DELETE FROM roomPhoto WHERE roomId = #{roomId}
     </delete>
 
+    <!-- 활성 예약 수 (회의실 삭제 전 확인용) -->
+    <select id="countActiveReserve" parameterType="long" resultType="int">
+        SELECT COUNT(*) FROM meetingReserve
+        WHERE roomId = #{roomId} AND status = 'ACTIVE'
+    </select>
+
 </mapper>

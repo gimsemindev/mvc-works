@@ -37,7 +37,7 @@
           AND delegatorEmpId = #{empId}
     </update>
 
-    <!-- 부재 수정 -->
+    <!-- 부재 수정 (본인 등록 건만) -->
     <update id="updateDeputy" parameterType="com.mvc.app.domain.dto.ApprovalDeputyDto">
         UPDATE approvalDeputyReg
         SET deputyEmpId = #{deputyEmpId, jdbcType=VARCHAR},
@@ -47,6 +47,7 @@
             reason      = #{reason,      jdbcType=VARCHAR},
             isActive    = #{isActive,    jdbcType=VARCHAR}
         WHERE deputyRegId = #{deputyRegId}
+          AND delegatorEmpId = #{delegatorEmpId}
     </update>
 
     <!-- 부재 목록 조회 (employee2 JOIN으로 부서·직급 포함) -->
