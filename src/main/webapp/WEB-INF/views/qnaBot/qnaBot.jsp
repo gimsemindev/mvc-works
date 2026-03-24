@@ -27,7 +27,7 @@
 			<jsp:include page="/WEB-INF/views/layout/header.jsp" />
 		</header>
 
-		<div class="card m-3">
+		<div class="card">
 
 			<div class="card-header">
 				<h5>QnA Bot</h5>
