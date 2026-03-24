@@ -49,5 +49,6 @@ public interface ProjectsMapper {
 	public void updateNewEmpId(Map<String, Object> map) throws SQLException;
 	
 	public void projectAutoCompleteAll() throws SQLException;
+	public void updateProjectDate(Map<String, Object> map) throws SQLException;
 
 }

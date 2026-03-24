@@ -11,8 +11,17 @@
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/projectlist.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/paginate.css" type="text/css">
-
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=arrow_forward_ios" />
+
+<style>
+    .swal-over-modal {
+        z-index: 99999 !important;
+    }
+    .swal2-container {
+        z-index: 99999 !important;
+    }
+</style>
+
 </head>
 <body>
 <jsp:include page="/WEB-INF/views/layout/header.jsp"/>
@@ -135,7 +144,10 @@
                         data-project-title="${p.title}"
                         data-project-status="${p.status}"
                         data-project-type="${p.projectType}"
-                        data-role="${p.role}">
+                        data-role="${p.role}"
+                        data-start-date="${p.startDate}"
+    					data-end-date="${p.endDate}">
+                        
                         <td>${dataCount - ((page-1) * size) - status.index}</td>
                         <td class="fw-medium">
 
@@ -211,9 +223,24 @@
 	                        </button>
 	                    </div>
 	                </div>
+	                
+	                <%-- 날짜 수정 추가 --%>
+				    <div class="mb-4 p-3 border rounded">
+				        <div class="fw-bold mb-3">프로젝트 기간 수정</div>
+				        <div class="row g-3">
+				            <div class="col-md-6">
+				                <label class="form-label text-muted small">시작일</label>
+				                <input type="date" id="editStartDate" class="form-control">
+				            </div>
+				            <div class="col-md-6">
+				                <label class="form-label text-muted small">종료일</label>
+				                <input type="date" id="editEndDate" class="form-control">
+				            </div>
+				        </div>
+				    </div>
 	
 	                
-	                <div class="mb-3" id="memberChangeArea">
+	                <div class="mb-3 p-3 border rounded" id="memberChangeArea">
 	                    <div class="d-flex justify-content-between align-items-center mb-3">
 	                        <div class="fw-bold">구성원 변경</div>
 	                    </div>

@@ -38,4 +38,6 @@ public interface ProjectService {
 	public void changeMember(Map<String, Object> map) throws Exception;
 	
 	public void projectAutoCompleteAll() throws Exception;
+	
+	public void updateProjectDate(Map<String, Object> map) throws Exception;
 }

@@ -429,4 +429,12 @@
 	    WHERE progress = 100
 	    AND status NOT IN ('4', '6')
 	</update>
+	
+	<update id="updateProjectDate" parameterType="map">
+	    UPDATE PROJECT
+	    SET STARTDATE = TO_DATE(#{startDate}, 'YYYY-MM-DD'),
+	        ENDDATE = TO_DATE(#{endDate}, 'YYYY-MM-DD')
+	    WHERE PROJECTID = #{projectId}
+	</update>
+	
 </mapper>

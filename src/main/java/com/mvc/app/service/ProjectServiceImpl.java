@@ -268,4 +268,14 @@ public class ProjectServiceImpl implements ProjectService {
 	    }
 	}
 
+	@Override
+	public void updateProjectDate(Map<String, Object> map) throws Exception {
+		try {
+			mapper.updateProjectDate(map);
+		} catch (Exception e) {
+			log.info("updateProjectDate : ", e);
+		}
+		
+	}
+
 }

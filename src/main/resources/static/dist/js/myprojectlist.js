@@ -124,9 +124,15 @@ function openEditModal(row) {
     const projectTitle  = row.dataset.projectTitle;
     const projectStatus = row.dataset.projectStatus;
 	const projectType   = row.dataset.projectType;
+	
+	const startDate = row.dataset.startDate || '';
+	const endDate = row.dataset.endDate || '';
 
     document.getElementById('editProjectId').value        = projectId;
     document.getElementById('editModalTitle').textContent = projectTitle + ' 수정';
+	document.getElementById('editStartDate').value = startDate.replace(/\//g, '-');
+	document.getElementById('editEndDate').value = endDate.replace(/\//g, '-');
+
 
     const forceStopBtn = document.getElementById('forceStopBtn');
     if (projectStatus === '6') {
@@ -171,13 +177,13 @@ function loadCurrentMembers(projectId) {
             list.forEach(member => {
                 // task 담당 여부 - 일단 서버에서 못 받으면 true로 처리
                 const badge = document.createElement('span');
-                badge.className     = 'badge bg-secondary d-flex align-items-center gap-1 p-2';
+                badge.className     = 'badge bg-secondary d-flex align-items-center gap-2 px-3 py-2';
                 badge.dataset.empId  = member.empId;
                 badge.dataset.role   = member.role;
                 badge.dataset.hasTask = 'true'; // 기본값, 나중에 API 붙이면 갱신
                 badge.innerHTML =
                     `<span>${member.name}</span>
-                     <span class="fw-normal opacity-75" style="font-size:0.75rem">${member.role}</span>
+                     <span class="fw-normal opacity-75" style="font-size:0.9rem">${member.role}</span>
                      <i class="fas fa-exchange-alt ms-1" style="cursor:pointer"
                         onclick="selectReplaceTarget('${member.empId}','${member.name}','${member.role}')"></i>`;
                 container.appendChild(badge);
@@ -233,10 +239,32 @@ function saveMemberChange() {
     const projectId = document.getElementById('editProjectId').value;
     const newEmpId  = document.querySelector('#hiddenInputContainer input[name="memberIds"]')?.value;
 
-    if (!replaceTargetEmpId || !newEmpId) {
-        toast('교체할 구성원과 새 구성원을 선택하세요.');
-        return;
-    }
+	const startDate = document.getElementById('editStartDate').value;
+	const endDate   = document.getElementById('editEndDate').value;
+
+	const today = new Date().toISOString().split('T')[0];
+
+	if (startDate && startDate < today) {
+	    toast('시작일은 오늘 날짜보다 이전일 수 없습니다.');
+	    return;
+	}
+	
+	// 날짜 유효성 검사
+	if (startDate && endDate && startDate > endDate) {
+	    toast('시작일이 종료일보다 늦을 수 없습니다.');
+	    return;
+	}
+
+	// 구성원 교체 없으면 날짜만 저장
+	if (!replaceTargetEmpId || !newEmpId) {
+	    if (!startDate || !endDate) {
+	        toast('날짜를 입력하거나 교체할 구성원을 선택하세요.');
+	        return;
+	    }
+	    saveProjectDate(projectId, startDate, endDate);
+	    return;
+	}
+
     if (replaceTargetEmpId === newEmpId) {
         toast('같은 구성원입니다.');
         return;
@@ -257,31 +285,48 @@ function saveMemberChange() {
             cancelButtonText: '취소',
             width: '320px',
         }).then(result => {
-            if (result.isConfirmed) doSaveMemberChange(projectId, newEmpId);
+            if (result.isConfirmed) doSaveMemberChange(projectId, newEmpId, startDate, endDate);
         });
         return;
     }
 
-    doSaveMemberChange(projectId, newEmpId);
+    doSaveMemberChange(projectId, newEmpId, startDate, endDate);
 }
 
-function doSaveMemberChange(projectId, newEmpId) {
-    fetch('/projects/member/change', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            projectId: projectId,
-            oldEmpId:  replaceTargetEmpId,
-            newEmpId:  newEmpId,
-            role:      replaceTargetRole
+function doSaveMemberChange(projectId, newEmpId, startDate, endDate) {
+    const requests = [];
+
+    if (startDate && endDate) {
+        requests.push(
+            fetch('/projects/updateDate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ projectId, startDate, endDate })
+            })
+        );
+    }
+
+    requests.push(
+        fetch('/projects/member/change', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                projectId,
+                oldEmpId: replaceTargetEmpId,
+                newEmpId,
+                role: replaceTargetRole
+            })
         })
-    }).then(res => {
-        if (res.ok) {
+    );
+
+    Promise.all(requests).then(responses => {
+        const allOk = responses.every(r => r.ok);
+        if (allOk) {
             bootstrap.Modal.getInstance(document.getElementById('projectEditModal')).hide();
-            toast('구성원이 변경되었습니다.', 'success');
+            toast('저장되었습니다.', 'success');
             setTimeout(() => location.reload(), 800);
         } else {
-            toast('구성원 변경 중 오류가 발생했습니다.');
+            toast('저장 중 오류가 발생했습니다.');
         }
     });
 }
@@ -449,6 +494,24 @@ function editRenderMemberList(list) {
     });
 }
 
+function saveProjectDate(projectId, startDate, endDate) {
+    fetch('/projects/updateDate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId, startDate, endDate })
+    }).then(res => {
+        if (res.ok) {
+            bootstrap.Modal.getInstance(document.getElementById('projectEditModal')).hide();
+            toast('날짜가 저장되었습니다.', 'success');
+            setTimeout(() => location.reload(), 800);
+        } else {
+            toast('날짜 저장 중 오류가 발생했습니다.');
+        }
+    });
+}
+
 function editConfirmSelection() {
     bootstrap.Modal.getInstance(document.getElementById('editMemberSearchModal')).hide();
 }
+
+

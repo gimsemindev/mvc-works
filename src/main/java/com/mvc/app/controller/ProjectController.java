@@ -168,6 +168,20 @@ public class ProjectController {
 		}
 		return "projects/article";
 	}
+	
+	
+	@PostMapping("updateDate")
+	@ResponseBody
+	public ResponseEntity<?> updateProjectDate(@RequestBody Map<String, Object> map) {
+	    try {
+	        service.updateProjectDate(map);
+	        return ResponseEntity.ok().build();
+	        
+	    } catch (Exception e) {
+	        log.info("updateProjectDate : ", e);
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+	    }
+	}
 
 	@GetMapping("gantt")
 	public String projectgantt(@RequestParam(name = "page", defaultValue = "1") int current_page,
