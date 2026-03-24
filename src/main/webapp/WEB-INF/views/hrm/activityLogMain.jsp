@@ -8,6 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>활동내역</title>
 <link rel="stylesheet" href="${pageContext.request.contextPath}/dist/css/activityLog.css" type="text/css">
+<style>[v-cloak] { display: none; }</style>
 <jsp:include page="/WEB-INF/views/layout/headerResources.jsp"/>
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp"/>
 </head>
@@ -21,7 +22,7 @@
         <jsp:include page="/WEB-INF/views/layout/header.jsp"/>
     </header>
 
-    <div id="vue-app">
+    <div id="vue-app" v-cloak>
         <jsp:include page="/WEB-INF/views/hrm/activityLogList.jsp"/>
     </div>
 </div>

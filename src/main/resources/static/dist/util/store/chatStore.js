@@ -125,6 +125,9 @@ export const useChatStore = defineStore('chat', {
                 this._closeCurrentRoom();
                 await this.loadUserList(true);
             }, 300);
+			//디바운스(300ms) 가 필요한 이유
+			//Vue의 반응형의 사용자의 빠른 타이밍 순간 마다 API를 호출 하는 성능적
+			//부하를 낮추기 위함
         },
 
         /* ── 무한스크롤: 다음 페이지 로드 ── */
