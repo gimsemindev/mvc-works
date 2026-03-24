@@ -91,10 +91,7 @@
 						</button>
 						<button type="button" class="btn-icon btn-edit" id="editBtn"
 							onclick="toggleEditMode()">
-							<i class="fas fa-check"></i>
-						</button>
-						<button type="button" class="btn-icon btn-delete">
-							<i class="fas fa-trash-alt"></i>
+							<i class="fas fa-edit"></i>
 						</button>
 					</c:if>
 
