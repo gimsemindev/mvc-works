@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.mvc.app.common.StorageService;
 import com.mvc.app.domain.dto.ApprovalDocDto;
 import com.mvc.app.domain.dto.ApprovalFileDto;
+import com.mvc.app.domain.dto.ApprovalLineDto;
+import com.mvc.app.domain.dto.ApprovalRefDto;
 import com.mvc.app.domain.dto.SessionInfo;
 import com.mvc.app.mapper.ApprovalDocMapper;
 import com.mvc.app.security.LoginMemberUtil;
@@ -213,12 +215,33 @@ public class ApprovalDocRestController {
         }
     }
     
- // 문서 상세 조회
+ // 문서 접근 권한 검증 (작성자/결재자/대결자/참조자)
+    private boolean hasDocAccess(ApprovalDocDto doc, String empId) {
+        if (empId.equals(doc.getWriterEmpId())) return true;
+        if (doc.getLines() != null) {
+            for (ApprovalLineDto line : doc.getLines()) {
+                if (empId.equals(line.getApprEmpId())) return true;
+                if (empId.equals(line.getDeputyEmpId())) return true;
+            }
+        }
+        if (doc.getRefs() != null) {
+            for (ApprovalRefDto ref : doc.getRefs()) {
+                if (empId.equals(ref.getRefEmpId())) return true;
+            }
+        }
+        return false;
+    }
+
+    // 문서 상세 조회
     @GetMapping("/{docId}")
     public ResponseEntity<?> getDoc(@PathVariable("docId") long docId) {
         try {
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
             ApprovalDocDto doc = service.getDoc(docId);
             if (doc == null) return ResponseEntity.notFound().build();
+            if (!hasDocAccess(doc, info.getEmpId())) {
+                return ResponseEntity.status(403).body(Map.of("msg", "문서 조회 권한이 없습니다."));
+            }
             return ResponseEntity.ok(doc);
         } catch (Exception e) {
             log.error("getDoc : ", e);
@@ -252,7 +275,7 @@ public class ApprovalDocRestController {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
             boolean ok = service.approveDoc(docId, info.getEmpId(), info.getName(), body.get("comment"));
             if (ok) return ResponseEntity.ok(Map.of("msg", "승인되었습니다."));
-            return ResponseEntity.badRequest().body(Map.of("msg", "승인 권한이 없거나 이미 처리된 문서입니다."));
+            return ResponseEntity.status(403).body(Map.of("msg", "승인 권한이 없거나 이미 처리된 문서입니다."));
         } catch (Exception e) {
             log.error("approveDoc : ", e);
             return ResponseEntity.badRequest().body(Map.of("msg", "승인 처리에 실패했습니다."));
@@ -272,7 +295,7 @@ public class ApprovalDocRestController {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
             boolean ok = service.rejectDoc(docId, info.getEmpId(), info.getName(), comment);
             if (ok) return ResponseEntity.ok(Map.of("msg", "반려되었습니다."));
-            return ResponseEntity.badRequest().body(Map.of("msg", "반려 권한이 없거나 이미 처리된 문서입니다."));
+            return ResponseEntity.status(403).body(Map.of("msg", "반려 권한이 없거나 이미 처리된 문서입니다."));
         } catch (Exception e) {
             log.error("rejectDoc : ", e);
             return ResponseEntity.badRequest().body(Map.of("msg", "반려 처리에 실패했습니다."));
@@ -288,7 +311,7 @@ public class ApprovalDocRestController {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
             boolean ok = service.holdDoc(docId, info.getEmpId(), info.getName(), body.get("comment"));
             if (ok) return ResponseEntity.ok(Map.of("msg", "보류 처리되었습니다."));
-            return ResponseEntity.badRequest().body(Map.of("msg", "보류 권한이 없거나 이미 처리된 문서입니다."));
+            return ResponseEntity.status(403).body(Map.of("msg", "보류 권한이 없거나 이미 처리된 문서입니다."));
         } catch (Exception e) {
             log.error("holdDoc : ", e);
             return ResponseEntity.badRequest().body(Map.of("msg", "보류 처리에 실패했습니다."));
@@ -418,6 +441,12 @@ public class ApprovalDocRestController {
             ApprovalFileDto file = mapper.getFileById(fileId);
             if (file == null) {
                 return ResponseEntity.notFound().build();
+            }
+            // 파일이 속한 문서에 대한 접근 권한 검증
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+            ApprovalDocDto doc = service.getDoc(file.getDocId());
+            if (doc == null || !hasDocAccess(doc, info.getEmpId())) {
+                return ResponseEntity.status(403).body(Map.of("msg", "파일 다운로드 권한이 없습니다."));
             }
             return storageService.downloadFile(uploadPath, file.getSaveFilename(), file.getOriFilename());
         } catch (Exception e) {

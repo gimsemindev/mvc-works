@@ -31,6 +31,7 @@ import com.mvc.app.security.LoginMemberUtil;
 import com.mvc.app.service.SurveyService;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -95,16 +96,40 @@ public class SurveyRestController {
 
             Map<String, Object> body = objectMapper.readValue(dataJson, new TypeReference<>() {});
 
+            // 제목 검증
+            String title = (String) body.get("title");
+            if (title == null || title.isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of("msg", "설문 제목을 입력해주세요."));
+            }
+
+            // 날짜 역전 검증
+            String startDate = (String) body.get("startDate");
+            String endDate = (String) body.get("endDate");
+            if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+                if (LocalDate.parse(startDate).isAfter(LocalDate.parse(endDate))) {
+                    return ResponseEntity.badRequest().body(Map.of("msg", "시작일이 종료일보다 늦을 수 없습니다."));
+                }
+            }
+
             SurveyDto dto = new SurveyDto();
-            dto.setTitle((String) body.get("title"));
+            dto.setTitle(title);
             dto.setDescription((String) body.get("description"));
             dto.setAnonymousYn((String) body.get("anonymousYn"));
             dto.setStatus((String) body.get("status"));
-            dto.setStartDate((String) body.get("startDate"));
-            dto.setEndDate((String) body.get("endDate"));
+            dto.setStartDate(startDate);
+            dto.setEndDate(endDate);
             dto.setWriterEmpId(info.getEmpId());
 
             List<SurveyQuestionDto> questions = parseQuestions(body);
+
+            // 객관식 선택지 검증
+            for (SurveyQuestionDto q : questions) {
+                if (("SINGLE".equals(q.getQuestionType()) || "MULTI".equals(q.getQuestionType()))
+                        && (q.getOptions() == null || q.getOptions().isEmpty())) {
+                    return ResponseEntity.badRequest().body(Map.of("msg", "객관식 질문에는 선택지가 필요합니다."));
+                }
+            }
+
             List<SurveyTargetDto> targets = parseTargets(body);
 
             service.createSurvey(dto, questions, targets, files);
@@ -128,15 +153,39 @@ public class SurveyRestController {
 
             Map<String, Object> body = objectMapper.readValue(dataJson, new TypeReference<>() {});
 
+            // 제목 검증
+            String title = (String) body.get("title");
+            if (title == null || title.isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of("msg", "설문 제목을 입력해주세요."));
+            }
+
+            // 날짜 역전 검증
+            String startDate = (String) body.get("startDate");
+            String endDate = (String) body.get("endDate");
+            if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+                if (LocalDate.parse(startDate).isAfter(LocalDate.parse(endDate))) {
+                    return ResponseEntity.badRequest().body(Map.of("msg", "시작일이 종료일보다 늦을 수 없습니다."));
+                }
+            }
+
             SurveyDto dto = new SurveyDto();
             dto.setSurveyId(surveyId);
-            dto.setTitle((String) body.get("title"));
+            dto.setTitle(title);
             dto.setDescription((String) body.get("description"));
             dto.setAnonymousYn((String) body.get("anonymousYn"));
-            dto.setStartDate((String) body.get("startDate"));
-            dto.setEndDate((String) body.get("endDate"));
+            dto.setStartDate(startDate);
+            dto.setEndDate(endDate);
 
             List<SurveyQuestionDto> questions = parseQuestions(body);
+
+            // 객관식 선택지 검증
+            for (SurveyQuestionDto q : questions) {
+                if (("SINGLE".equals(q.getQuestionType()) || "MULTI".equals(q.getQuestionType()))
+                        && (q.getOptions() == null || q.getOptions().isEmpty())) {
+                    return ResponseEntity.badRequest().body(Map.of("msg", "객관식 질문에는 선택지가 필요합니다."));
+                }
+            }
+
             List<SurveyTargetDto> targets = parseTargets(body);
 
             service.updateSurvey(dto, questions, targets, files);
@@ -214,21 +263,27 @@ public class SurveyRestController {
             Map<String, Object> detail = service.findById(surveyId);
             SurveyDto survey = (SurveyDto) detail.get("survey");
             LocalDate today = LocalDate.now();
-            if (survey.getStartDate() != null && !survey.getStartDate().isEmpty()) {
-                if (today.isBefore(LocalDate.parse(survey.getStartDate()))) {
-                    return ResponseEntity.status(403).body(Map.of("msg", "응답 가능 기간이 아닙니다."));
+            try {
+                if (survey.getStartDate() != null && !survey.getStartDate().isEmpty()) {
+                    if (today.isBefore(LocalDate.parse(survey.getStartDate()))) {
+                        return ResponseEntity.status(403).body(Map.of("msg", "응답 가능 기간이 아닙니다."));
+                    }
                 }
-            }
-            if (survey.getEndDate() != null && !survey.getEndDate().isEmpty()) {
-                if (today.isAfter(LocalDate.parse(survey.getEndDate()))) {
-                    return ResponseEntity.status(403).body(Map.of("msg", "응답 가능 기간이 아닙니다."));
+                if (survey.getEndDate() != null && !survey.getEndDate().isEmpty()) {
+                    if (today.isAfter(LocalDate.parse(survey.getEndDate()))) {
+                        return ResponseEntity.status(403).body(Map.of("msg", "응답 가능 기간이 아닙니다."));
+                    }
                 }
+            } catch (DateTimeParseException e) {
+                return ResponseEntity.badRequest().body(Map.of("msg", "설문 날짜 형식이 올바르지 않습니다."));
             }
 
             dto.setSurveyId(surveyId);
             dto.setEmpId(info.getEmpId());
             service.submitResponse(dto);
             return ResponseEntity.ok(Map.of("result", "ok"));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("msg", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
         }

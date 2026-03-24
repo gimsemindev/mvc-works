@@ -192,6 +192,11 @@ public class SurveyServiceImpl implements SurveyService {
     @Override
     @Transactional
     public void submitResponse(SurveyResponseDto dto) throws Exception {
+        // 중복 응답 방지 (서버 측 재검증)
+        if (checkResponse(dto.getSurveyId(), dto.getEmpId())) {
+            throw new IllegalStateException("이미 응답한 설문입니다.");
+        }
+
         // 1. 응답 등록 → responseId 자동 세팅
         mapper.insertResponse(dto);
 

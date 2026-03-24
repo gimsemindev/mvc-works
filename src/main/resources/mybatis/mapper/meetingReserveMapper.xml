@@ -52,7 +52,7 @@
         WHERE r.reserveId = #{reserveId}
     </select>
 
-    <!-- 예약 등록 -->
+    <!-- 예약 등록 (원자적 중복 방지: INSERT...SELECT WHERE NOT EXISTS) -->
     <insert id="insertReserve" parameterType="com.mvc.app.domain.dto.MeetingReserveDto">
         <selectKey keyProperty="reserveId" resultType="long" order="BEFORE">
             SELECT meetingReserve_seq.NEXTVAL FROM dual
@@ -61,11 +61,20 @@
             (reserveId, roomId, reserveDate, startTime, endTime,
              title, memo, attendees, reserveEmpId, reserveEmpName,
              reserveDeptName, status)
-        VALUES
-            (#{reserveId}, #{roomId}, TO_DATE(#{reserveDate}, 'YYYY-MM-DD'),
-             #{startTime}, #{endTime},
-             #{title}, #{memo}, #{attendees}, #{reserveEmpId}, #{reserveEmpName},
-             #{reserveDeptName}, 'ACTIVE')
+        SELECT
+            #{reserveId}, #{roomId}, TO_DATE(#{reserveDate}, 'YYYY-MM-DD'),
+            #{startTime}, #{endTime},
+            #{title}, #{memo}, #{attendees}, #{reserveEmpId}, #{reserveEmpName},
+            #{reserveDeptName}, 'ACTIVE'
+        FROM DUAL
+        WHERE NOT EXISTS (
+            SELECT 1 FROM meetingReserve
+            WHERE roomId = #{roomId}
+              AND reserveDate = TO_DATE(#{reserveDate}, 'YYYY-MM-DD')
+              AND status = 'ACTIVE'
+              AND startTime &lt; #{endTime}
+              AND endTime &gt; #{startTime}
+        )
     </insert>
 
     <!-- 예약 취소 -->

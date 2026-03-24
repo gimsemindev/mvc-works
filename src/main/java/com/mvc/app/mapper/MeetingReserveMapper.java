@@ -15,7 +15,7 @@ public interface MeetingReserveMapper {
 
     MeetingReserveDto getReserve(long reserveId);
 
-    void insertReserve(MeetingReserveDto dto);
+    int insertReserve(MeetingReserveDto dto);
 
     void cancelReserve(long reserveId);
 

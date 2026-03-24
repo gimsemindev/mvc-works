@@ -39,7 +39,7 @@ public class MeetingReserveServiceImpl implements MeetingReserveService {
     @Override
     @Transactional
     public void insertReserve(MeetingReserveDto dto) {
-        // 시간 중복 체크
+        // 사전 중복 체크 (빠른 실패)
         Map<String, Object> param = new HashMap<>();
         param.put("roomId", dto.getRoomId());
         param.put("reserveDate", dto.getReserveDate());
@@ -51,7 +51,11 @@ public class MeetingReserveServiceImpl implements MeetingReserveService {
             throw new IllegalStateException("해당 시간대에 이미 예약이 있습니다.");
         }
 
-        mapper.insertReserve(dto);
+        // 원자적 INSERT (Race Condition 방지)
+        int inserted = mapper.insertReserve(dto);
+        if (inserted == 0) {
+            throw new IllegalStateException("해당 시간대에 이미 예약이 있습니다.");
+        }
     }
 
     @Override

@@ -129,8 +129,10 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 		    this.selectedDocTypeName = name;
 		    const doc = this.docTypeList.find(d => d.docTypeId === id);
 		    const newFormCode = doc ? doc.formCode : '';
-		    // FM003/FM004 → 다른 양식 전환 시 expenseRows 초기화
-		    if (this.selectedFormCode !== newFormCode && newFormCode !== 'FM003' && newFormCode !== 'FM004') {
+		    // expense 양식(FM003/FM004) 간 전환은 데이터 유지, 그 외 전환 시 초기화
+		    const oldUsesExpense = (this.selectedFormCode === 'FM003' || this.selectedFormCode === 'FM004');
+		    const newUsesExpense = (newFormCode === 'FM003' || newFormCode === 'FM004');
+		    if (oldUsesExpense !== newUsesExpense) {
 		        this.expenseRows = [{ date: '', content: '', vendor: '', amount: 0, remark: '' }];
 		    }
 		    this.selectedFormCode = newFormCode;

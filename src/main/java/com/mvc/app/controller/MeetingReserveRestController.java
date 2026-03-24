@@ -87,6 +87,8 @@ public class MeetingReserveRestController {
             }
             reserveService.insertReserve(dto);
             return ResponseEntity.ok(Map.of("msg", "예약 완료"));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("msg", e.getMessage()));
         } catch (Exception e) {
             log.info("insert : ", e);
             return ResponseEntity.badRequest().body(Map.of("msg", "예약 등록에 실패했습니다."));
@@ -96,6 +98,14 @@ public class MeetingReserveRestController {
     @DeleteMapping("/{reserveId}")
     public ResponseEntity<?> cancel(@PathVariable("reserveId") long reserveId) {
         try {
+            SessionInfo si = LoginMemberUtil.getSessionInfo();
+            MeetingReserveDto reserve = reserveService.getReserve(reserveId);
+            if (reserve == null) {
+                return ResponseEntity.notFound().build();
+            }
+            if (!reserve.getReserveEmpId().equals(si.getEmpId())) {
+                return ResponseEntity.status(403).body(Map.of("msg", "본인의 예약만 취소할 수 있습니다."));
+            }
             reserveService.cancelReserve(reserveId);
             return ResponseEntity.ok(Map.of("msg", "예약 취소 완료"));
         } catch (Exception e) {

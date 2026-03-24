@@ -1,6 +1,8 @@
 package com.mvc.app.controller;
 
 import com.mvc.app.domain.dto.MeetingRoomDto;
+import com.mvc.app.domain.dto.SessionInfo;
+import com.mvc.app.security.LoginMemberUtil;
 import com.mvc.app.service.MeetingRoomService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +20,11 @@ import java.util.Map;
 public class MeetingRoomRestController {
 
     private final MeetingRoomService meetingRoomService;
+
+    private boolean isAdmin() {
+        SessionInfo info = LoginMemberUtil.getSessionInfo();
+        return info != null && info.getUserLevel() == 99;
+    }
 
     @GetMapping
     public ResponseEntity<?> list() {
@@ -44,6 +51,9 @@ public class MeetingRoomRestController {
     @PutMapping("/sort")
     public ResponseEntity<?> updateSort(@RequestBody List<MeetingRoomDto> list) {
         try {
+            if (!isAdmin()) {
+                return ResponseEntity.status(403).body(Map.of("msg", "관리자만 회의실을 관리할 수 있습니다."));
+            }
             meetingRoomService.updateSortOrders(list);
             return ResponseEntity.ok(Map.of("msg", "순서 변경 완료"));
         } catch (Exception e) {
@@ -57,6 +67,9 @@ public class MeetingRoomRestController {
             @RequestPart("data") MeetingRoomDto dto,
             @RequestPart(value = "photos", required = false) MultipartFile[] photos) {
         try {
+            if (!isAdmin()) {
+                return ResponseEntity.status(403).body(Map.of("msg", "관리자만 회의실을 관리할 수 있습니다."));
+            }
             meetingRoomService.insertRoom(dto, photos);
             return ResponseEntity.ok(Map.of("msg", "등록 완료"));
         } catch (Exception e) {
@@ -71,6 +84,9 @@ public class MeetingRoomRestController {
             @RequestPart("data") MeetingRoomDto dto,
             @RequestPart(value = "photos", required = false) MultipartFile[] photos) {
         try {
+            if (!isAdmin()) {
+                return ResponseEntity.status(403).body(Map.of("msg", "관리자만 회의실을 관리할 수 있습니다."));
+            }
             dto.setRoomId(roomId);
             meetingRoomService.updateRoom(dto, photos);
             return ResponseEntity.ok(Map.of("msg", "수정 완료"));
@@ -83,6 +99,9 @@ public class MeetingRoomRestController {
     @DeleteMapping("/{roomId}")
     public ResponseEntity<?> delete(@PathVariable("roomId") long roomId) {
         try {
+            if (!isAdmin()) {
+                return ResponseEntity.status(403).body(Map.of("msg", "관리자만 회의실을 관리할 수 있습니다."));
+            }
             meetingRoomService.deleteRoom(roomId);
             return ResponseEntity.ok(Map.of("msg", "삭제 완료"));
         } catch (Exception e) {
