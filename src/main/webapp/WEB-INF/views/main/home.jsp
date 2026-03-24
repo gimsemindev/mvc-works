@@ -12,8 +12,7 @@
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp" />
 
 <link rel="stylesheet" href="<c:url value='/dist/css/core.css' />">
-<link rel="stylesheet"
-	href="<c:url value='/dist/css/editProfile.css' />">
+<link rel="stylesheet" href="<c:url value='/dist/css/main.css' />">
 </head>
 
 <body>
@@ -74,13 +73,13 @@
 					<div class="todo-track">
 
 						<c:forEach var="t" items="${todoList}" varStatus="s">
-
 							<c:if test="${s.index % 6 == 0}">
 								<div class="todo-slide">
 									<div class="todo-grid">
 							</c:if>
 
-							<div class="todo-item">
+							<div class="todo-item"
+								onclick="location.href='<c:url value='/projects/task?projectId=${t.projectId}' />'">
 								<div class="todo-left">
 									<span class="todo-project">[${t.PROJECTNAME}]</span> <span
 										class="todo-title">${t.TITLE}</span>
@@ -92,13 +91,11 @@
 					</div>
 				</div>
 				</c:if>
-
 				</c:forEach>
 
 			</div>
 		</div>
 	</div>
-
 	</div>
 
 	<!-- ================= 중단 ================= -->
@@ -110,30 +107,26 @@
 			<div class="approval-grid">
 
 				<div class="approval-box"
-					onclick="location.href='<c:url value='/approval/list?type=pendingInbox' />'">
+					onclick="location.href='<c:url value="/approval/list?type=pendingInbox"/>'">
 					<div class="approval-icon">
-						<span class="material-symbols-outlined">send</span>
-						<c:if test="${pendingCount > 0}">
-							<span class="badge-count">${pendingCount}</span>
-						</c:if>
+						<i class="bi bi-pencil-square"></i> <span class="badge-count">${pendingCount}</span>
 					</div>
 					<div class="box-label">미결재</div>
 				</div>
 
 				<div class="approval-box"
-					onclick="location.href='<c:url value='/approval/list?type=unreadRef' />'">
+					onclick="location.href='<c:url value="/approval/list?type=unreadRef"/>'">
 					<div class="approval-icon">
-						<span class="material-symbols-outlined">move_to_inbox</span>
-						<c:if test="${unreadCount > 0}">
-							<span class="badge-count">${unreadCount}</span>
-						</c:if>
+						<i class="bi bi-bell"></i><span class="badge-count">${unreadCount}</span>
 					</div>
 					<div class="box-label">미확인</div>
 				</div>
 
 				<div class="approval-box"
-					onclick="location.href='<c:url value='/approval/list?type=all' />'">
-					<span class="material-symbols-outlined">inbox</span>
+					onclick="location.href='<c:url value="/approval/list?type=all"/>'">
+					<div class="approval-icon">
+						<i class="bi bi-archive"></i>
+					</div>
 					<div class="box-label">전체</div>
 				</div>
 
@@ -152,14 +145,12 @@
 
 			<div class="project-slider">
 				<div class="project-track">
-
 					<c:forEach var="p" items="${projectList}" varStatus="s">
-
 						<c:if test="${s.index % 2 == 0}">
 							<div class="project-slide">
 						</c:if>
-
-						<div class="project-item">
+						<div class="project-item"
+							onclick="location.href='<c:url value='/projects/task?projectId=${p.projectId}' />'">
 							<div class="project-top">
 								<span>${p.title}</span> <span>${p.progress}%</span>
 							</div>
@@ -173,32 +164,52 @@
 				</c:if>
 
 				</c:forEach>
-
 			</div>
 		</div>
 	</div>
 
 	<!-- 공지 -->
+	<!-- 공지 -->
 	<div class="card notice-card">
-		<div class="card-title">프로젝트 공지사항</div>
+		<div class="project-header">
+			<div class="card-title">프로젝트 공지사항</div>
+			<div class="project-nav-wrap">
+				<button class="project-nav" onclick="noticePrev()">‹</button>
+				<button class="project-nav" onclick="noticeNext()">›</button>
+			</div>
+		</div>
 
-		<c:choose>
-			<c:when test="${empty noticeList}">
-				<div class="notice-empty">등록된 공지사항이 없습니다.</div>
-			</c:when>
-			<c:otherwise>
-				<c:forEach var="n" items="${noticeList}" varStatus="s">
-					<c:if test="${s.index < 3}">
-						<div class="notice-item"
-							onclick="location.href='<c:url value='/projects/projectNotice/projectNoticeDetail?noticenum=${n.noticenum}' />'">
-							<div class="notice-subject">[${n.projectName}] ${n.subject}</div>
-							<div class="notice-date">${n.regdate}</div>
+		<div class="notice-slider">
+			<div class="notice-track">
 
-						</div>
-					</c:if>
-				</c:forEach>
+				<c:choose>
+					<c:when test="${empty noticeList}">
+						<div class="notice-empty">등록된 공지사항이 없습니다.</div>
+					</c:when>
+					<c:otherwise>
+
+						<c:forEach var="n" items="${noticeList}" varStatus="s">
+							<c:if test="${s.index % 2 == 0}">
+								<div class="notice-slide">
+							</c:if>
+
+							<div class="notice-item"
+								onclick="location.href='<c:url value='/projects/projectNotice/projectNoticeDetail?noticenum=${n.noticenum}' />'">
+								<div class="notice-subject">[${n.projectName}]
+									${n.subject}</div>
+								<div class="notice-date">${n.regdate}</div>
+							</div>
+
+							<c:if test="${s.index % 2 == 1 || s.last}">
+			</div>
+			</c:if>
+			</c:forEach>
+
 			</c:otherwise>
-		</c:choose>
+			</c:choose>
+
+		</div>
+	</div>
 	</div>
 
 	</div>
@@ -221,6 +232,7 @@
 
 	<!-- JS -->
 	<script>
+	let calendar;
     // 슬라이더 공용 함수
     function moveTrack(trackSelector, index) {
         const track = document.querySelector(trackSelector);
@@ -235,6 +247,18 @@
     function todoNext() { const slides = document.querySelectorAll(".todo-slide"); if(todoIndex < slides.length-1) moveTrack(".todo-track", ++todoIndex); }
     function todoPrev() { if(todoIndex > 0) moveTrack(".todo-track", --todoIndex); }
 
+    let noticeIndex = 0;
+
+    function noticeNext() {
+        const slides = document.querySelectorAll(".notice-slide");
+        if (noticeIndex < slides.length - 1)
+            moveTrack(".notice-track", ++noticeIndex);
+    }
+
+    function noticePrev() {
+        if (noticeIndex > 0)
+            moveTrack(".notice-track", --noticeIndex);
+    }
     // 캘린더
     document.addEventListener('DOMContentLoaded', function() {
         const calendarEl = document.getElementById('calendar');
