@@ -22,5 +22,6 @@ public class SnackDto {
     private String adminComment;   // 관리자 코멘트 (승인/반려 사유)
     private int    voteCount;      // 공감 수
     private boolean voted;         // 현재 사용자 공감 여부
+    private int    commentCount;
     private List<SnackCommentDto> comments; // 댓글 목록
 }

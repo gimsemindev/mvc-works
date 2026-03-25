@@ -128,7 +128,7 @@ public class SnackRestController {
 
     // ── 공감 토글 ──
     @PostMapping("/{snackId}/vote")
-    public ResponseEntity<?> vote(@PathVariable long snackId) {
+    public ResponseEntity<?> vote(@PathVariable("snackId") long snackId) { 
         try {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
             Map<String, Object> map = new HashMap<>();
@@ -149,7 +149,7 @@ public class SnackRestController {
     // ── 댓글 등록 ──
     @PostMapping("/{snackId}/comment")
     public ResponseEntity<?> insertComment(
-            @PathVariable long snackId,
+            @PathVariable("snackId") long snackId, 
             @RequestBody Map<String, String> body) {
         try {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
@@ -167,7 +167,7 @@ public class SnackRestController {
 
     // ── 댓글 삭제 ──
     @DeleteMapping("/comment/{commentId}")
-    public ResponseEntity<?> deleteComment(@PathVariable long commentId) {
+    public ResponseEntity<?> deleteComment(@PathVariable("commentId") long commentId) {
         try {
             mapper.deleteComment(commentId);
             return ResponseEntity.ok(Map.of("msg", "댓글이 삭제되었습니다."));

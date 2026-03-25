@@ -85,14 +85,22 @@ if (member != null) {
 .snack-table tr:hover { background: #fbfcfe; }
 
 /* --- 4. 상태 뱃지 및 요소 --- */
-.status-badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 12px; display: inline-block; }
-.status-PENDING { background: #fff4e0; color: #d97706; }
-.status-APPROVED { background: #ecfdf5; color: #059669; }
-.status-REJECTED { background: #fef2f2; color: #dc2626; }
+.snack-status { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 12px; display: inline-block; }
+.snack-PENDING { background: #fff4e0; color: #d97706; }
+.snack-APPROVED { background: #ecfdf5; color: #059669; }
+.snack-REJECTED { background: #fef2f2; color: #dc2626; }
 
 .vote-tag { display: inline-flex; align-items: center; gap: 4px; color: #4e73df; font-weight: 700; }
 .comment-tag { display: inline-flex; align-items: center; gap: 4px; color: #9aa0b4; }
-
+.vote-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #f0f4ff; color: #4e73df;
+    border: 1.5px solid #c7d4f8; border-radius: 20px;
+    padding: 6px 16px; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all .15s;
+}
+.vote-btn:hover { background: #dce6ff; }
+.vote-btn.voted { background: #4e73df; color: #fff; border-color: #4e73df; }
 /* --- 5. 모달 레이어 (Portal 최적화 유지) --- */
 .modal-overlay {
     position: fixed !important;
@@ -293,7 +301,7 @@ function DetailModal({ snackId, onClose, onRefresh }) {
                 <div className="modal-body">
                     <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px'}}>
                         <span style={{fontWeight:700, fontSize:'16px'}}>{detail.itemName}</span>
-                        <span className={`status-badge status-\${detail.status}`}>{statusLabel(detail.status)}</span>
+                        <span className={`snack-status snack-${detail.status}`}>{statusLabel(detail.status)}</span>
                     </div>
                     <div style={{fontSize:'13px', color:'#667085', marginBottom:'8px'}}>수량: {detail.quantity}개</div>
                     <div style={{fontSize:'13px', color:'#667085', marginBottom:'8px'}}>신청자: {detail.requesterName}</div>
@@ -420,7 +428,7 @@ function SnackApp() {
                             </td>
                             <td>{item.requesterName}</td>
                             <td>
-                                <span className={`status-badge status-${item.status}`}>
+                                <span className={`snack-status snack-${item.status}`}>
                                     {statusLabel(item.status)}
                                 </span>
                             </td>

@@ -51,12 +51,10 @@
                s.requesterEmpId,
                e.name             AS requesterName,
                s.adminComment,
-               (SELECT COUNT(*) FROM snackVote v
-                WHERE v.snackId = s.snackId) AS voteCount,
-               (SELECT COUNT(*) FROM snackVote v2
-                WHERE v2.snackId = s.snackId
-                  AND v2.empId = #{empId, jdbcType=VARCHAR}) AS voted
-        FROM snackRequest s
+               (SELECT COUNT(*) FROM snackVote v WHERE v.snackId = s.snackId) AS voteCount,
+           (SELECT COUNT(*) FROM snackVote v2 WHERE v2.snackId = s.snackId AND v2.empId = #{empId}) AS voted,
+           (SELECT COUNT(*) FROM snackComment c WHERE c.snackId = s.snackId) AS commentCount
+    		FROM snackRequest s
         LEFT JOIN employee2 e ON s.requesterEmpId = e.empId
         WHERE s.status != 'DELETED'
         <if test="status != null and status != ''">
