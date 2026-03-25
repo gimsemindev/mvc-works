@@ -275,18 +275,19 @@
         }
 
         const events = [
-            <c:forEach var="p" items="${projectList}" varStatus="s">
-            {
-                title: "${p.title}",
-                start: "${p.startDate}",
-                end: "${p.endDate}",
-                allDay: true,
-                backgroundColor: getProjectColor("${p.title}"),
-                borderColor: getProjectColor("${p.title}"),
-                textColor: "#000"
-            }<c:if test="${!s.last}">,</c:if>
-            </c:forEach>
-        ];
+        	<c:forEach var="p" items="${projectList}" varStatus="s">
+        	{
+        	    title: "${p.title}",
+        	    start: "${p.startDate}",
+        	    end: "${p.endDate}",
+        	    projectId: "${p.projectId}",
+        	    allDay: true,
+        	    backgroundColor: getProjectColor("${p.title}"),
+        	    borderColor: getProjectColor("${p.title}"),
+        	    textColor: "#000"
+        	}<c:if test="${!s.last}">,</c:if>
+        	</c:forEach>
+        	];
 
         calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
@@ -298,9 +299,18 @@
             handleWindowResize: true,
             fixedWeekCount: false,
             eventDisplay: 'block',
+
+            eventClick: function(info) {
+                const projectId = info.event.extendedProps.projectId;
+                if(!projectId) return;
+                window.location.href = "/projects/task?projectId=" + projectId;
+            },
+
             dayCellDidMount: function(arg) {
-                if(arg.date.getDay()===0) arg.el.querySelector('.fc-daygrid-day-number').style.color='#ff4d4d';
-                else if(arg.date.getDay()===6) arg.el.querySelector('.fc-daygrid-day-number').style.color='#3b82f6';
+                if(arg.date.getDay()===0)
+                    arg.el.querySelector('.fc-daygrid-day-number').style.color='#ff4d4d';
+                else if(arg.date.getDay()===6)
+                    arg.el.querySelector('.fc-daygrid-day-number').style.color='#3b82f6';
             },
             datesSet: function(info){ titleEl.innerText = info.view.title; },
             events: events
