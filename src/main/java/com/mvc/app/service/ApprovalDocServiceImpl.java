@@ -224,12 +224,11 @@ public class ApprovalDocServiceImpl implements ApprovalDocService {
         }
 
         mapper.rejectDocStatus(docId);
-        
+
         // 반려 알림
         ApprovalDocDto doc = mapper.getDoc(docId);
-        List<ApprovalLineDto> lines = mapper.getLines(docId);
         pushAlarm(doc.getWriterEmpId(), empId, empName, docId, doc.getTitle(), "REJECT");
-        for (ApprovalLineDto line : lines) {
+        for (ApprovalLineDto line : doc.getLines()) {
             if ("APPROVED".equals(line.getApprStatus())) {
                 pushAlarm(line.getApprEmpId(), empId, empName, docId, doc.getTitle(), "REJECT");
             }
@@ -254,12 +253,11 @@ public class ApprovalDocServiceImpl implements ApprovalDocService {
         }
 
         mapper.holdDocStatus(docId);
-        
+
         // 보류 알림
         ApprovalDocDto doc = mapper.getDoc(docId);
-        List<ApprovalLineDto> lines = mapper.getLines(docId);
         pushAlarm(doc.getWriterEmpId(), empId, empName, docId, doc.getTitle(), "HOLD");
-        for (ApprovalLineDto line : lines) {
+        for (ApprovalLineDto line : doc.getLines()) {
             if ("APPROVED".equals(line.getApprStatus())) {
                 pushAlarm(line.getApprEmpId(), empId, empName, docId, doc.getTitle(), "HOLD");
             }

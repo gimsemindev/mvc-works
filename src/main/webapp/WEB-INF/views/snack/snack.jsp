@@ -157,15 +157,15 @@ function DetailModal({ snackId, onClose, onRefresh }) {
 
     const load = useCallback(async () => {
     try {
-        const url = `${ctx}/api/snack/${snackId}`.replace(/\/+/g, '/');
+        setLoading(true);
+        const url = `\${SNACK_CTX}/api/snack/\${snackId}`.replace(/\/+/g, '/');
         const res = await fetch(url);
-        
+
         if (!res.ok) {
             throw new Error('데이터를 불러오지 못했습니다.');
         }
 
         const text = await res.text();
-        // HTML이 반환되었는지 체크 (에러 페이지 방지)
         if (text.includes("<!DOCTYPE")) {
             console.error("API 경로 오류: HTML이 반환됨");
             return;
@@ -176,20 +176,61 @@ function DetailModal({ snackId, onClose, onRefresh }) {
     } catch (err) {
         console.error("상세조회 에러:", err);
         alert("상세 내용을 가져오는데 실패했습니다.");
-        onClose(); // 에러 시 모달 닫기
+        onClose();
+    } finally {
+        setLoading(false);
     }
-}, [snackId, ctx, onClose]);
+}, [snackId, onClose]);
 
-    useEffect(() => { loadDetail(); }, [loadDetail]);
+    useEffect(() => { load(); }, [load]);
 
-    // ... (toggleVote, submitComment 함수는 이전과 동일)
+    const [adminComment, setAdminComment] = useState('');
 
-    if (loading) return null; // 로딩 중에는 아무것도 안 띄움
+    const updateStatus = async (newStatus) => {
+        if (newStatus === 'REJECTED' && !adminComment.trim()) {
+            alert('반려 사유를 입력해주세요.');
+            return;
+        }
+        if (!confirm(newStatus === 'APPROVED' ? '승인하시겠습니까?' : '반려하시겠습니까?')) return;
+        try {
+            const res = await fetch(`\${SNACK_CTX}/api/snack/\${snackId}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus, adminComment: adminComment })
+            });
+            if (res.ok) {
+                alert(newStatus === 'APPROVED' ? '승인되었습니다.' : '반려되었습니다.');
+                onRefresh();
+                load();
+            }
+        } catch (err) { console.error(err); }
+    };
+
+    const toggleVote = async () => {
+        try {
+            await fetch(`\${SNACK_CTX}/api/snack/\${snackId}/vote`, { method: 'POST' });
+            load();
+        } catch (err) { console.error(err); }
+    };
+
+    const submitComment = async () => {
+        if (!newComment.trim()) return;
+        try {
+            await fetch(`\${SNACK_CTX}/api/snack/\${snackId}/comment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: newComment })
+            });
+            setNewComment('');
+            load();
+        } catch (err) { console.error(err); }
+    };
+
+    if (loading) return null;
     if (!detail) return null;
 
     return createPortal(
         <div className="modal-overlay" onClick={onClose}>
-            {/* 이하 모달 UI 코드는 이전과 동일 */}
             <div className="modal" onClick={e => e.stopPropagation()}>
                 <div className="modal-header">
                     <h3 style={{margin:0}}>신청 상세 보기</h3>
@@ -198,7 +239,68 @@ function DetailModal({ snackId, onClose, onRefresh }) {
                     </button>
                 </div>
                 <div className="modal-body">
-                    {/* ... 상세 내용 구성 ... */}
+                    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px'}}>
+                        <span style={{fontWeight:700, fontSize:'16px'}}>{detail.itemName}</span>
+                        <span className={`status-badge status-\${detail.status}`}>{statusLabel(detail.status)}</span>
+                    </div>
+                    <div style={{fontSize:'13px', color:'#667085', marginBottom:'8px'}}>수량: {detail.quantity}개</div>
+                    <div style={{fontSize:'13px', color:'#667085', marginBottom:'8px'}}>신청자: {detail.requesterName}</div>
+                    <div style={{fontSize:'13px', color:'#667085', marginBottom:'16px'}}>신청일: {detail.regDate}</div>
+                    <div style={{background:'#f8f9fc', borderRadius:'8px', padding:'14px', marginBottom:'16px', fontSize:'14px', lineHeight:'1.6'}}>
+                        {detail.reason}
+                    </div>
+
+                    {detail.adminComment && (
+                        <div style={{background:'#fff8f0', borderRadius:'8px', padding:'14px', marginBottom:'16px', fontSize:'13px', border:'1px solid #fde4c8'}}>
+                            <strong>관리자 의견:</strong> {detail.adminComment}
+                        </div>
+                    )}
+
+                    {SNACK_IS_ADMIN && detail.status === 'PENDING' && (
+                        <div style={{background:'#f0f4ff', borderRadius:'8px', padding:'16px', marginBottom:'16px', border:'1px solid #d0d9f0'}}>
+                            <h4 style={{margin:'0 0 10px', fontSize:'14px', color:'#4e5968'}}>관리자 처리</h4>
+                            <textarea
+                                value={adminComment}
+                                onChange={e => setAdminComment(e.target.value)}
+                                placeholder="승인/반려 사유를 입력하세요 (반려 시 필수)"
+                                style={{width:'100%', padding:'10px', border:'1px solid #d8dde6', borderRadius:'8px', height:'70px', boxSizing:'border-box', marginBottom:'10px'}}
+                            />
+                            <div style={{display:'flex', gap:'8px', justifyContent:'flex-end'}}>
+                                <button onClick={() => updateStatus('APPROVED')} style={{padding:'8px 20px', background:'#059669', color:'#fff', border:'none', borderRadius:'6px', cursor:'pointer', fontWeight:600}}>승인</button>
+                                <button onClick={() => updateStatus('REJECTED')} style={{padding:'8px 20px', background:'#dc2626', color:'#fff', border:'none', borderRadius:'6px', cursor:'pointer', fontWeight:600}}>반려</button>
+                            </div>
+                        </div>
+                    )}
+
+                    <div style={{display:'flex', alignItems:'center', gap:'12px', marginBottom:'20px'}}>
+                        <button className={`vote-btn\${detail.voted ? ' voted' : ''}`} onClick={toggleVote}>
+                            <span className="material-symbols-outlined" style={{fontSize:'16px'}}>thumb_up</span>
+                            공감 {detail.voteCount}
+                        </button>
+                    </div>
+
+                    <div style={{borderTop:'1px solid #f0f2f9', paddingTop:'16px'}}>
+                        <h4 style={{margin:'0 0 12px', fontSize:'14px'}}>댓글 ({detail.comments ? detail.comments.length : 0})</h4>
+                        {detail.comments && detail.comments.map(c => (
+                            <div key={c.commentId} className="comment-item">
+                                <div style={{display:'flex', justifyContent:'space-between', marginBottom:'4px'}}>
+                                    <strong style={{fontSize:'12px'}}>{c.authorName}</strong>
+                                    <span style={{fontSize:'11px', color:'#9aa0b4'}}>{c.regDate}</span>
+                                </div>
+                                <div>{c.content}</div>
+                            </div>
+                        ))}
+                        <div style={{display:'flex', gap:'8px', marginTop:'12px'}}>
+                            <input
+                                value={newComment}
+                                onChange={e => setNewComment(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && submitComment()}
+                                placeholder="댓글을 입력하세요"
+                                style={{flex:1, padding:'10px', border:'1px solid #d8dde6', borderRadius:'8px'}}
+                            />
+                            <button onClick={submitComment} style={{padding:'10px 16px', background:'#4e73df', color:'#fff', border:'none', borderRadius:'8px', cursor:'pointer', whiteSpace:'nowrap'}}>등록</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>,

@@ -99,6 +99,9 @@ public class MeetingReserveRestController {
     public ResponseEntity<?> cancel(@PathVariable("reserveId") long reserveId) {
         try {
             SessionInfo si = LoginMemberUtil.getSessionInfo();
+            if (si == null) {
+                return ResponseEntity.status(401).body(Map.of("msg", "로그인이 필요합니다."));
+            }
             MeetingReserveDto reserve = reserveService.getReserve(reserveId);
             if (reserve == null) {
                 return ResponseEntity.notFound().build();

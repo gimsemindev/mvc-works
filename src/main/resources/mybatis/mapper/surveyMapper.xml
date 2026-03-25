@@ -190,7 +190,10 @@
               SELECT surveyResponse_seq.NEXTVAL FROM dual
           </selectKey>
           INSERT INTO surveyResponse (responseId, surveyId, empId, respondedDate)
-          VALUES (#{responseId}, #{surveyId}, #{empId}, SYSDATE)
+          SELECT #{responseId}, #{surveyId}, #{empId}, SYSDATE FROM dual
+          WHERE NOT EXISTS (
+              SELECT 1 FROM surveyResponse WHERE surveyId = #{surveyId} AND empId = #{empId}
+          )
       </insert>
 
       <select id="checkResponse" parameterType="map" resultType="int">

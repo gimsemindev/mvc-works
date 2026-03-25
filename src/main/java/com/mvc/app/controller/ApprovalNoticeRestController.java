@@ -74,10 +74,10 @@ public class ApprovalNoticeRestController {
 	        @RequestPart(value = "files", required = false) MultipartFile[] files) {
     	try {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
-            if (info.getUserLevel() != 99) {
+            if (info == null || info.getUserLevel() != 99) {
                 return ResponseEntity.status(403).body(Map.of("msg", "권한이 없습니다"));
             }
-            
+
             dto.setWriterEmpId(info.getEmpId());
             dto.setWriterName(info.getName());
             service.insertNotice(dto, files);
@@ -94,10 +94,10 @@ public class ApprovalNoticeRestController {
 	                                @RequestPart(value = "files", required = false) MultipartFile[] files){
 		try {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
-            if (info.getUserLevel() != 99) {
+            if (info == null || info.getUserLevel() != 99) {
                 return ResponseEntity.status(403).body(Map.of("msg", "권한이 없습니다"));
             }
-            
+
             dto.setNoticeId(noticeId);
             service.updateNotice(dto, files);
             return ResponseEntity.ok(Map.of("msg", "수정 완료"));
@@ -112,7 +112,7 @@ public class ApprovalNoticeRestController {
     public ResponseEntity<?> delete(@PathVariable("noticeId") long noticeId) {
         try {
             SessionInfo info = LoginMemberUtil.getSessionInfo();
-            if (info.getUserLevel() != 99) {
+            if (info == null || info.getUserLevel() != 99) {
                 return ResponseEntity.status(403).body(Map.of("msg", "권한이 없습니다"));
             }
 
@@ -127,6 +127,12 @@ public class ApprovalNoticeRestController {
     @GetMapping("/file/{fileId}/download")
     public ResponseEntity<?> downloadFile(@PathVariable("fileId") long fileId) {
         try {
+            // 로그인 확인
+            SessionInfo info = LoginMemberUtil.getSessionInfo();
+            if (info == null) {
+                return ResponseEntity.status(401).body(Map.of("msg", "로그인이 필요합니다."));
+            }
+
             // 1. DB에서 파일 정보 조회
             ApprovalNoticeFileDto fileDto = service.findFileById(fileId);
             if (fileDto == null) {
