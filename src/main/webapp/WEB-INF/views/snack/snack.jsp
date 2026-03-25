@@ -21,51 +21,105 @@ if (member != null) {
 <jsp:include page="/WEB-INF/views/layout/sidebarResources.jsp" />
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 <style>
-/* --- 기본 레이아웃 --- */
-#main-content { margin-left: 240px !important; padding: 28px 32px !important; box-sizing: border-box; min-height: 100vh; background: #f8f9fc; }
-
-/* --- 모달 레이어 (Portal 최적화) --- */
-.modal-overlay {
-    position: fixed !important;
-    top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
-    width: 100vw !important; height: 100vh !important;
-    background: rgba(0, 0, 0, 0.6) !important;
-    z-index: 999999 !important; /* 사이드바보다 높은 값 */
-    display: flex !important;
-    align-items: center; justify-content: center;
-    pointer-events: auto !important;
+/* --- 1. 기본 레이아웃 (유지) --- */
+#main-content { 
+    margin-left: 240px !important; 
+    padding: 28px 32px !important; 
+    box-sizing: border-box; 
+    min-height: 100vh; 
+    background: #f8f9fc; 
 }
 
-.modal {
-    background: #fff; border-radius: 16px; width: 550px; max-width: 90%;
-    max-height: 90vh; overflow-y: auto; position: relative;
-    z-index: 1000000 !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    display: flex; flex-direction: column;
+/* --- 2. 게시판 컨테이너 및 헤더 --- */
+.snack-container { 
+    background: #fff; 
+    border-radius: 12px; 
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05); 
+    padding: 24px; 
 }
+.snack-header { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    margin-bottom: 24px; 
+}
+.btn-request { 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 6px; 
+    background: #4e73df; 
+    color: #fff; 
+    border: none; 
+    border-radius: 8px; 
+    padding: 10px 20px; 
+    font-weight: 600; 
+    cursor: pointer; 
+    transition: background 0.2s;
+}
+.btn-request:hover { background: #2e59d9; }
 
-.modal-header { padding: 20px 24px; border-bottom: 1px solid #f0f2f9; display: flex; justify-content: space-between; align-items: center; }
-.modal-body { padding: 24px; flex: 1; }
-.modal-footer { padding: 16px 24px; border-top: 1px solid #f0f2f9; display: flex; justify-content: flex-end; gap: 8px; }
+/* --- 3. 리스트(테이블) 스타일 (최적화) --- */
+.snack-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    margin-top: 10px;
+}
+.snack-table th {
+    background: #f8f9fc;
+    padding: 14px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #4e5968;
+    text-align: center;
+    border-bottom: 2px solid #eef2f9;
+}
+.snack-table td {
+    padding: 16px 12px;
+    border-bottom: 1px solid #f0f2f9;
+    font-size: 14px;
+    color: #333;
+    text-align: center;
+}
+.snack-table tr { transition: background 0.2s; cursor: pointer; }
+.snack-table tr:hover { background: #fbfcfe; }
 
-/* --- 컴포넌트 스타일 --- */
-.snack-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
-.btn-request { display: inline-flex; align-items: center; gap: 6px; background: #4e73df; color: #fff; border: none; border-radius: 8px; padding: 10px 20px; font-weight: 600; cursor: pointer; }
-.snack-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
-.snack-card { background: #fff; border-radius: 12px; border: 1px solid #e6eaf4; padding: 20px; cursor: pointer; transition: transform 0.2s; }
-.snack-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-
-.status-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 12px; margin-left: 8px; }
+/* --- 4. 상태 뱃지 및 요소 --- */
+.status-badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 12px; display: inline-block; }
 .status-PENDING { background: #fff4e0; color: #d97706; }
 .status-APPROVED { background: #ecfdf5; color: #059669; }
 .status-REJECTED { background: #fef2f2; color: #dc2626; }
 
-.form-row { margin-bottom: 16px; }
-.form-row label { display: block; font-size: 12px; font-weight: 700; margin-bottom: 6px; color: #4e5968; }
-.form-row input, .form-row textarea { width: 100%; padding: 10px; border: 1px solid #d8dde6; border-radius: 8px; box-sizing: border-box; }
+.vote-tag { display: inline-flex; align-items: center; gap: 4px; color: #4e73df; font-weight: 700; }
+.comment-tag { display: inline-flex; align-items: center; gap: 4px; color: #9aa0b4; }
 
-.vote-btn { display: inline-flex; align-items: center; gap: 4px; background: #f8f9fa; border: 1px solid #e2e5ef; border-radius: 20px; padding: 6px 14px; font-size: 13px; cursor: pointer; }
-.vote-btn.voted { background: #eef2ff; border-color: #4e73df; color: #4e73df; }
+/* --- 5. 모달 레이어 (Portal 최적화 유지) --- */
+.modal-overlay {
+    position: fixed !important;
+    top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+    width: 100vw !important; height: 100vh !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+    z-index: 9999 !important;
+    display: flex !important;
+    align-items: center; justify-content: center;
+}
+.modal {
+    background: #fff; border-radius: 16px; width: 550px; max-width: 95%;
+    max-height: 90vh; overflow-y: auto; position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    display: flex; flex-direction: column;
+}
+.modal-header { padding: 20px 24px; border-bottom: 1px solid #f0f2f9; display: flex; justify-content: space-between; align-items: center; }
+.modal-body { padding: 24px; flex: 1; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid #f0f2f9; display: flex; justify-content: flex-end; gap: 8px; }
+
+/* --- 6. 폼 및 기타 --- */
+.form-row { margin-bottom: 16px; }
+.form-row label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: #4e5968; }
+.form-row input, .form-row textarea { 
+    width: 100%; padding: 12px; border: 1px solid #d8dde6; border-radius: 8px; box-sizing: border-box; 
+    font-size: 14px;
+}
 .comment-item { background: #f8f9fc; border-radius: 8px; padding: 12px; margin-top: 8px; font-size: 13px; }
 </style>
 </head>
@@ -309,37 +363,36 @@ function DetailModal({ snackId, onClose, onRefresh }) {
 /* 3. 메인 앱 컴포넌트 */
 function SnackApp() {
     const [list, setList] = useState([]);
-    const [showForm, setShowForm] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
+    const [showForm, setShowForm] = useState(false);
 
+    // 이미지 2, 4번의 HTML 반환 에러 방지를 위한 fetch 로직
     const fetchList = useCallback(async () => {
-    try {
-        const response = await fetch(`${SNACK_CTX}/api/snack/list?pageNo=1&pageSize=12`);
-        
-        // JSON 파싱 전 텍스트로 먼저 받아보기 (디버깅용)
-        const text = await response.text();
-
-        // 만약 응답이 HTML로 시작한다면(404나 500 에러 페이지)
-        if (text.trim().startsWith("<!DOCTYPE")) {
-            console.error("서버에서 JSON 대신 HTML을 반환했습니다. 경로를 확인하세요.");
-            return;
+        try {
+            const response = await fetch(`${SNACK_CTX}/api/snack/list?pageNo=1&pageSize=20`);
+            const text = await response.text();
+            
+            // HTML이 반환되었는지 체크 (로그인 만료 등)
+            if (text.trim().startsWith("<!DOCTYPE")) {
+                console.error("API 경로가 잘못되었거나 서버 에러 페이지가 반환되었습니다.");
+                return;
+            }
+            
+            const data = JSON.parse(text);
+            setList(data.list || []);
+        } catch (e) {
+            console.error("데이터 로딩 실패:", e);
         }
-
-        const data = JSON.parse(text);
-        setList(data.list || data); // data.list가 없으면 data 자체가 배열인지 확인
-    } catch(e) { 
-        console.error("데이터 로딩 중 에러:", e); 
-    }
-}, []);
+    }, []);
 
     useEffect(() => { fetchList(); }, [fetchList]);
 
     return (
-        <div>
+        <div className="snack-container">
             <div className="snack-header">
                 <div>
-                    <h2 style={{margin:0}}>탕비실 비품 신청</h2>
-                    <p style={{margin:0, color:'#9aa0b4', fontSize:'13px'}}>원하는 비품을 신청하고 동료들의 공감을 얻어보세요.</p>
+                    <h2 style={{margin:0, fontSize:'22px', color:'#1a1f36'}}>탕비실 비품 신청</h2>
+                    <p style={{margin:'4px 0 0', color:'#697386'}}>필요한 비품을 신청하고 동료들의 공감을 확인하세요.</p>
                 </div>
                 <button className="btn-request" onClick={() => setShowForm(true)}>
                     <span className="material-symbols-outlined" style={{fontSize:'18px'}}>add</span>
@@ -347,31 +400,52 @@ function SnackApp() {
                 </button>
             </div>
 
-            <div className="snack-grid">
-                {list.length > 0 ? list.map(item => (
-                    <div key={item.snackId} className="snack-card" onClick={() => setSelectedId(item.snackId)}>
-                        <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'12px'}}>
-                            <span style={{fontWeight:700}}>{item.itemName}</span>
-                            <span className={`status-badge status-\${item.status}`} style={{margin:0}}>{statusLabel(item.status)}</span>
-                        </div>
-                        <div style={{fontSize:'13px', color:'#667085', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap'}}>
-                            {item.reason}
-                        </div>
-                        <div style={{marginTop:'16px', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-                            <span style={{fontSize:'12px', color:'#9aa0b4'}}>공감 {item.voteCount}</span>
-                            <span style={{fontSize:'12px', color:'#4e73df'}}>{item.requesterName}</span>
-                        </div>
-                    </div>
-                )) : (
-                    <div style={{gridColumn:'1/-1', textAlign:'center', padding:'100px', color:'#9aa0b4'}}>
-                         등록된 신청이 없습니다.
-                    </div>
-                )}
-            </div>
+            <table className="snack-table">
+                <thead>
+                    <tr>
+                        <th style={{width:'80px'}}>번호</th>
+                        <th>신청 품목</th>
+                        <th style={{width:'120px'}}>신청자</th>
+                        <th style={{width:'120px'}}>상태</th>
+                        <th style={{width:'100px'}}>공감</th>
+                        <th style={{width:'100px'}}>댓글</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {list.length > 0 ? list.map(item => (
+                        <tr key={item.snackId} onClick={() => setSelectedId(item.snackId)}>
+                            <td>{item.snackId}</td>
+                            <td style={{textAlign:'left', paddingLeft:'20px'}}>
+                                <strong>{item.itemName}</strong>
+                            </td>
+                            <td>{item.requesterName}</td>
+                            <td>
+                                <span className={`status-badge status-${item.status}`}>
+                                    {statusLabel(item.status)}
+                                </span>
+                            </td>
+                            <td>
+                                <span className={`vote-tag ${item.voted ? 'voted' : ''}`}>
+                                    <span className="material-symbols-outlined" style={{fontSize:'16px'}}>thumb_up</span>
+                                    {item.voteCount}
+                                </span>
+                            </td>
+                            <td style={{color:'#9aa0b4'}}>
+                                <span className="material-symbols-outlined" style={{fontSize:'16px', verticalAlign:'middle'}}>chat_bubble</span>
+                                {item.commentCount || 0}
+                            </td>
+                        </tr>
+                    )) : (
+                        <tr>
+                            <td colSpan="6" style={{padding:'100px 0', color:'#9aa0b4'}}>신청 내역이 없습니다.</td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
 
-            {/* Portal 기반 모달들 */}
-            {showForm && <FormModal onClose={() => setShowForm(false)} onSubmit={() => { setShowForm(false); fetchList(); }} />}
+            {/* 모달 컴포넌트 연결 */}
             {selectedId && <DetailModal snackId={selectedId} onClose={() => setSelectedId(null)} onRefresh={fetchList} />}
+            {showForm && <FormModal onClose={() => setShowForm(false)} onSubmit={() => { setShowForm(false); fetchList(); }} />}
         </div>
     );
 }
