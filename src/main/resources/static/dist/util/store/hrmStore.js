@@ -17,8 +17,6 @@ export const useHrmStore = defineStore('hrm', {
             empStatusCode: '',      // 재직 공통코드
             levelCode:     '',      // 권한레벨
 			authorityCode: '',      // 권한등급 공통코드
-            pmoY:          false,
-            pmoN:          false,
             page:          1
         },
 
@@ -91,11 +89,6 @@ export const useHrmStore = defineStore('hrm', {
 		//조회
         search() {
             this.fetchList(1);
-        },
-		//PMO 필터
-        setPmoFilter(value) {
-            this.searchParams.pmoY = (value === 'Y');
-            this.searchParams.pmoN = (value === 'N');
         },
 		
 		async initialize() {
@@ -252,8 +245,8 @@ export const useHrmStore = defineStore('hrm', {
 
 		//엑셀 다운로드
         excelDownload() {
-            const { name, empNo, project, deptCode, gradeCode, empStatusCode, levelCode, authorityCode, pmoY, pmoN } = this.searchParams;
-            const qs = new URLSearchParams({ name, empNo, project, deptCode, gradeCode, empStatusCode, levelCode, authorityCode, pmoY, pmoN });
+            const { name, empNo, project, deptCode, gradeCode, empStatusCode, levelCode, authorityCode } = this.searchParams;
+            const qs = new URLSearchParams({ name, empNo, project, deptCode, gradeCode, empStatusCode, levelCode, authorityCode});
             location.href = '/api/hrm/excel/download?' + qs;
         },
 

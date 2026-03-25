@@ -84,32 +84,6 @@
                                placeholder="권한레벨 입력" 
                                @keyup.enter="store.search()">
                     </div>
-                    <div class="emp-filter-check-group">
-                        <label class="group-label">PMO</label>
-                        <div class="emp-check-items">
-                            <label class="emp-check-item">
-                                <input type="radio" 
-                                	   name="pmoFilter" 
-                                	   value="Y"
-                                       :checked="store.searchParams.pmoY"
-                                       @change="store.setPmoFilter('Y')"> Y
-                            </label>
-                            <label class="emp-check-item">
-                                <input type="radio" 
-                                	   name="pmoFilter" 
-                                	   value="N"
-                                       :checked="store.searchParams.pmoN"
-                                       @change="store.setPmoFilter('N')"> N
-                            </label>
-                            <label class="emp-check-item">
-                                <input type="radio" 
-                                	   name="pmoFilter" 
-                                	   value=""
-                                       :checked="!store.searchParams.pmoY && !store.searchParams.pmoN"
-                                       @change="store.setPmoFilter('')"> 전체
-                            </label>
-                        </div>
-                    </div>
                     <div class="emp-filter-btns">
                         <button class="emp-btn emp-btn-search" @click="store.search()">
                             <i class="bi bi-search"></i> 검색
