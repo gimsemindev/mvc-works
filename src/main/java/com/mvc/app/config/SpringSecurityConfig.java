@@ -39,6 +39,10 @@ public class SpringSecurityConfig {
 		http.authorizeHttpRequests(authorize -> authorize
 			.dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ASYNC).permitAll()
 			.requestMatchers(excludeUri).permitAll()
+			//hrm 권한 handler
+			.requestMatchers("/hrm", "/activity-log").hasAnyRole("ADMIN")
+			.requestMatchers("/hrm/**").hasAnyRole("ADMIN", "EMP")
+			
 			.requestMatchers("/admin", "/admin/**").hasAnyRole("ADMIN")
 			.requestMatchers("/api/projectnotice/**").hasAnyRole("EMP","ADMIN")
 			.requestMatchers("/api/notifications/**").authenticated()// 알림 처리 허용
