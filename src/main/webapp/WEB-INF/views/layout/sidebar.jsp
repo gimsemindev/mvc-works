@@ -113,7 +113,7 @@
 	</a> <a href="${pageContext.request.contextPath}/layout/lunchLadder"
 		class="nav-link"> <i class="fa-solid fa-gamepad"></i> 쉬어가기
 	</a> <a href="${pageContext.request.contextPath}/snack" class="nav-link">
-		<i class="fas fa-cookie-bite"></i> 탕비실 신청
+		<i class="fas fa-cookie-bite"></i> 비품 신청
 	</a>
 
 </aside>

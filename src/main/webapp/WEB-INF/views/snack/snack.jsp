@@ -167,15 +167,13 @@ function DetailModal({ snackId, onClose, onRefresh }) {
 
         const text = await res.text();
         if (text.includes("<!DOCTYPE")) {
-            console.error("API 경로 오류: HTML이 반환됨");
+        
             return;
         }
 
         const data = JSON.parse(text);
         setDetail(data);
     } catch (err) {
-        console.error("상세조회 에러:", err);
-        alert("상세 내용을 가져오는데 실패했습니다.");
         onClose();
     } finally {
         setLoading(false);
@@ -320,7 +318,6 @@ function SnackApp() {
         
         // JSON 파싱 전 텍스트로 먼저 받아보기 (디버깅용)
         const text = await response.text();
-        console.log("서버 응답 원문:", text); 
 
         // 만약 응답이 HTML로 시작한다면(404나 500 에러 페이지)
         if (text.trim().startsWith("<!DOCTYPE")) {
@@ -341,7 +338,7 @@ function SnackApp() {
         <div>
             <div className="snack-header">
                 <div>
-                    <h2 style={{margin:0}}>탕비실 신청</h2>
+                    <h2 style={{margin:0}}>탕비실 비품 신청</h2>
                     <p style={{margin:0, color:'#9aa0b4', fontSize:'13px'}}>원하는 비품을 신청하고 동료들의 공감을 얻어보세요.</p>
                 </div>
                 <button className="btn-request" onClick={() => setShowForm(true)}>
