@@ -27,7 +27,7 @@ public class SnackRestController {
         return info.getUserLevel() == 99;
     }
 
-    // ── 목록 조회 ──
+
     @GetMapping("/list")
     public ResponseEntity<?> list(
             @RequestParam(name = "pageNo",   defaultValue = "1")  int pageNo,
@@ -53,7 +53,7 @@ public class SnackRestController {
         }
     }
 
-    // ── 단건 조회 ──
+
     @GetMapping("/{snackId}")
     public ResponseEntity<?> get(@PathVariable("snackId") long snackId) {
         try {
@@ -71,7 +71,7 @@ public class SnackRestController {
         }
     }
 
-    // ── 신청 등록 ──
+
     @PostMapping
     public ResponseEntity<?> insert(@RequestBody SnackDto dto) {
         try {
@@ -85,7 +85,7 @@ public class SnackRestController {
         }
     }
 
-    // ── 상태 변경 (관리자: 승인/반려) ──
+
     @PutMapping("/{snackId}/status")
     public ResponseEntity<?> updateStatus(
             @PathVariable("snackId") long snackId,
@@ -105,7 +105,7 @@ public class SnackRestController {
         }
     }
 
-    // ── 삭제 (본인 또는 관리자) ──
+
     @DeleteMapping("/{snackId}")
     public ResponseEntity<?> delete(@PathVariable("snackId") long snackId) {
         try {
@@ -126,7 +126,7 @@ public class SnackRestController {
         }
     }
 
-    // ── 공감 토글 ──
+
     @PostMapping("/{snackId}/vote")
     public ResponseEntity<?> vote(@PathVariable("snackId") long snackId) { 
         try {
@@ -146,7 +146,7 @@ public class SnackRestController {
         }
     }
 
-    // ── 댓글 등록 ──
+
     @PostMapping("/{snackId}/comment")
     public ResponseEntity<?> insertComment(
             @PathVariable("snackId") long snackId, 
@@ -165,7 +165,7 @@ public class SnackRestController {
         }
     }
 
-    // ── 댓글 삭제 ──
+
     @DeleteMapping("/comment/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable("commentId") long commentId) {
         try {

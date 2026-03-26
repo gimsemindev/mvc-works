@@ -10,6 +10,6 @@ public class SnackController {
 
     @GetMapping
     public String snack() {
-        return "snack/snack"; // /WEB-INF/views/snack/snack.jsp
+        return "snack/snack";
     }
 }
