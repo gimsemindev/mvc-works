@@ -40,7 +40,6 @@ document.addEventListener('click', function (e) {
         displayArea.innerHTML = '<span class="status-dot"></span>' + item.getAttribute('data-label');
         displayArea.className = 'selected-value ' + item.getAttribute('data-class');
 
-        // hidden input에 역할 코드 저장 (M / D / P / S)
         if (hiddenInput) {
             hiddenInput.value = item.getAttribute('data-code');
         }
@@ -49,7 +48,7 @@ document.addEventListener('click', function (e) {
         return;
     }
 
-    // 드롭다운 열기/닫기
+
     const selectedBtn = e.target.closest('.selected-value');
     if (selectedBtn) {
         const menu   = selectedBtn.nextElementSibling;
