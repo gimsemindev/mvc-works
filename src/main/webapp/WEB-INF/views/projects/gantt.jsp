@@ -29,7 +29,7 @@
         <div class="table-header">
             <h5 class="mb-0 fw-bold">Project gantt</h5>
             <div class="d-flex gap-2 align-items-center">
-                <%-- 검색폼 --%>
+
                 <form method="get" action="${pageContext.request.contextPath}/projects/gantt" class="d-flex gap-2 align-items-center">
                     <div class="search-box">
                         <select name="schType">
@@ -99,7 +99,6 @@
             </table>
         </div>
 
-        <%-- 페이징 --%>
         <div class="d-flex justify-content-center py-4 border-top">
             ${dataCount == 0 ? "등록된 게시글이 없습니다" : paging}
         </div>

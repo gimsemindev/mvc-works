@@ -3,8 +3,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterBtn = document.getElementById('myFilterBtn');
     const filterMenu = document.getElementById('myFilterMenu');
     const filterItems = filterMenu.querySelectorAll('.dropdown-item');
-
-    // ── 실시간 검색 → 서버 요청 (디바운스 400ms) ──────────────────────────
     let searchTimer = null;
     searchInput.addEventListener('input', function() {
         clearTimeout(searchTimer);
@@ -25,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 400);
     });
 
-    // ── 필터 드롭다운 열기/닫기 ──────────────────────────────────────────
+	
     if (filterBtn && filterMenu) {
         filterBtn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -40,7 +38,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ── 필터 클릭 → form submit ──────────────────────────────────────────
     filterItems.forEach(item => {
         item.addEventListener('click', function(e) {
             e.preventDefault();
@@ -67,7 +64,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 form.appendChild(statusInput);
             }
 
-            // 같은 거 누르면 해제 (토글)
             const currentStatus = form.querySelector('input[name="status"]')?.value || '';
             if (currentStatus === statusCode) {
                 statusInput.value = '';

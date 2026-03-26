@@ -10,7 +10,6 @@
 <div class="card-custom">
     <div class="section-title"><i class="fas fa-user-tag me-2"></i>Team Project Member</div>
 
-    <%-- JS가 동적으로 채우는 컨테이너 (하드코딩 제거) --%>
     <div class="member-list" id="step3MemberList">
         <p class="text-muted">선택된 멤버가 없습니다. 이전 단계에서 멤버를 추가하세요.</p>
     </div>

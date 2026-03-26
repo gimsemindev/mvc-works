@@ -329,7 +329,7 @@ const ask = (msg, callback) => {
         icon: 'question',
         showCancelButton: true,
         confirmButtonColor: '#4e73df',
-        cancelButtonColor: '#f8f9fc',
+        cancelButtonColor: '#888888',
         confirmButtonText: '확인',
         cancelButtonText: '취소',
         width: '320px',

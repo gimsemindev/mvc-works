@@ -372,7 +372,7 @@
 	    GROUP BY p.PROJECTID, p.STATUS
 	</select>
 
-	<!-- 1. 프로젝트 시작일 됐으면 자동 진행중 -->
+	<!-- 프로젝트 시작일 됐으면 자동 진행중 -->
 	<update id="projectAutoStart" parameterType="string">
 		UPDATE PROJECT
 		SET status = '2'
@@ -380,7 +380,7 @@
 		AND TRUNC(startDate) &lt;= TRUNC(SYSDATE)
 	</update>
 
-	<!-- 2. 프로젝트 종료일 지났으면 자동 지연 -->
+	<!-- 프로젝트 종료일 지났으면 자동 지연 -->
 	<update id="projectAutoDelay" parameterType="string">
 	    UPDATE PROJECT
 	    SET status = '5'
@@ -389,7 +389,7 @@
 	    AND progress &lt; 100
 	</update>
 
-	<!-- 프로젝트 강제 중단 시 → project status 6 -->
+	<!-- 프로젝트 강제 중단 → project status 6 -->
 	<update id="projectForceStop" parameterType="long">
 		UPDATE PROJECT
 		SET status = '6'

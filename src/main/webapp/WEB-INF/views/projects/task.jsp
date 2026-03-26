@@ -58,7 +58,6 @@
 				<h5 class="mb-0 fw-bold">${projectTitle}</h5>
 				<div class="d-flex gap-2 align-items-center">
 
-					<%-- 검색폼 --%>
 					<form method="get"
 						action="${pageContext.request.contextPath}/projects/task"
 						class="d-flex gap-2 align-items-center">
@@ -98,7 +97,6 @@
 
 			<div class="table-wrapper">
 
-				<%-- 왼쪽 태스크 리스트 --%>
 				<div class="task-list-side">
 					<table class="task-table">
 						<thead>
@@ -172,19 +170,18 @@
 					</table>
 				</div>
 
-				<%-- 오른쪽 간트 차트 --%>
 				<div class="chart-area">
 					<div class="grid-container" id="ganttGrid"></div>
 				</div>
 
 			</div>
-			<%-- 페이징 --%>
+
 			<div class="d-flex justify-content-center py-4 border-top">
 				${dataCount == 0 ? "등록된 Task가 없습니다" : paging}</div>
 		</div>
 	</main>
 
-	<!-- 생성 모달 -->
+
 	<div id="taskModal" class="modal-overlay" style="display: none;">
 		<div class="modal-box">
 			<div class="modal-header">
@@ -193,7 +190,6 @@
 			</div>
 			<div class="modal-body">
 
-				<%-- 단계 선택 --%>
 				<div class="form-row">
 					<div class="form-group full">
 						<label>단계 선택 <span class="required">*</span></label> <select
@@ -207,7 +203,6 @@
 					</div>
 				</div>
 
-				<%-- 단계 직접입력 (직접 입력 선택 시 노출) --%>
 				<div class="form-row" id="directStageRow" style="display: none;">
 					<div class="form-group full">
 						<label>단계명 직접 입력</label> <input type="text" id="modalDirectStage"
@@ -215,7 +210,6 @@
 					</div>
 				</div>
 
-				<%-- 태스크명 --%>
 				<div class="form-row">
 					<div class="form-group full">
 						<label>태스크명 <span class="required">*</span></label> <input
@@ -223,7 +217,7 @@
 					</div>
 				</div>
 
-				<%-- 담당자 --%>
+
 				<div class="form-row">
 					<div class="form-group full">
 						<label>담당자 <span class="required">*</span></label> <select
@@ -237,7 +231,6 @@
 					</div>
 				</div>
 
-				<%-- 시작일 / 종료일 --%>
 				<div class="form-row">
 					<div class="form-group">
 						<label>시작일 <span class="required">*</span></label> <input
@@ -249,7 +242,6 @@
 					</div>
 				</div>
 
-				<%-- 설명 --%>
 				<div class="form-row">
 					<div class="form-group full">
 						<label>설명</label> <input type="text" id="modalTaskDesc"
@@ -265,12 +257,12 @@
 		</div>
 	</div>
 
-	<!-- 날짜별 진행 현황 모달 -->
+
 	<div id="taskDailyModal" class="modal-overlay" style="display: none;">
 		<div class="modal-box" style="width: 700px;">
 			<div class="modal-header">
 				<div style="display: flex; flex-direction: column; gap: 2px;">
-					<%-- 1줄: 프로젝트 제목 크게 --%>
+
 					<div style="font-size: 1.2rem; font-weight: 800; color: #1d2939;"
 						id="dailyModalProjectTitle">-</div>
 				</div>
@@ -278,9 +270,9 @@
 			</div>
 
 			<div class="modal-body" style="gap: 6px;">
-				<%-- 태스크 정보 --%>
+
 				<div style="padding: 12px 14px;">
-					<%-- 1줄: 단계 + Task 제목 --%>
+
 					<div
 						style="display: flex; align-items: center; gap: 8px; margin-bottom: 15px;">
 						<span
@@ -295,7 +287,7 @@
 							style="font-size: 1.05rem; font-weight: 700; color: #1d2939; flex: 1;"
 							id="dailyModalTitle">-</span>
 					</div>
-					<%-- 2줄: Task 기간 --%>
+	
 					<div
 						style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
 						<span
@@ -306,7 +298,7 @@
 					</div>
 				</div>
 
-				<%-- 날짜별 표 --%>
+
 				<div
 					style="overflow-x: auto; padding: 12px 14px; align-items: center; border-radius: 8px;">
 					<span
@@ -316,7 +308,7 @@
 						style="display: grid; padding-top: 10px; min-width: max-content;"></div>
 				</div>
 
-				<%-- 툴팁 표시 영역 --%>
+
 				<div id="dailyTooltipText" class="daily-tooltip-box">해당 날짜의 진행
 					상태와 사유를 확인하세요.</div>
 
@@ -331,7 +323,6 @@
 
 
 
-	<!-- 날짜 클릭 확인 모달 -->
 	<div id="taskDailyCheckModal" class="modal-overlay"
 		style="display: none;">
 		<div class="modal-box" style="width: 420px;">
@@ -340,7 +331,7 @@
 				<button class="modal-close" onclick="closeDailyCheckModal()">&times;</button>
 			</div>
 			<div class="modal-body" style="gap: 12px;">
-				<%-- 날짜 가운데 정렬 --%>
+
 				<div style="text-align: center; margin-bottom: 12px;">
 					<p style="font-size: 1rem; font-weight: 600; margin-bottom: 4px;">오늘도
 						열심히 작업하셨나요?</p>
@@ -350,7 +341,7 @@
 						style="font-size: 0.82rem; color: var(--primary-blue); font-weight: 600;"></div>
 				</div>
 
-				<%-- 버튼 (툴팁 포함) --%>
+
 				<div
 					style="display: flex; justify-content: center; gap: 12px; margin-bottom: 16px; position: relative;">
 					<div class="daily-btn-wrap" data-tooltip="오늘 작업량을 모두 처리했을 때">
@@ -377,11 +368,11 @@
 					</div>
 				</div>
 
-				<%-- 사유 입력란 --%>
+
 				<div style="display: flex; flex-direction: column; gap: 4px;">
 					<label style="font-size: 0.8rem; font-weight: 600; color: #344054;">
 						사유 <span id="reasonRequired"
-						style="color: #dc2626; display: none;">*필수</span> <span
+						style="color: #dc2626; display: none;">* 필수</span> <span
 						id="reasonOptional" style="color: #aaa; font-weight: 400;">(선택)</span>
 					</label>
 					<textarea id="dailyReason" rows="3" placeholder="사유를 입력해주세요."
@@ -396,7 +387,7 @@
 		</div>
 	</div>
 
-	<%-- JS 변수 전달 --%>
+
 	<input type="hidden" id="hiddenProjectId" value="${projectId}">
 	<input type="hidden" id="hiddenIsManager" value="${isManager}">
 	<input type="hidden" id="hiddenProjectStart" value="${projectStart}">
@@ -414,7 +405,7 @@
 	<script
 		src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/l10n/ko.js"></script>
 
-	<%-- 외부 스크립트 --%>
+
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 	<script src="${pageContext.request.contextPath}/dist/js/tasklist.js"></script>
 	<script

@@ -24,8 +24,6 @@
         </ol>
     </div>
 
-    <%-- 여기에 내용 채우기 --%>
-
         <main id="main-content">
     <p>테스트</p>
 </main>

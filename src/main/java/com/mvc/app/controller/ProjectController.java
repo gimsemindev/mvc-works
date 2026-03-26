@@ -448,7 +448,6 @@ public class ProjectController {
 	            taskService.updateProjectTask(dto);
 	        }
 	        
-	        // 첫 번째 task의 empTaskId 조회해서 반환
 	        Map<String, Object> result = new HashMap<>();
 	        if (!list.isEmpty()) {
 	            String empTaskId = taskService.findEmpTaskId(list.get(0).getTaskId());
@@ -577,7 +576,6 @@ public class ProjectController {
 	}
 	
 	
-	// 구성원 조회
 	@GetMapping("members")
 	@ResponseBody
 	public ResponseEntity<?> getProjectMembers(@RequestParam("projectId") long projectId) {
@@ -590,7 +588,6 @@ public class ProjectController {
 	    }
 	}
 
-	// 프로젝트 강제 중단
 	@PostMapping("forceStop")
 	@ResponseBody
 	public ResponseEntity<?> projectForceStop(@RequestParam("projectId") long projectId) {
@@ -604,7 +601,6 @@ public class ProjectController {
 	    }
 	}
 
-	// 구성원 변경
 	@PostMapping("member/change")
 	@ResponseBody
 	public ResponseEntity<?> changeMember(@RequestBody Map<String, Object> map) {

@@ -1,6 +1,3 @@
-// 공통 날짜 처리 - flatpickr 적용
-// task.jsp, projectEnter.jsp 등 날짜 input이 있는 모든 페이지에서 사용
-
 document.addEventListener('DOMContentLoaded', function () {
     initDatePickers();
 });
@@ -18,7 +15,6 @@ function initDatePickers() {
 		    disableMobile: true,
 		    allowInput: false,
 
-		    // 프로젝트 시작일/종료일 범위 + 주말 비활성화
 			disable: [
 			    function (date) {
 			        if (date.getDay() === 0 || date.getDay() === 6) return true;
@@ -43,7 +39,6 @@ function initDatePickers() {
             onReady: function (selectedDates, dateStr, instance) {
 				setDefaultMonth(instance);
 				    
-				    // 년도 ▲▼ 클릭 시 달력 갱신
 				    const yearInput = instance.calendarContainer.querySelector('.numInput.cur-year');
 				    if (yearInput) {
 				        yearInput.addEventListener('change', function () {
@@ -64,7 +59,6 @@ function initDatePickers() {
 			    const nativeInput = instance.input;
 			    nativeInput.value = dateStr;
 
-			    // data-task-id, data-type으로 updateTask 직접 호출
 			    const taskId = nativeInput.getAttribute('data-task-id');
 			    const type = nativeInput.getAttribute('data-type');
 			    if (taskId && type) {
@@ -82,7 +76,7 @@ function initDatePickers() {
     });
 }
 
-// 이전 task 종료일 기준으로 달력 시작 월 설정
+
 function setDefaultMonth(instance) {
     const input = instance.input;
 
@@ -91,7 +85,6 @@ function setDefaultMonth(instance) {
     const row = input.closest('tr');
     if (!row) return;
 
-    // flatpickr가 type을 text로 바꾸므로 .cell-date 클래스로 찾기
     const prevRow = row.previousElementSibling;
     if (prevRow) {
         const prevEndInput = prevRow.querySelectorAll('.cell-date')[1];
@@ -103,7 +96,7 @@ function setDefaultMonth(instance) {
         }
     }
 
-    // 같은 행 내에서 다른 날짜 참조
+
     const dates = row.querySelectorAll('.cell-date');
     dates.forEach(function (d) {
         if (d !== input && d._flatpickr && d._flatpickr.selectedDates.length > 0) {
@@ -114,7 +107,7 @@ function setDefaultMonth(instance) {
     });
 }
 
-// 동적으로 추가된 input에도 flatpickr 적용 (MutationObserver)
+
 const observer = new MutationObserver(function () {
     initDatePickers();
 });

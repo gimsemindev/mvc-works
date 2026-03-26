@@ -93,7 +93,6 @@
 				<h5 class="mb-0 fw-bold">My Project List</h5>
 				<div class="d-flex gap-2 align-items-center">
 
-					<%-- 검색폼 --%>
 					<form method="get"
 						action="${pageContext.request.contextPath}/projects/myProjectList"
 						class="d-flex gap-2 align-items-center">
@@ -117,7 +116,6 @@
 							onclick="location.href='${pageContext.request.contextPath}/projects/myProjectList'">↺</button>
 					</form>
 
-					<%-- 상태 필터 --%>
 					<div class="dropdown">
 						<button id="myFilterBtn"
 							class="btn btn-filter ${not empty status ? 'active' : ''}"
@@ -257,7 +255,6 @@
 			</div>
 
 
-            <%-- 페이징 --%>
             <div class="d-flex justify-content-center py-4 border-top">
                 ${dataCount == 0 ? "" : paging}
             </div>
@@ -288,7 +285,6 @@
 						</div>
 					</div>
 
-					<%-- 날짜 수정 추가 --%>
 					<div class="mb-4 p-3 border rounded">
 						<div class="fw-bold mb-3">프로젝트 기간 수정</div>
 						<div class="row g-3">
@@ -336,7 +332,6 @@
 	</div>
 
 
-	<%-- ✅ 구성원 검색 모달 --%>
 	<div class="modal fade" id="editMemberSearchModal" tabindex="-1"
 		aria-hidden="true">
 		<div class="modal-dialog modal-xl modal-dialog-centered">

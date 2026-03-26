@@ -1,20 +1,18 @@
 (function() {
 
-	// 공통 알림 함수 (추가)
 	const toast = (msg, icon = 'warning') => {
 		Swal.fire({
 			title: '알림',
 			html: `<div style="font-size: 0.95rem; font-weight: 500; margin-top: 10px;">${msg}</div>`,
-			// position: 'top',
 			showConfirmButton: false,
 			timer: 5000,
 			timerProgressBar: false,
 			text: msg,
 			icon: icon,
 			iconColor: '#4e73df',
-			width: '320px', // 전체 너비 조절 (기본보다 작게)
-			padding: '1rem', // 내부 여백 조절
-			confirmButtonColor: '#4f86c6', // 프로젝트 메인 컬러에 맞춤
+			width: '320px',
+			padding: '1rem',
+			confirmButtonColor: '#4f86c6',
 			confirmButtonText: '확인'
 		});
 	};
@@ -28,16 +26,14 @@
 		return el && el.value === 'I';
 	}
 
-	// 개인일 때 step2 멤버 영역 숨김/표시
 	function applyPersonalModeToStep2() {
 		const sections = document.querySelectorAll('#step-panel-2 .form-section');
 		if (sections.length >= 2) {
-			sections[0].style.display = isPersonal() ? 'none' : ''; // 총 인원
-			sections[1].style.display = isPersonal() ? 'none' : ''; // 팀 멤버
+			sections[0].style.display = isPersonal() ? 'none' : '';
+			sections[1].style.display = isPersonal() ? 'none' : '';
 		}
 	}
 
-	// 다음/이전 스텝 계산 (개인이면 step3 스킵)
 	function getNextStep(from) {
 		if (from === 2 && isPersonal()) return 4;
 		return from < TOTAL_STEPS ? from + 1 : from;
@@ -47,7 +43,6 @@
 		return from > 1 ? from - 1 : from;
 	}
 
-	// 단계별 유효성 검사 
 	function validateStep(step) {
 		// Step1: 프로젝트 타입 선택 여부
 		if (step === 1) {
@@ -123,9 +118,8 @@
 			const dept = data.dept || '';
 			const grade = data.grade || '';
 
-			// 이름 첫 글자 이니셜 (한글은 첫 글자, 영문은 첫 글자 대문자)
 			const initial = name ? name.charAt(0) : '?';
-			// 이니셜 배경색: empId 기반으로 고정 색상 부여
+			
 			const colors = ['#4f86c6', '#e07b54', '#6abf69', '#9b6db5', '#e5a823', '#3ab0b0', '#d95f7f'];
 			const colorIdx = empId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0) % colors.length;
 			const bgColor = colors[colorIdx];
@@ -159,7 +153,6 @@
 		});
 	}
 
-	// 단계 이동
 	function goToStep(step) {
 		if (step < 1 || step > TOTAL_STEPS) return;
 
@@ -171,7 +164,6 @@
 		});
 		document.getElementById('step-panel-' + step).classList.add('active');
 
-		// 스테퍼 nav: 개인이면 step3 흐리게 + 클릭 막기
 		document.querySelectorAll('.stepper-nav .step-item').forEach(function(item) {
 			const s = parseInt(item.getAttribute('data-step'));
 			item.classList.remove('active');
@@ -199,7 +191,6 @@
 		currentStep = step;
 	}
 
-	// 버튼 이벤트
 	document.getElementById('btnNext').addEventListener('click', function() {
 		if (!validateStep(currentStep)) return;
 		goToStep(getNextStep(currentStep));
@@ -211,18 +202,15 @@
 
 	document.getElementById('btnComplete').addEventListener('click', function() {
 
-		// Step1
 		const projectType = document.getElementById('projectType').value;
 		const pmoType = isPersonal() ? 'S' : document.getElementById('pmoType').value;
 		const personal = (projectType === 'I');
 
-		// Step2
 		const title = document.querySelector('[name="title"]').value;
 		const description = document.querySelector('[name="description"]').value;
 		const startDate = document.querySelector('[name="startDate"]').value;
 		const endDate = document.querySelector('[name="endDate"]').value;
 
-		// Step3 - 팀 프로젝트일 때만 멤버/역할 수집
 		let members = [];
 		if (!personal) {
 			const memberIds = [...document.querySelectorAll('input[name="memberIds"]')].map(i => i.value);

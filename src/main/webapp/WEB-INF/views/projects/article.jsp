@@ -40,18 +40,18 @@
 				    <c:forEach var="m" items="${members}">
 				        <c:choose>
 				            <c:when test="${not empty m.predecessorName}">
-				                <%-- 전임자 있는 경우 --%>
+
 				                <div class="member-chip" style="position:relative;">
-				                    <%-- 전임자 --%>
+
 				                    <div style="display:flex; align-items:center; opacity:0.5; text-decoration:line-through;">
 				                        <div class="member-avatar-text" data-empid="${m.predecessorEmpId}">
 				                            ${fn:substring(m.predecessorName, 0, 1)}
 				                        </div>
 				                        <span class="member-name text-muted">${m.predecessorName}</span>
 				                    </div>
-				                    <%-- 화살표 --%>
+
 				                    <span style="margin:0 4px; color:#aaa; font-size:0.8rem;">→</span>
-				                    <%-- 현재 구성원 --%>
+
 				                    <div class="member-avatar-text" data-empid="${m.empId}">
 				                        ${fn:substring(m.name, 0, 1)}
 				                    </div>
@@ -59,7 +59,7 @@
 				                </div>
 				            </c:when>
 				            <c:otherwise>
-				                <%-- 전임자 없는 경우 기존과 동일 --%>
+
 				                <div class="member-chip">
 				                    <div class="member-avatar-text" data-empid="${m.empId}">
 				                        ${fn:substring(m.name, 0, 1)}
@@ -101,7 +101,7 @@
 				    <span class="info-label">Project Manager</span>
 				    <div class="manager-info">
 				        <c:forEach var="m" items="${members}">
-				            <c:if test="${m.role eq 'M'}"> <%-- ROLE이 M인 사람만 출력 --%>
+				            <c:if test="${m.role eq 'M'}">
 				                <div class="member-avatar-text" data-empid="${m.empId}">
 				                    ${fn:substring(m.name, 0, 1)}
 				                </div>

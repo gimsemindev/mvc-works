@@ -20,7 +20,6 @@ public class TaskServiceImpl implements TaskService{
 
 	@Override
 	public void insertProjectTask(ProjectsDto dto) throws ExportException {
-		// task 생성
 		try {
 			if(dto.getStageId() == null && dto.getStgTitle() != null && !dto.getStgTitle().isEmpty()) {
 				mapper.insertNewStage(dto);				

@@ -69,7 +69,6 @@
                 <h5 class="mb-0 fw-bold">Project List</h5>
                 <div class="d-flex gap-2 align-items-center">
 
-                    <%-- 검색폼 --%>
 					<form method="get" action="${pageContext.request.contextPath}/projects/list" class="d-flex gap-2 align-items-center">
 					    <input type="hidden" name="page" value="1">
 					    <input type="hidden" name="status" value="${status}">
@@ -89,7 +88,6 @@
 					        onclick="location.href='${pageContext.request.contextPath}/projects/list'">↺</button>
 					</form>
 
-                    <%-- 상태 필터 --%>
                     <div class="dropdown">
                         <button id="myFilterBtn" class="btn btn-filter ${not empty status ? 'active' : ''}" type="button">
                             <i class="fas fa-filter"></i>
@@ -171,7 +169,6 @@
                 </table>
             </div>
 
-            <%-- 페이징 --%>
             <div class="d-flex justify-content-center py-4 border-top">
                 ${dataCount == 0 ? "" : paging}
             </div>

@@ -34,12 +34,9 @@ public class ProjectServiceImpl implements ProjectService {
 			throws Exception {
 
 		try {
-
-			// 프로젝트 생성
 			mapper.insertProject(dto);
 			long project = dto.getProjectId();
 
-			// 프로젝트 구성원
 			if (members != null && !members.isEmpty()) {
 
 				Map<String, Object> memberParam = new HashMap<>();
@@ -49,7 +46,6 @@ public class ProjectServiceImpl implements ProjectService {
 				mapper.insertProjectMembers(memberParam);
 			}
 
-			// 프로젝트 단계
 			if (stages != null && !stages.isEmpty()) {
 
 				Map<String, Object> stage = new HashMap<>();
@@ -58,7 +54,6 @@ public class ProjectServiceImpl implements ProjectService {
 
 				mapper.insertProjectStep(stage);
 
-				// stageId 조회
 				List<Map<String, Object>> stageList = mapper.findStageByProjectId(project);
 
 				for (int i = 0; i < stageList.size(); i++) {
@@ -281,14 +276,12 @@ public class ProjectServiceImpl implements ProjectService {
 	@Override
 	public boolean isProjectManager(long projectId, String empId) {
 		try {
-			// 사용자가 PM인 프로젝트 리스트를 가져옴
 			List<Map<String, Object>> managerProjects = noticeMapper.getMyPmProjects(empId);
 
 			if (managerProjects == null || managerProjects.isEmpty()) {
 				return false;
 			}
 
-			// 가져온 리스트 중 현재 projectId와 일치하는 것이 있는지 확인
 			return managerProjects.stream().anyMatch(m -> {
 				Object pid = m.get("PROJECTID");
 				return pid != null && String.valueOf(pid).equals(String.valueOf(projectId));
@@ -299,7 +292,7 @@ public class ProjectServiceImpl implements ProjectService {
 		}
 	}
 
-	@Override // 인터페이스에 정의된 이름과 맞춤
+	@Override 
 	public List<Map<String, Object>> ManagerProjects(String empId) {
 		return noticeMapper.getMyPmProjects(empId);
 	}

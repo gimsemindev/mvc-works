@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterMenu  = document.getElementById('myFilterMenu');
     const filterItems = filterMenu.querySelectorAll('.dropdown-item');
 
-    // ── 실시간 검색 → 서버 요청 (디바운스 400ms) ──────────────────────────
     const searchInput = document.querySelector('.search-box input');
     let searchTimer = null;
     if (searchInput) {
@@ -27,7 +26,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ── 필터 드롭다운 열기/닫기 ──────────────────────────────────────────
     if (filterBtn && filterMenu) {
         filterBtn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -41,7 +39,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ── 필터 클릭 → form submit ────────────────────────────────────────
     filterItems.forEach(item => {
         item.addEventListener('click', function(e) {
             e.preventDefault();
@@ -75,7 +72,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // ── 조직도 모달 로드 ──────────────────────────────────────────────
     const editMemberSearchModal = document.getElementById('editMemberSearchModal');
     if (editMemberSearchModal) {
         editMemberSearchModal.addEventListener('show.bs.modal', () => {
@@ -90,10 +86,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-
-// ══════════════════════════════════════════════════════════════════════════
-// 전역 함수 (아래는 기존 코드 유지)
-// ══════════════════════════════════════════════════════════════════════════
 
 let editMode = false;
 
@@ -143,13 +135,11 @@ function openEditModal(row) {
         forceStopBtn.textContent = '강제 중단';
     }
 
-	const memberChangeArea = document.getElementById('memberChangeArea'); // JSP에 id 추가 필요
+	const memberChangeArea = document.getElementById('memberChangeArea'); 
 	    
 	    if (projectStatus === '6') {
-	        // 1) 강제 중단 프로젝트 - 구성원 변경 X
 	        memberChangeArea.style.display = 'none';
 	    } else if (projectType === 'I') {
-	        // 2) 개인 프로젝트 - 구성원 변경 X
 	        memberChangeArea.style.display = 'none';
 	    } else {
 	        memberChangeArea.style.display = '';
@@ -171,16 +161,15 @@ function loadCurrentMembers(projectId) {
             const container = document.getElementById('currentMemberBadges');
             container.innerHTML = '';
 
-            // 현재 구성원 empId 목록 저장 (전역)
             window.__currentMemberIds = list.map(m => m.empId);
 
             list.forEach(member => {
-                // task 담당 여부 - 일단 서버에서 못 받으면 true로 처리
+ 
                 const badge = document.createElement('span');
                 badge.className     = 'badge bg-secondary d-flex align-items-center gap-2 px-3 py-2';
                 badge.dataset.empId  = member.empId;
                 badge.dataset.role   = member.role;
-                badge.dataset.hasTask = 'true'; // 기본값, 나중에 API 붙이면 갱신
+                badge.dataset.hasTask = 'true'; 
                 badge.innerHTML =
                     `<span>${member.name}</span>
                      <span class="fw-normal opacity-75" style="font-size:0.9rem">${member.role}</span>
@@ -218,6 +207,7 @@ function forceStopProject() {
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc3545',
+			cancelButtonColor: '#f8f9fc',
             confirmButtonText: '중단',
             cancelButtonText: '취소'
         }).then(result => {
@@ -243,19 +233,17 @@ function saveMemberChange() {
 	const endDate   = document.getElementById('editEndDate').value;
 
 	const today = new Date().toISOString().split('T')[0];
-
+	
 	if (startDate && startDate < today) {
 	    toast('시작일은 오늘 날짜보다 이전일 수 없습니다.');
 	    return;
 	}
 	
-	// 날짜 유효성 검사
 	if (startDate && endDate && startDate > endDate) {
 	    toast('시작일이 종료일보다 늦을 수 없습니다.');
 	    return;
 	}
 
-	// 구성원 교체 없으면 날짜만 저장
 	if (!replaceTargetEmpId || !newEmpId) {
 	    if (!startDate || !endDate) {
 	        toast('날짜를 입력하거나 교체할 구성원을 선택하세요.');
@@ -270,7 +258,6 @@ function saveMemberChange() {
         return;
     }
 
-    // 1) 담당 업무 없는 구성원인지 체크
     const targetBadge = document.querySelector(`#currentMemberBadges .badge[data-emp-id="${replaceTargetEmpId}"]`);
     const hasNoTask = targetBadge?.dataset.hasTask === 'false';
 
@@ -280,7 +267,7 @@ function saveMemberChange() {
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#4e73df',
-            cancelButtonColor: '#6c757d',
+            cancelButtonColor: '#888888',
             confirmButtonText: '변경',
             cancelButtonText: '취소',
             width: '320px',
@@ -348,29 +335,29 @@ function toast(msg, icon = 'warning') {
 function editRenderDeptTree(nodes, parentEl, depth) {
     nodes.forEach(dept => {
         const hasChildren = dept.children && dept.children.length > 0;
-        const li          = document.createElement('li');
-        const row         = document.createElement('div');
-        row.className        = 'dept-item';
+        const li = document.createElement('li');
+        const row = document.createElement('div');
+        row.className = 'dept-item';
         row.dataset.deptCode = dept.deptCode;
         row.dataset.deptName = dept.deptName;
 
-        const toggle      = document.createElement('span');
-        toggle.className  = 'dept-toggle';
-        toggle.innerHTML  = hasChildren ? '&#9654;' : '&nbsp;';
+        const toggle = document.createElement('span');
+        toggle.className = 'dept-toggle';
+        toggle.innerHTML = hasChildren ? '&#9654;' : '&nbsp;';
         row.appendChild(toggle);
 
-        const icon        = document.createElement('i');
-        icon.className    = depth === 0 ? 'fas fa-building text-secondary' : 'fas fa-folder text-warning';
+        const icon = document.createElement('i');
+        icon.className = depth === 0 ? 'fas fa-building text-secondary' : 'fas fa-folder text-warning';
         icon.style.fontSize = '0.8rem';
         row.appendChild(icon);
 
-        const label       = document.createElement('span');
+        const label = document.createElement('span');
         label.textContent = dept.deptName;
         row.appendChild(label);
         li.appendChild(row);
 
         if (hasChildren) {
-            const childUl     = document.createElement('ul');
+            const childUl = document.createElement('ul');
             childUl.className = 'list-unstyled mb-0 dept-children';
             editRenderDeptTree(dept.children, childUl, depth + 1);
             li.appendChild(childUl);
@@ -402,7 +389,7 @@ function editCollectDeptCodes(node) {
 
 function editLoadDeptMembers(deptCodes, deptName, hasChildren) {
     document.getElementById('editSelectedDeptName').textContent = deptName + ' (조회 중...)';
-    document.getElementById('editModalMemberList').innerHTML    =
+    document.getElementById('editModalMemberList').innerHTML =
         '<p class="text-muted p-2"><i class="fas fa-spinner fa-spin me-1"></i>불러오는 중...</p>';
 
     const codes = Array.isArray(deptCodes) ? deptCodes : [deptCodes];
@@ -412,7 +399,7 @@ function editLoadDeptMembers(deptCodes, deptName, hasChildren) {
                 .then(r => r.json()).then(r => r.list || []).catch(() => [])
         )
     ).then(results => {
-        const seen   = new Set();
+        const seen = new Set();
         const merged = results.flat().filter(emp => {
             const id = emp.EMPID || emp.empId || '';
             if (seen.has(id)) return false;
@@ -447,17 +434,17 @@ function editRenderMemberList(list) {
     container.innerHTML = '';
     list.forEach(emp => {
         const empId = String(emp.EMPID || emp.empId || '');
-        const name  = emp.NAME  || emp.name  || '';
-        const dept  = emp.DEPT  || emp.dept  || '';
+        const name = emp.NAME || emp.name || '';
+        const dept = emp.DEPT || emp.dept || '';
         const grade = emp.GRADE || emp.grade || '';
 
-        const col   = document.createElement('div');
+        const col = document.createElement('div');
         col.className = 'col';
-        const card  = document.createElement('div');
-        card.className     = 'member-card';
+        const card = document.createElement('div');
+        card.className = 'member-card';
         card.dataset.empId = empId;
-        card.dataset.name  = name;
-        card.dataset.dept  = dept;
+        card.dataset.name = name;
+        card.dataset.dept = dept;
         card.dataset.grade = grade;
         card.innerHTML =
             '<div class="emp-name">' + name + '</div>' +
@@ -473,18 +460,18 @@ function editRenderMemberList(list) {
             document.querySelectorAll('#editModalMemberList .member-card').forEach(c => c.classList.remove('added'));
             this.classList.add('added');
 
-            const container   = document.getElementById('hiddenInputContainer');
+            const container = document.getElementById('hiddenInputContainer');
             container.innerHTML = '';
-            const input       = document.createElement('input');
-            input.type        = 'hidden';
-            input.name        = 'memberIds';
-            input.value       = empId;
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'memberIds';
+            input.value = empId;
             container.appendChild(input);
 
             document.getElementById('selectedMemberList').innerHTML = '';
-            const badge       = document.createElement('span');
-            badge.className   = 'badge bg-primary d-flex align-items-center gap-1 p-2';
-            badge.innerHTML   = `<span>${name}</span>
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-primary d-flex align-items-center gap-1 p-2';
+            badge.innerHTML = `<span>${name}</span>
                 <span class="fw-normal opacity-75" style="font-size:0.75rem">${dept} / ${grade}</span>`;
             document.getElementById('selectedMemberList').appendChild(badge);
         });
