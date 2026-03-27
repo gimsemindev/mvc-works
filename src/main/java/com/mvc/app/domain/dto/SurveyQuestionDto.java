@@ -10,7 +10,5 @@ public class SurveyQuestionDto {
     private String questionText;
     private String questionType;
     private int sortOrder;
-
-    // 하위 데이터 (선택지 목록)
     private List<SurveyOptionDto> options;
 }

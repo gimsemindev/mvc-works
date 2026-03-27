@@ -8,7 +8,5 @@ public class SurveyTargetDto {
     private long surveyId;
     private String targetType;
     private String targetValue;
-
-    // 조회용
     private String targetName;
 }

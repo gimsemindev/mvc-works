@@ -9,7 +9,5 @@ public class SurveyResponseDto {
     private long surveyId;
     private String empId;
     private String respondedDate;
-
-    // 하위 데이터 (개별 답변 목록)
     private List<SurveyAnswerDto> answers;
 }

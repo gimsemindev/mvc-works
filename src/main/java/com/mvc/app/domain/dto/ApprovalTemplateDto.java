@@ -14,7 +14,5 @@ public class ApprovalTemplateDto {
     private String tempName;
     private String writerEmpId;
     private String regDate;
-
-    // 템플릿 상세 (결재자 목록)
     private List<ApprovalTemplateLineDto> lines;
 }

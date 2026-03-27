@@ -8,11 +8,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class NoticeFileDto {
-    private long   filenum;           // 첨부파일 고유번호 (PK)
-    private long   savefilename;      // 첨부파일 저장 이름 (NUMBER)
-    private String originalfilename;  // 첨부파일 원래 이름
-    private long    filesize;          // 파일 크기
-    private long   noticenum;         // 공지사항 고유번호 (FK)
+    private long   filenum;
+    private long   savefilename;
+    private String originalfilename;
+    private long    filesize;
+    private long   noticenum;
 }
 
 
