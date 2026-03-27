@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * 채팅 만료 데이터 정리 스케줄러
- * - 매일 새벽 3시에 7일 경과 메시지 및 파일 삭제
+ * 매일 새벽 3시에 7일 경과 메시지 및 파일 삭제
  */
 @Slf4j
 @Component
@@ -49,7 +49,7 @@ public class ChatScheduler {
                 }
             }
 
-            // 2. DB 삭제 (chatfile → chatmessage 순서)
+            // 2. DB 삭제 (chatfile → chatmessage)
             int deletedFiles    = chatMapper.deleteExpiredFiles();
             int deletedMessages = chatMapper.deleteExpiredMessages();
 

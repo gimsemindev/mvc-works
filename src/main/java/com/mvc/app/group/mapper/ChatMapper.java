@@ -13,16 +13,13 @@ import java.util.Map;
 @Mapper
 public interface ChatMapper {
 
-    /* ── 직원 목록 ── */
-    // 로그인 사원이 속한 프로젝트의 직원 목록 (무한스크롤)
+    //직원 목록
     List<ChatUserDto> listChatUsers(ChatUserDto params);
 
-    /* ── 프로젝트 목록 ── */
-    // 로그인 사원이 참여 중인 프로젝트 목록
+    //프로젝트 목록
     List<Map<String, Object>> listMyProjects(@Param("empId") String empId);
 
-    /* ── 채팅방 ── */
-    // 두 사용자 간 기존 채팅방 조회 (중복 방지)
+    //채팅방
     ChatRoomDto findRoomByUsers(@Param("userAid") String userAid,
                                 @Param("userBid") String userBid);
 
@@ -47,14 +44,14 @@ public interface ChatMapper {
     // 다음 roomId 시퀀스
     Long nextRoomSeq();
 
-    /* ── 채팅 메시지 ── */
+    //채팅 메시지
     // 메시지 저장
     void insertMessage(ChatMessageDto dto);
 
     // 다음 messageId 시퀀스
     Long nextMessageSeq();
 
-    // 채팅방 메시지 조회 (최신 20건 기준, 무한스크롤)
+    // 채팅방 메시지 조회 (최신 20건)
     List<ChatMessageDto> listMessages(@Param("roomId")    Long roomId,
                                       @Param("offset")    int  offset,
                                       @Param("size")      int  size);
@@ -63,7 +60,7 @@ public interface ChatMapper {
     void markAsRead(@Param("roomId")   Long   roomId,
                     @Param("empId")    String empId);   // 읽는 사람 empId
 
-    // 특정 메시지 읽음 처리 (WebSocket 실시간)
+    // 특정 메시지 읽음 처리
     void markMessageRead(@Param("messageId") Long messageId);
 
     // 미읽음 메시지 수 조회

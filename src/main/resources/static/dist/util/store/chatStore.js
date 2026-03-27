@@ -1,20 +1,15 @@
 import { defineStore } from 'pinia';
 import http            from 'http';
 
-/**
- * chatStore.js
- * 위치: /dist/js/store/chatStore.js
- * 역할: 채팅 전역 상태 관리 (Pinia) - API/WebSocket 연동 완성본
- */
 export const useChatStore = defineStore('chat', {
 
     state: () => ({
-        /* ── 세션 정보 (chatMain.jsp에서 JSP EL로 주입) ── */
+        //세션 정보
         sessionEmpId:  '',
         sessionName:   '',
         sessionAvatar: '',
 
-        /* ── 직원 목록 ── */
+        //직원 목록
         allUsers:      [],
         filteredUsers: [],
         userLoading:   false,
@@ -22,20 +17,20 @@ export const useChatStore = defineStore('chat', {
         userOffset:    0,
         userPageSize:  20,
 
-        /* ── 프로젝트 필터 ── */
+        //프로젝트 필터
         projects:        [],
         selectedProject: '',
 
-        /* ── 검색 키워드 ── */
+        //검색 키워드
         searchKeyword:  '',
         searchTimer:    null,   // debounce용
 
-        /* ── 현재 열린 채팅 상대 ── */
+        //현재 열린 채팅 상대
         activeEmpId:  null,
         activeUser:   null,
         activeRoomId: null,
 
-        /* ── 메시지 ── */
+        //메시지
         messages:      [],
         messageGroups: [],
         unreadCount:   0,
@@ -44,14 +39,14 @@ export const useChatStore = defineStore('chat', {
         msgHasMore:    true,
         msgLoading:    false,
 
-        /* ── 입력창 ── */
+        //입력창
         inputText:    '',
         inputFocused: false,
 
-        /* ── 로딩 ── */
+        //로딩
         loading: false,
 
-        /* ── WebSocket (STOMP) ── */
+        //WebSocket, STOMP
         stompClient:      null,
         subscription:     null,     // 현재 채팅방 구독 객체
         wsConnected:      false,
@@ -59,9 +54,7 @@ export const useChatStore = defineStore('chat', {
 
     actions: {
 
-        /* ──────────────────────────────────────────────────
-         * 프로젝트 목록 로드
-         * ────────────────────────────────────────────────── */
+        //프로젝트 목록 로드
         async loadProjects() {
             try {
                 const res = await http.get('/chat/projects');
@@ -71,9 +64,7 @@ export const useChatStore = defineStore('chat', {
             }
         },
 
-        /* ──────────────────────────────────────────────────
-         * 직원 목록 로드 (초기 또는 필터 변경 시)
-         * ────────────────────────────────────────────────── */
+        //직원 목록 로드
         async loadUserList(reset = true) {
             if (this.userLoading) return;
 
@@ -112,13 +103,13 @@ export const useChatStore = defineStore('chat', {
             }
         },
 
-        /* ── 프로젝트 필터 변경 → 진행 중 채팅방 종료 후 목록 갱신 ── */
+        //프로젝트 필터 변경 후 진행 중 채팅방 종료 후 목록 갱신
         async filterByProject() {
             this._closeCurrentRoom();
             await this.loadUserList(true);
         },
 
-        /* ── 이름/사원번호 검색 (debounce 300ms) ── */
+        //이름, 사원번호 검색
         filterUsers() {
             clearTimeout(this.searchTimer);
             this.searchTimer = setTimeout(async () => {
@@ -130,17 +121,15 @@ export const useChatStore = defineStore('chat', {
 			//부하를 낮추기 위함
         },
 
-        /* ── 무한스크롤: 다음 페이지 로드 ── */
+        //페이지 로드, 무한스크롤
         async loadMoreUsers() {
             if (!this.userHasMore || this.userLoading) return;
             await this.loadUserList(false);
         },
 
-        /* ──────────────────────────────────────────────────
-         * 채팅방 열기
-         * ────────────────────────────────────────────────── */
+        //채팅방 열기
         async openChat(user) {
-            // 7: 진행 중 채팅방 종료 후 새 채팅방 입장
+            //진행 중 채팅방 종료 후 새 채팅방 입장
             this._closeCurrentRoom();
 
             this.activeEmpId = user.empId;
@@ -181,9 +170,7 @@ export const useChatStore = defineStore('chat', {
             }
         },
 
-        /* ──────────────────────────────────────────────────
-         * 메시지 로드 (무한스크롤)
-         * ────────────────────────────────────────────────── */
+        // 메시지 로드
         async loadMessages(prepend = true) {
             if (!this.activeRoomId || this.msgLoading || !this.msgHasMore) return;
 
@@ -215,9 +202,7 @@ export const useChatStore = defineStore('chat', {
             }
         },
 
-        /* ──────────────────────────────────────────────────
-         * 텍스트 메시지 전송 (STOMP)
-         * ────────────────────────────────────────────────── */
+        //텍스트 메시지 전송, STOMP
         sendMessage() {
             const text = this.inputText.trim();
 
@@ -242,9 +227,7 @@ export const useChatStore = defineStore('chat', {
             this.inputText = '';
         },
 
-        /* ──────────────────────────────────────────────────
-         * 파일 업로드 전송 (REST API)
-         * ────────────────────────────────────────────────── */
+        //파일 업로드 전송
         triggerFileInput() {
             document.getElementById('chatFileInput')?.click();
         },
@@ -264,7 +247,7 @@ export const useChatStore = defineStore('chat', {
                     );
                     const saved = res.data;
 
-                    // 21: 파일 업로드 성공 시 WebSocket으로 상대방에게 브로드캐스트
+                    //파일 업로드 성공 시 socket 상대방 브로드캐스트
                     this._sendWsFrame('/app/chat/message', {
                         roomId:      this.activeRoomId,
                         msgType:     'FILE',
@@ -285,9 +268,7 @@ export const useChatStore = defineStore('chat', {
             event.target.value = '';
         },
 
-        /* ──────────────────────────────────────────────────
-         * 파일 다운로드
-         * ────────────────────────────────────────────────── */
+        //파일 다운로드
         async downloadFile(fileId, fileName) {
             try {
                 const res = await http.get(
@@ -306,18 +287,16 @@ export const useChatStore = defineStore('chat', {
             }
         },
 
-        /* ──────────────────────────────────────────────────
-         * WebSocket (STOMP) 연결
-         * ────────────────────────────────────────────────── */
+        //WebSocket, STOMP 연결
         connectWebSocket() {
             if (this.stompClient && this.wsConnected) return;
 
-            // @stomp/stompjs 6.x : StompJs.Client 사용
+            // @stomp/stompjs 6.x : StompJs.Client
             this.stompClient = new StompJs.Client({
                 // SockJS를 transport로 사용
                 webSocketFactory: () => new SockJS('/ws/chat'),
 
-                // 재연결 간격 (ms)
+                // 재연결 간격
                 reconnectDelay: 5000,
 
                 // 콘솔 디버그 출력 비활성화
@@ -342,17 +321,17 @@ export const useChatStore = defineStore('chat', {
             this.stompClient.activate();
         },
 
-        /* ── 채팅방 구독 ── */
+        //채팅방 구독
         _subscribeRoom(roomId) {
             if (!this.stompClient || !this.wsConnected) return;
 
-            // 기존 구독 해제
+            //기존 구독 해제
             if (this.subscription) {
                 this.subscription.unsubscribe();
                 this.subscription = null;
             }
 
-            // 9: 채팅방 재진입 시 새 구독(세션) 생성
+            //채팅방 재진입 시 새 세션 생성
             this.subscription = this.stompClient.subscribe(
                 `/topic/chat/${roomId}`,
                 (frame) => {
@@ -362,26 +341,26 @@ export const useChatStore = defineStore('chat', {
             );
         },
 
-        /* ── WebSocket 수신 메시지 처리 ── */
+        //WebSocket 수신 메시지 처리
         _handleWsMessage(msg) {
             switch (msg.type) {
 
                 case 'CHAT':
-                    // 11: 서버 timestamp 기준 순서 보장 (서버 sentAt 사용)
+                    //서버 timestamp 기준 순서 보장, sentAt
                     this.messages.push(msg);
                     this._buildMessageGroups();
 
-                    // 14: 상대방이 채팅방에 있으면 즉시 읽음 처리
+                    //상대방이 채팅방에 있으면 즉시 읽음 처리
                     if (msg.senderId !== this.sessionEmpId) {
                         this._sendWsFrame('/app/chat/read', { roomId: this.activeRoomId });
                     }
 
-                    // 직원 목록 마지막 메시지 갱신
+                    //직원 목록 마지막 메시지 갱신
                     this._updateUserLastMsg(msg);
                     break;
 
                 case 'READ':
-                    // 내가 보낸 메시지 읽음 상태 갱신
+                    //내가 보낸 메시지 읽음 상태 갱신
                     this.messages.forEach(m => {
                         if (m.senderId === this.sessionEmpId) m.isRead = 'Y';
                     });
@@ -389,7 +368,7 @@ export const useChatStore = defineStore('chat', {
                     break;
 
                 case 'ENTER':
-                    // 상대방 온라인 상태 갱신
+                    //상대방 온라인 상태 갱신
                     if (msg.senderId !== this.sessionEmpId && this.activeUser) {
                         this.activeUser.onlineStatus = 'online';
                     }
@@ -407,7 +386,7 @@ export const useChatStore = defineStore('chat', {
             }
         },
 
-        /* ── STOMP 프레임 전송 헬퍼 ── */
+        //STOMP 프레임 전송 헬퍼
         _sendWsFrame(destination, body) {
             if (!this.stompClient || !this.wsConnected) return;
             this.stompClient.publish({
@@ -416,7 +395,7 @@ export const useChatStore = defineStore('chat', {
             });
         },
 
-        /* ── 채팅방 종료 (구독 해제 + 퇴장 알림) ── */
+        //채팅방 종료, 구독 해제, 퇴장 알림
         _closeCurrentRoom() {
             if (this.activeRoomId) {
                 this._sendWsFrame('/app/chat/leave', { roomId: this.activeRoomId });
@@ -434,7 +413,7 @@ export const useChatStore = defineStore('chat', {
             this.msgHasMore   = true;
         },
 
-        /* ── 직원 목록의 마지막 메시지 갱신 ── */
+        //직원 목록의 마지막 메시지 갱신
         _updateUserLastMsg(msg) {
             const targetId = msg.senderId === this.sessionEmpId
                 ? this.activeEmpId
@@ -446,7 +425,7 @@ export const useChatStore = defineStore('chat', {
                 user.lastMessageAt  = msg.sentAt;
                 user.lastMessageType= msg.msgType;
 
-                // 14: 내가 채팅방 밖에 있고 상대가 보낸 메시지면 미읽음 +1
+                //상대가 보낸 메시지면 미읽음 +1
                 if (msg.senderId !== this.sessionEmpId &&
                     msg.senderId !== this.activeEmpId) {
                     user.unreadCount = (user.unreadCount || 0) + 1;
@@ -454,9 +433,7 @@ export const useChatStore = defineStore('chat', {
             }
         },
 
-        /* ──────────────────────────────────────────────────
-         * 입력창 동작
-         * ────────────────────────────────────────────────── */
+        //입력창 동작
         handleKeydown(event) {
             if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();
@@ -469,9 +446,7 @@ export const useChatStore = defineStore('chat', {
             el.style.height = Math.min(el.scrollHeight, 120) + 'px';
         },
 
-        /* ──────────────────────────────────────────────────
-         * 메시지 그룹 빌드 (날짜 구분선 · 미읽음 구분선)
-         * ────────────────────────────────────────────────── */
+         //메시지 그룹
         _buildMessageGroups() {
             const result = [];
             let lastDate       = null;
@@ -479,7 +454,7 @@ export const useChatStore = defineStore('chat', {
             let unreadStart    = -1;
             this.unreadCount   = 0;
 
-            // 미읽음 첫 번째 위치 탐색 (상대방이 보낸 것 중 isRead = 'N')
+            //미읽음 위치 탐색
             for (let i = 0; i < this.messages.length; i++) {
                 const msg = this.messages[i];
                 if (msg.senderId !== this.sessionEmpId && msg.isRead === 'N') {
@@ -514,16 +489,12 @@ export const useChatStore = defineStore('chat', {
                     && prevMsg.senderId === msg.senderId
                     && prevMsg.sentAt?.substring(0, 10) === dateStr;
 
-                //result.push({ type: 'message', ...msg, isMine, hiddenAvatar });
 				result.push({ ...msg, isMine, hiddenAvatar, type: 'message' });
             });
 
             this.messageGroups = result;
         },
 
-        /* ──────────────────────────────────────────────────
-         * 유틸 메서드
-         * ────────────────────────────────────────────────── */
         getAvatarColor(empId) {
             const colors = [
                 'avatar-color-1', 'avatar-color-2', 'avatar-color-3',
@@ -558,7 +529,7 @@ export const useChatStore = defineStore('chat', {
             const diffMs     = now - date;
             const diffDays   = diffMs / (1000 * 60 * 60 * 24);
 
-            // 4-2: 날짜 포맷 규칙
+            //날짜 포맷 규칙
             if (isToday) {
                 return date.getHours().toString().padStart(2,'0') + ':' +
                        date.getMinutes().toString().padStart(2,'0');
@@ -585,7 +556,7 @@ export const useChatStore = defineStore('chat', {
                    date.getDate() + '일 ' + days[date.getDay()] + '요일';
         },
 
-        // XSS 방지 처리
+        //XSS 방지 처리
         formatMsgText(text) {
             if (!text) return '';
             return text

@@ -30,7 +30,7 @@ export const useActivityLogStore = defineStore('activityLog', {
         detailItem: null,
         showDetail: false,
 
-        // ★ 공통코드 맵 (code → codeName)
+        //공통코드 맵
         commonCodeMap: {
             DEPT:      {},   // 부서
             RANK:      {},   // 직급
@@ -42,14 +42,12 @@ export const useActivityLogStore = defineStore('activityLog', {
 
     actions: {
 
-        // ── 공통코드 로드 ────────────────────────────────────────────────────────
-        // GET /api/hrm/codes — dept / rank / empStatus / authority 한 번에 반환
+        //공통코드 로드
         async loadCommonCodes() {
             try {
                 const res = await http.get('/hrm/codes');
                 const data = res.data;
 
-                // 컨트롤러 응답 키 → commonCodeMap 키 매핑
                 const keyMap = {
                     dept:      'DEPT',
                     rank:      'RANK',
@@ -69,7 +67,7 @@ export const useActivityLogStore = defineStore('activityLog', {
             }
         },
 
-        // ── 목록 조회 ─────────────────────────────────────────────────────────
+        //목록 조회
         async fetchList(page = this.searchParams.page) {
             this.loading = true;
             this.searchParams.page = page;
@@ -166,19 +164,15 @@ export const useActivityLogStore = defineStore('activityLog', {
             return map[type] || type;
         },
 
-        // ★ JSON 문자열 → 사용자 표시용 필드 배열로 파싱
-        //   단건(object) / 복수(array) 모두 처리
-        //   반환: [{ label, code, name }, ...]  행(row) 배열
         parseEmployeeData(jsonStr) {
             if (!jsonStr) return null;
 
-            // EXCEL_IMPORT 결과값 처리 (importedCount 형태)
             try {
                 const parsed = JSON.parse(jsonStr);
                 if (parsed && typeof parsed.importedCount === 'number') {
                     return [{ single: true, rows: [{ label: '처리 건수', value: parsed.importedCount + '건' }] }];
                 }
-            } catch { /* 아래에서 재시도 */ }
+            } catch {}
 
             let records;
             try {
@@ -188,7 +182,7 @@ export const useActivityLogStore = defineStore('activityLog', {
                 return null;
             }
 
-            // 출력할 필드 정의 (label + codeGroup: null이면 그대로 출력)
+            //필드 정의
             const FIELDS = [
                 { key: 'empId',         label: '사원번호',   codeGroup: null        },
                 { key: 'name',          label: '이름',       codeGroup: null        },
@@ -214,7 +208,6 @@ export const useActivityLogStore = defineStore('activityLog', {
                             label: f.label,
                             code:  raw,
                             name:  name,
-                            // code와 name이 같으면(미매핑) code만 표시
                             showBoth: name !== raw,
                         };
                     });

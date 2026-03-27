@@ -30,19 +30,19 @@ public class ChatServiceImpl implements ChatService {
         return storageService.getRealPath(UPLOAD_WEB_PATH);
     }
 
-    /* ── 직원 목록 (무한스크롤) ── */
+    //직원 목록
     @Override
     public List<ChatUserDto> listChatUsers(ChatUserDto params) {
         return chatMapper.listChatUsers(params);
     }
 
-    /* ── 내 프로젝트 목록 ── */
+    //내 프로젝트 목록
     @Override
     public List<Map<String, Object>> listMyProjects(String empId) {
         return chatMapper.listMyProjects(empId);
     }
 
-    /* ── 채팅방 조회 또는 생성 ── */
+    //채팅방 조회 또는 생성
     @Override
     @Transactional
     public ChatRoomDto getOrCreateRoom(String myEmpId, String targetEmpId) {
@@ -60,7 +60,7 @@ public class ChatServiceImpl implements ChatService {
         newRoom.setUserBid(targetEmpId);
         chatMapper.insertRoom(newRoom);
 
-        // 3. 참여자 등록 (chatroommember - 권한 검증 테이블)
+        // 3. 참여자 등록
         chatMapper.insertRoomMember(chatMapper.nextRoomMemberSeq(), roomId, myEmpId);
         chatMapper.insertRoomMember(chatMapper.nextRoomMemberSeq(), roomId, targetEmpId);
 
@@ -68,13 +68,13 @@ public class ChatServiceImpl implements ChatService {
         return newRoom;
     }
 
-    /* ── 채팅방 참여자 검증 ── */
+    //채팅방 참여자 검증
     @Override
     public boolean isRoomMember(Long roomId, String empId) {
         return chatMapper.countRoomMember(roomId, empId) > 0;
     }
 
-    /* ── 텍스트 메시지 저장 ── */
+    //텍스트 메시지 저장
     @Override
     @Transactional
     public ChatMessageDto saveMessage(ChatMessageDto dto) {
@@ -97,20 +97,20 @@ public class ChatServiceImpl implements ChatService {
         return dto;
     }
 
-    /* ── 메시지 목록 조회 ── */
+    //메시지 목록 조회
     @Override
     public List<ChatMessageDto> listMessages(Long roomId, int offset, int size) {
         return chatMapper.listMessages(roomId, offset, size);
     }
 
-    /* ── 입장 시 미읽음 일괄 읽음 처리 ── */
+    //입장 시 미읽음 일괄 읽음 처리
     @Override
     @Transactional
     public void markAsRead(Long roomId, String empId) {
         chatMapper.markAsRead(roomId, empId);
     }
 
-    /* ── 파일 업로드 후 메시지 저장 ── */
+    //파일 업로드 후 메시지 저장
     @Override
     @Transactional
     public ChatMessageDto saveFileMessage(Long roomId, String senderId,
@@ -131,7 +131,7 @@ public class ChatServiceImpl implements ChatService {
             fileExt = originalName.substring(originalName.lastIndexOf('.') + 1).toLowerCase();
         }
 
-        // 메시지 저장 (content = 파일명으로 저장)
+        // 메시지 저장
         Long messageId = chatMapper.nextMessageSeq();
         ChatMessageDto msgDto = new ChatMessageDto();
         msgDto.setMessageId(messageId);
@@ -170,7 +170,7 @@ public class ChatServiceImpl implements ChatService {
         return msgDto;
     }
 
-    /* ── 파일 다운로드 ── */
+    //파일 다운로드
     @Override
     public ResponseEntity<?> downloadFile(Long fileId) throws Exception {
         ChatFileDto fileDto = chatMapper.findFileById(fileId);

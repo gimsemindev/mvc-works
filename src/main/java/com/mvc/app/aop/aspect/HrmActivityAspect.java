@@ -23,13 +23,6 @@ import java.util.stream.Collectors;
 
 /**
  * 직원관리 활동 로그 AOP
- *
- *   HrmServiceImpl
- *     insertEmployee   — before: null         / after: 등록 DTO
- *     updateEmployee   — before: DB 현재 데이터 / after: 수정 요청 DTO
- *     updateEmployees  — before: DB 현재 데이터 / after: 수정 요청 리스트
- *     deleteEmployees  — before: DB 현재 데이터 / after: null
- *     importExcel      — before: null         / after: 처리 건수
  */
 @Aspect
 @Component
@@ -41,7 +34,7 @@ public class HrmActivityAspect {
     private final HrmMapper         hrmMapper;          // before 데이터 조회용
     private final ObjectMapper      objectMapper;
 
-    // ── Pointcut ──────────────────────────────────────────────────────────────
+    //Pointcut
     private static final String POINTCUT_INSERT =
             "execution(* com.mvc.app.service.HrmServiceImpl.insertEmployee(..))";
     private static final String POINTCUT_UPDATE =
@@ -53,21 +46,19 @@ public class HrmActivityAspect {
     private static final String POINTCUT_EXCEL  =
             "execution(* com.mvc.app.service.HrmServiceImpl.importExcel(..))";
 
-    // ── 직원 단건 등록 ─────────────────────────────────────────────────────────
-    // 등록은 변경 전 데이터가 없으므로 beforeObj = null
+    //직원 단건 등록
     @Around(POINTCUT_INSERT)
     public Object logInsert(ProceedingJoinPoint pjp) throws Throwable {
         HrmDto dto = (HrmDto) pjp.getArgs()[0];
         return executeWithLog(pjp, ActionType.INSERT, dto.getEmpId(), null, dto);
     }
 
-    // ── 직원 단건 수정 ─────────────────────────────────────────────────────────
-    // [수정] pjp.proceed() 전에 DB에서 현재 데이터를 조회해 beforeObj로 전달
+    //직원 단건 수정
     @Around(POINTCUT_UPDATE)
     public Object logUpdate(ProceedingJoinPoint pjp) throws Throwable {
         HrmDto dto = (HrmDto) pjp.getArgs()[0];
 
-        // ★ 수정 전 원본 데이터를 미리 조회 (proceed() 이전)
+        //수정 전 원본 데이터 조회
         HrmDto beforeDto = null;
         try {
             beforeDto = hrmMapper.selectEmployee(dto.getEmpId());
@@ -79,8 +70,7 @@ public class HrmActivityAspect {
         return executeWithLog(pjp, ActionType.UPDATE, dto.getEmpId(), beforeDto, dto);
     }
 
-    // ── 직원 벌크 수정 ─────────────────────────────────────────────────────────
-    // [수정] pjp.proceed() 전에 대상 직원 전체를 미리 조회해 beforeObj로 전달
+    //직원 벌크 수정
     @Around(POINTCUT_BULK)
     public Object logBulkUpdate(ProceedingJoinPoint pjp) throws Throwable {
         @SuppressWarnings("unchecked")
@@ -90,7 +80,7 @@ public class HrmActivityAspect {
                 .map(HrmDto::getEmpId)
                 .collect(Collectors.joining(","));
 
-        // ★ 수정 전 원본 데이터를 미리 조회 (proceed() 이전)
+        //수정 전 원본 데이터를 미리 조회
         List<HrmDto> beforeList = null;
         try {
             List<String> ids = dtoList.stream()
@@ -105,15 +95,13 @@ public class HrmActivityAspect {
         return executeWithLog(pjp, ActionType.BULK_UPDATE, targetIds, beforeList, dtoList);
     }
 
-    // ── 직원 선택 삭제 ─────────────────────────────────────────────────────────
-    // [수정] 삭제 전 대상 직원 데이터를 미리 조회해 beforeObj로 전달
+    //직원 선택 삭제
     @Around(POINTCUT_DELETE)
     public Object logDelete(ProceedingJoinPoint pjp) throws Throwable {
         @SuppressWarnings("unchecked")
         List<String> ids = (List<String>) pjp.getArgs()[0];
         String targetIds = String.join(",", ids);
 
-        // ★ 삭제 전 원본 데이터를 미리 조회 (proceed() 이전)
         List<HrmDto> beforeList = null;
         try {
             beforeList = hrmMapper.selectEmployeesByIds(ids);
@@ -122,17 +110,16 @@ public class HrmActivityAspect {
                     targetIds, e.getMessage());
         }
 
-        // 삭제는 after 데이터 없음
         return executeWithLog(pjp, ActionType.DELETE, targetIds, beforeList, null);
     }
 
-    // ── 엑셀 업로드 일괄 등록 ──────────────────────────────────────────────────
+    //엑셀 업로드 일괄 등록
     @Around(POINTCUT_EXCEL)
     public Object logExcelImport(ProceedingJoinPoint pjp) throws Throwable {
         return executeWithLog(pjp, ActionType.EXCEL_IMPORT, null, null, null);
     }
 
-    // ── 공통 로그 저장 ─────────────────────────────────────────────────────────
+    //공통 로그 저장
     private Object executeWithLog(ProceedingJoinPoint pjp,
                                   String actionType,
                                   String targetEmpIds,
@@ -152,7 +139,7 @@ public class HrmActivityAspect {
             if (afterObj != null) {
                 afterJson = toJson(afterObj);
             }
-            // 엑셀 임포트: 처리 건수를 after 데이터로 기록
+            //처리 건수를 데이터로 기록
             if (ActionType.EXCEL_IMPORT.equals(actionType) && result instanceof Integer cnt) {
                 afterJson = "{\"importedCount\":" + cnt + "}";
             }
@@ -188,7 +175,7 @@ public class HrmActivityAspect {
         return result;
     }
 
-    // ── 세션 조회 ──────────────────────────────────────────────────────────────
+    //세션 조회
     private SessionInfo getSessionInfo() {
         try {
             ServletRequestAttributes attrs =
@@ -205,7 +192,7 @@ public class HrmActivityAspect {
         }
     }
 
-    // ── 클라이언트 IP 조회 ─────────────────────────────────────────────────────
+    //클라이언트 IP 조회
     private String getClientIp() {
         try {
             ServletRequestAttributes attrs =
@@ -230,7 +217,6 @@ public class HrmActivityAspect {
         }
     }
 
-    // ── 객체 → JSON ────────────────────────────────────────────────────────────
     private String toJson(Object obj) {
         try {
             String json = objectMapper.writeValueAsString(obj);
@@ -240,7 +226,6 @@ public class HrmActivityAspect {
         }
     }
 
-    // ── 문자열 길이 제한 ───────────────────────────────────────────────────────
     private String truncate(String s, int maxLen) {
         if (s == null) return null;
         return s.length() <= maxLen ? s : s.substring(0, maxLen);
