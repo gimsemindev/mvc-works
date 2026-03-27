@@ -5,7 +5,7 @@
 <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 
 <!-- Favicons -->
-<link href="${pageContext.request.contextPath}/dist/images/h.png" rel="icon">
+<link href="${pageContext.request.contextPath}/dist/images/favicon.png" rel="icon">
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
