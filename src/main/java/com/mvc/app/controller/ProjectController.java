@@ -342,27 +342,27 @@ public class ProjectController {
 	        Model model) {
 
 	    try {
-	        // 자동 상태 업데이트 서비스 호출
 	        service.projectAutoStart();
 	        service.projectAutoDelay();
 	        taskService.taskAutoDelay();
 
 	        int size = 30;
-	        int total_page = 0;
 	        kwd = myUtil.decodeUrl(kwd);
 
 	        SessionInfo info = LoginMemberUtil.getSessionInfo();
 	        String loginEmpId = info.getEmpId();
 
-	        // 1. 셀렉트 박스용 내 프로젝트 목록 (이미 서비스에 구현됨)
+	        // [수정] 1. 셀렉트 박스용 내 프로젝트 목록 조회 파라미터 보강
 	        Map<String, Object> projectParams = new HashMap<>();
 	        projectParams.put("empId", loginEmpId);
+	        projectParams.put("empName", info.getName()); // Mapper의 #{name} 또는 #{empName} 대응
 	        projectParams.put("offset", 0);
-	        projectParams.put("size", 1000); 
+	        projectParams.put("size", 1000); // 전체 목록을 위해 크게 잡음
+	        
 	        List<ProjectsDto> myProjects = service.myProjectsList(projectParams); 
 	        model.addAttribute("myProjects", myProjects); 
 
-	        // 2. 검색 및 페이징 설정
+	        // 2. 내 업무(Task) 목록 조회를 위한 검색 조건
 	        Map<String, Object> map = new HashMap<>();
 	        if (projectId != 0) map.put("projectId", projectId);
 	        map.put("empId", loginEmpId); 
@@ -370,20 +370,17 @@ public class ProjectController {
 	        map.put("kwd", kwd);
 
 	        int taskDataCount = taskService.myTaskDataCount(map);
-	        if (taskDataCount != 0) {
-	            total_page = (int) Math.ceil((double) taskDataCount / size);
-	        }
+	        int total_page = (taskDataCount != 0) ? (int) Math.ceil((double) taskDataCount / size) : 0;
 
 	        current_page = Math.min(current_page, total_page > 0 ? total_page : 1);
 	        int offset = (current_page - 1) * size;
 	        map.put("offset", offset < 0 ? 0 : offset);
 	        map.put("size", size);
 
-	        // 3. 내 업무 목록 조회
 	        List<ProjectsDto> list = taskService.myTasklist(map); 
 	        model.addAttribute("list", list);
 
-	        // 페이징 유틸
+	        // 페이징 유틸 및 기타 모델 데이터
 	        String cp = RequestUtils.getContextPath();
 	        String listUrl = cp + "/projects/myTask?projectId=" + projectId;
 	        String paging = paginateUtil.paging(current_page, total_page, listUrl);
@@ -392,8 +389,8 @@ public class ProjectController {
 	        model.addAttribute("projectId", projectId);
 	        model.addAttribute("schType", schType);
 	        model.addAttribute("kwd", kwd);
+	        model.addAttribute("loginEmpId", loginEmpId); // JSP의 hidden input 대응
 
-	        // 4. 프로젝트 선택 시 상세 정보 및 권한 체크
 	        if (projectId != 0) {
 	            ProjectsDto dto = service.projectarticle(projectId);
 	            if (dto != null) {
@@ -401,21 +398,19 @@ public class ProjectController {
 	                model.addAttribute("projectStart", dto.getStartDate() != null ? dto.getStartDate().replace("/", "-") : "");
 	                model.addAttribute("projectEnd", dto.getEndDate() != null ? dto.getEndDate().replace("/", "-") : "");
 	                
-	                // [수정] 서비스의 getManagerProjects를 사용하여 PM 여부 확인
+	                // PM 권한 체크 (서비스 로직 활용)
 	                List<Map<String, Object>> managerProjects = service.ManagerProjects(loginEmpId);
 	                boolean isManager = managerProjects != null && managerProjects.stream()
 	                        .anyMatch(m -> String.valueOf(m.get("PROJECTID")).equals(String.valueOf(projectId)));
 	                
 	                model.addAttribute("isManager", isManager);
-	                
-	                // 모달용 데이터 (단계 및 멤버)
 	                model.addAttribute("stages", taskService.findStagesByProjectId(projectId));
 	                model.addAttribute("members", service.projectMembers(projectId));
 	            }
 	        }
 
 	    } catch (Exception e) {
-	        log.info("myTaskList error : ", e);
+	        log.error("myTaskList error : ", e);
 	    }
 
 	    return "projects/myTask"; 
@@ -515,6 +510,7 @@ public class ProjectController {
 
 	        Map<String, Object> map = new HashMap<>();
 	        map.put("empId", info.getEmpId());
+	        map.put("empName", info.getName());
 	        map.put("schType", schType);
 	        map.put("kwd", kwd);
 	        map.put("status", status);

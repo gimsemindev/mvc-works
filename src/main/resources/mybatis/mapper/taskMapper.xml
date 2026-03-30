@@ -22,7 +22,8 @@
 		WHEN TO_DATE(#{taskEndDate, jdbcType=VARCHAR}, 'YYYY-MM-DD') &lt;
 		TRUNC(SYSDATE) THEN 4
 		WHEN TO_DATE(#{taskStartDate,
-		jdbcType=VARCHAR}, 'YYYY-MM-DD') &lt;=
+		jdbcType=VARCHAR},
+		'YYYY-MM-DD') &lt;=
 		TRUNC(SYSDATE)
 		AND TO_DATE(#{taskEndDate,
 		jdbcType=VARCHAR}, 'YYYY-MM-DD') &gt;=
@@ -473,78 +474,86 @@
 	<select id="myTasklist" parameterType="map"
 		resultType="com.mvc.app.domain.dto.ProjectsDto">
 		SELECT
-			t.taskId,
-			t.stageId,
-			s.projectId,
-			p.TITLE AS title,      t.taskTitle,
-			t.taskDescription,
-			TO_CHAR(t.taskStartDate, 'YYYY-MM-DD') AS taskStartDate,
-			TO_CHAR(t.taskEndDate, 'YYYY-MM-DD') AS taskEndDate,
-			t.taskStatus,
-			t.taskcreator,
-			TO_CHAR(t.taskCreatedDate, 'YYYY-MM-DD') AS taskCreatedDate,
-			s.stgTitle,
-			s.sequence,
-			e1.NAME AS taskCreaterName,
-			ep.EMPTASKID AS empTaskId,
-			e2.NAME AS name,
-			e2.empId AS empId,
-			ROUND(
-				(SELECT COUNT(*) FROM TASKDAILYLOG dl
-				JOIN EMPTASK et ON dl.empTaskId = et.empTaskId
-				WHERE et.taskId = t.taskId AND et.empId = #{empId, jdbcType=VARCHAR} AND
-				dl.logStatus = 'F')
-				* 100.0 /
-				NULLIF((SELECT taskEndDate - taskStartDate + 1 FROM TASK WHERE taskId = t.taskId), 0)
-			) AS taskProgress
+		t.taskId,
+		p.projectId,
+		p.TITLE AS title,
+		t.taskTitle,
+		t.taskStatus,
+		s.stgTitle,
+		TO_CHAR(t.taskStartDate, 'YYYY-MM-DD') AS taskStartDate,
+		TO_CHAR(t.taskEndDate, 'YYYY-MM-DD') AS taskEndDate,
+		e2.NAME AS name,
+		COALESCE(tp.progress, 0) AS taskProgress
 		FROM TASK t
-		LEFT JOIN STAGE s ON t.stageId = s.stageId
-		LEFT JOIN PROJECT p ON s.projectId = p.projectId  LEFT JOIN EMPLOYEE2 e1 ON t.taskcreator = e1.empId
-		LEFT JOIN EMPTASK ep ON t.taskId = ep.taskId
+		JOIN STAGE s ON t.stageId = s.stageId
+		JOIN PROJECT p ON s.projectId = p.projectId
+		INNER JOIN EMPTASK ep ON t.taskId = ep.taskId AND ep.empId = #{empId}
 		LEFT JOIN EMPLOYEE2 e2 ON ep.empId = e2.empId
-		WHERE ep.empId = #{empId, jdbcType=VARCHAR}
+		LEFT JOIN (
+		SELECT et.taskId,
+		ROUND(COUNT(CASE WHEN dl.logStatus='F' THEN 1 END) * 100.0 /
+		NULLIF(MAX(t2.taskEndDate - t2.taskStartDate + 1), 0)) AS progress
+		FROM EMPTASK et
+		JOIN TASK t2 ON et.taskId = t2.taskId
+		LEFT JOIN TASKDAILYLOG dl ON et.empTaskId = dl.empTaskId
+		WHERE et.empId = #{empId}
+		GROUP BY et.taskId
+		) tp ON t.taskId = tp.taskId
+		WHERE 1=1
 		<if test="projectId != null and projectId != 0">
-			AND s.PROJECTID = #{projectId, jdbcType=NUMERIC}
+			AND p.projectId = #{projectId}
 		</if>
 		<if test="kwd != null and kwd != ''">
-			AND (
 			<choose>
-				<when test="schType == 'taskTitle'">INSTR(t.TASKTITLE, #{kwd}) &gt; 0</when>
-				<when test="schType == 'stgTitle'">INSTR(s.STGTITLE, #{kwd}) &gt; 0</when>
-				<when test="schType == 'taskStartDate'">INSTR(TO_CHAR(t.TASKSTARTDATE,'YYYY-MM-DD'), #{kwd}) &gt; 0</when>
-				<when test="schType == 'taskEndDate'">INSTR(TO_CHAR(t.TASKENDDATE,'YYYY-MM-DD'), #{kwd}) &gt; 0</when>
-				<when test="schType == 'taskCreater'">INSTR(e1.NAME, #{kwd}) &gt; 0</when>
-				<otherwise>1=1</otherwise>
+				<when test="schType == 'taskTitle'">AND t.taskTitle LIKE '%' || #{kwd} || '%'</when>
+				<when test="schType == 'stgTitle'">AND s.stgTitle LIKE '%' || #{kwd} || '%'</when>
 			</choose>
-			)
 		</if>
-		ORDER BY t.taskEndDate ASC, t.taskStartDate ASC
-		OFFSET #{offset, jdbcType=INTEGER} ROWS FETCH FIRST #{size, jdbcType=INTEGER} ROWS ONLY
+		ORDER BY t.taskEndDate ASC
+		OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
 	</select>
+
 
 	<select id="myTaskDataCount" parameterType="map"
 		resultType="Integer">
+
 		SELECT NVL(COUNT(*), 0)
 		FROM TASK t
-		LEFT JOIN STAGE s ON t.stageId = s.stageId
-		LEFT JOIN EMPTASK ep ON t.taskId = ep.taskId
-		WHERE ep.empId = #{empId, jdbcType=VARCHAR}
+		LEFT JOIN STAGE s ON t.stageId =
+		s.stageId
+
+		WHERE EXISTS (
+		SELECT 1
+		FROM EMPTASK ep
+		WHERE ep.taskId =
+		t.taskId
+		AND ep.empId = #{empId}
+		)
+
 		<if test="projectId != null and projectId != 0">
-			AND s.projectId = #{projectId, jdbcType=NUMERIC}
+			AND s.projectId = #{projectId}
 		</if>
+
 		<if test="kwd != null and kwd != ''">
 			AND (
 			<choose>
 				<when test="schType == 'taskTitle'">INSTR(t.TASKTITLE, #{kwd}) &gt; 0</when>
 				<when test="schType == 'stgTitle'">INSTR(s.STGTITLE, #{kwd}) &gt; 0</when>
-				<when test="schType == 'taskStartDate'">INSTR(TO_CHAR(t.TASKSTARTDATE,'YYYY-MM-DD'), #{kwd})
-					&gt; 0</when>
-				<when test="schType == 'taskEndDate'">INSTR(TO_CHAR(t.TASKENDDATE,'YYYY-MM-DD'), #{kwd})
-					&gt; 0</when>
-				<when test="schType == 'taskCreater'">INSTR(e1.NAME, #{kwd}) &gt; 0</when>
+				<when test="taskStartDate == 'taskStartDate'">
+					INSTR(TO_CHAR(t.TASKSTARTDATE,'YYYY-MM-DD'), #{kwd})
+					&gt; 0
+				</when>
+				<when test="schType == 'taskEndDate'">
+					INSTR(TO_CHAR(t.TASKENDDATE,'YYYY-MM-DD'), #{kwd})
+					&gt; 0
+				</when>
+				<when test="schType == 'taskCreater'">
+					INSTR(e1.NAME, #{kwd}) &gt; 0
+				</when>
 				<otherwise>1=1</otherwise>
 			</choose>
 			)
 		</if>
+
 	</select>
 </mapper>

@@ -111,52 +111,70 @@
 							</select> <input type="text" name="kwd" placeholder="검색어를 입력하세요.."
 								value="${kwd}"> <i class="fas fa-search"></i>
 						</div>
+
+						<div class="dropdown">
+							<button id="myFilterBtn"
+								class="btn btn-filter ${not empty status ? 'active' : ''}"
+								type="button">
+								<i class="fa-solid fa-signal"></i>
+							</button>
+							<ul id="myFilterMenu" class="dropdown-menu">
+								<li><a class="dropdown-item" href="?status="> <span
+										class="status-badge"><span class="status-dot"></span>전체보기</span>
+								</a></li>
+								<li><hr class="dropdown-divider"></li>
+								<li><a class="dropdown-item"
+									href="?status=1&schType=${schType}&kwd=${kwd}"> <span
+										class="status-badge badge-ready"><span
+											class="status-dot"></span>시작전</span>
+								</a></li>
+								<li><a class="dropdown-item"
+									href="?status=2&schType=${schType}&kwd=${kwd}"> <span
+										class="status-badge badge-inprogress"><span
+											class="status-dot"></span>진행중</span>
+								</a></li>
+								<li><a class="dropdown-item"
+									href="?status=3&schType=${schType}&kwd=${kwd}"> <span
+										class="status-badge badge-pending"><span
+											class="status-dot"></span>승인대기</span>
+								</a></li>
+								<li><a class="dropdown-item"
+									href="?status=5&schType=${schType}&kwd=${kwd}"> <span
+										class="status-badge badge-delayed"><span
+											class="status-dot"></span>지연</span>
+								</a></li>
+								<li><a class="dropdown-item"
+									href="?status=4&schType=${schType}&kwd=${kwd}"> <span
+										class="status-badge badge-finished"><span
+											class="status-dot"></span>종료</span>
+								</a></li>
+								<li><a class="dropdown-item"
+									href="?status=6&schType=${schType}&kwd=${kwd}"> <span
+										class="status-badge badge-stop"><span
+											class="status-dot"></span>중단</span>
+								</a></li>
+							</ul>
+						</div>
+
 						<button type="submit" class="btn btn-primary">검색</button>
+
 						<button type="button" class="btn btn-secondary"
 							onclick="location.href='${pageContext.request.contextPath}/projects/myProjectList'">↺</button>
 					</form>
 
-					<div class="dropdown">
-						<button id="myFilterBtn"
-							class="btn btn-filter ${not empty status ? 'active' : ''}"
-							type="button">
-							<i class="fas fa-filter"></i>
-						</button>
-						<ul id="myFilterMenu" class="dropdown-menu">
-							<li><h6 class="dropdown-header fw-bold">Status</h6></li>
-							<li><a class="dropdown-item"><span
-									class="status-badge badge-inprogress"><span
-										class="status-dot"></span>진행중</span></a></li>
-							<li><a class="dropdown-item"><span
-									class="status-badge badge-pending"><span
-										class="status-dot"></span>승인대기</span></a></li>
-							<li><a class="dropdown-item"><span
-									class="status-badge badge-stop"><span class="status-dot"></span>중단</span></a></li>
-							<li><a class="dropdown-item"><span
-									class="status-badge badge-finished"><span
-										class="status-dot"></span>종료</span></a></li>
-							<li><a class="dropdown-item"><span
-									class="status-badge badge-delayed"><span
-										class="status-dot"></span>지연</span></a></li>
-							<li><a class="dropdown-item"><span
-									class="status-badge badge-ready"><span
-										class="status-dot"></span>시작전</span></a></li>
-						</ul>
-					</div>
-
-				<c:set var="hasManagerProject" value="false"/>
+					<c:set var="hasManagerProject" value="false" />
 					<c:forEach var="p" items="${list}">
-					    <c:if test="${p.role == 'M'}">
-					        <c:set var="hasManagerProject" value="true"/>
-					    </c:if>
+						<c:if test="${p.role == 'M'}">
+							<c:set var="hasManagerProject" value="true" />
+						</c:if>
 					</c:forEach>
-				
-				<c:if test="${hasManagerProject}">
-				    <button type="button" class="btn-icon btn-edit" id="editModeBtn"
-				        onclick="toggleEditMode()">
-				        <i class="fas fa-pen"></i>
-				    </button>
-				</c:if>
+
+					<c:if test="${hasManagerProject}">
+						<button type="button" class="btn-icon btn-edit" id="editModeBtn"
+							onclick="toggleEditMode()">
+							<i class="fas fa-pen"></i>
+						</button>
+					</c:if>
 
 					<button type="button" class="btn btn-create"
 						onclick="location.href='${pageContext.request.contextPath}/projects/create';">+</button>
@@ -264,9 +282,8 @@
 			</div>
 
 
-            <div class="d-flex justify-content-center py-4 border-top">
-                ${dataCount == 0 ? "" : paging}
-            </div>
+			<div class="d-flex justify-content-center py-4 border-top">
+				${dataCount == 0 ? "" : paging}</div>
 		</div>
 	</main>
 
@@ -389,5 +406,33 @@
 	<script
 		src="${pageContext.request.contextPath}/dist/js/myprojectlist.js"></script>
 
+	<script type="text/javascript">
+		document.addEventListener("DOMContentLoaded", function() {
+			// 현재 URL의 status 파라미터 확인
+			const urlParams = new URLSearchParams(window.location.search);
+			const currentStatus = urlParams.get('status');
+			const filterBtn = document.getElementById('myFilterBtn');
+
+			// 필터가 적용되어 있다면 버튼에 'active' 클래스 추가 (색상 강조)
+			if (currentStatus && currentStatus !== "") {
+				filterBtn.classList.add('btn-primary');
+				filterBtn.classList.remove('btn-filter');
+			}
+
+			// 드롭다운 토글 기능 (Bootstrap 미작동 시 대비)
+			filterBtn.addEventListener('click', function() {
+				const menu = document.getElementById('myFilterMenu');
+				menu.classList.toggle('show');
+			});
+
+			// 외부 클릭 시 드롭다운 닫기
+			window.addEventListener('click', function(e) {
+				if (!filterBtn.contains(e.target)) {
+					document.getElementById('myFilterMenu').classList
+							.remove('show');
+				}
+			});
+		});
+	</script>
 </body>
 </html>
