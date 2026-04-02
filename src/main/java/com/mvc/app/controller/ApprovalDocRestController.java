@@ -56,6 +56,7 @@ public class ApprovalDocRestController {
 
             log.info("★ deptCode={}, deptName={}, gradeCode={}, gradeName={}",
             	      info.getDeptCode(), info.getDeptName(), info.getGradeCode(), info.getGradeName());
+            log.info("★ files={}, keepFileIds={}", files != null ? files.length : 0, dto.getKeepFileIds());
 
             service.saveDraft(dto, files);
             return ResponseEntity.ok(Map.of("msg", "임시저장 완료"));

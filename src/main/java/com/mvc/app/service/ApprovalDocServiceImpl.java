@@ -77,7 +77,9 @@ public class ApprovalDocServiceImpl implements ApprovalDocService {
             }
 
             if (files != null) {
+                log.info("★ Service files.length={}", files.length);
                 for (MultipartFile file : files) {
+                    log.info("★ file: name={}, size={}, isEmpty={}", file.getOriginalFilename(), file.getSize(), file.isEmpty());
                     if (file.isEmpty()) continue;
                     String saveFilename = storageService.uploadFileToServer(file, uploadPath);
                     ApprovalFileDto fileDto = new ApprovalFileDto();
@@ -206,6 +208,7 @@ public class ApprovalDocServiceImpl implements ApprovalDocService {
         }
 
         ApprovalDocDto doc = mapper.getDoc(docId);
+        doc.setLines(mapper.getLines(docId));
 
         if (remaining == 0) {
         	pushAlarm(doc.getWriterEmpId(), empId, empName, docId, doc.getTitle(), "APPROVE_FINAL");
@@ -238,6 +241,7 @@ public class ApprovalDocServiceImpl implements ApprovalDocService {
         mapper.rejectDocStatus(docId);
 
         ApprovalDocDto doc = mapper.getDoc(docId);
+        doc.setLines(mapper.getLines(docId));
         pushAlarm(doc.getWriterEmpId(), empId, empName, docId, doc.getTitle(), "REJECT");
         for (ApprovalLineDto line : doc.getLines()) {
             if ("APPROVED".equals(line.getApprStatus())) {
@@ -266,6 +270,7 @@ public class ApprovalDocServiceImpl implements ApprovalDocService {
         mapper.holdDocStatus(docId);
 
         ApprovalDocDto doc = mapper.getDoc(docId);
+        doc.setLines(mapper.getLines(docId));
         pushAlarm(doc.getWriterEmpId(), empId, empName, docId, doc.getTitle(), "HOLD");
         for (ApprovalLineDto line : doc.getLines()) {
             if ("APPROVED".equals(line.getApprStatus())) {

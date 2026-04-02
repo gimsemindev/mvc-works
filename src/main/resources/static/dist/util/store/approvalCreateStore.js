@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
-import { toRaw, markRaw } from 'vue';
 import http from 'http';
+
+let pendingFiles = [];
 
 export const useApprovalCreateStore = defineStore('approvalCreate', {
     state: () => ({
@@ -69,6 +70,7 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 
 		async loadDraft(docId) {
 		    try {
+		        pendingFiles = [];
 		        const res = await http.get('/approval/doc/' + docId);
 		        const doc = res.data;
 
@@ -122,6 +124,7 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 		        }
 
 		        // 기존 첨부파일 복원
+		        console.log('★ doc.files:', doc.files);
 		        this.existingFiles = (doc.files || []).map(f => ({
 		            fileId: f.fileId,
 		            oriFilename: f.oriFilename,
@@ -194,7 +197,7 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 		// ── 첨부파일 ──
 		addFiles(fileList) {
 		    Array.from(fileList).forEach(file => {
-		        if (this.attachedFiles.length >= 10) {
+		        if (this.attachedFiles.length + this.existingFiles.length >= 10) {
 		            alert('첨부파일은 최대 10개까지 가능합니다.');
 		            return;
 		        }
@@ -205,11 +208,13 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 		        if (this.attachedFiles.some(f => f.name === file.name && f.size === file.size)) {
 		            return;
 		        }
-		        this.attachedFiles.push(markRaw(file));
+		        pendingFiles.push(file);
+		        this.attachedFiles.push({ name: file.name, size: file.size });
 		    });
 		},
-				
+
 		removeFile(idx) {
+		    pendingFiles.splice(idx, 1);
 		    this.attachedFiles.splice(idx, 1);
 		},
 		removeExistingFile(idx) {
@@ -381,17 +386,17 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 				const formData = new FormData();
 				formData.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
 
-				this.attachedFiles.forEach(file => {
-				    formData.append('files', toRaw(file));
+				console.log('★ pendingFiles 개수:', pendingFiles.length);
+				pendingFiles.forEach(file => {
+				    console.log('★ file:', file.name, 'size:', file.size, 'instanceof File:', file instanceof File);
+				    formData.append('files', file);
 				});
 
-				await http.post('/approval/doc', formData, {
-				    headers: { 'Content-Type': 'multipart/form-data' }
-				});
+				await http.post('/approval/doc', formData);
 
 		        alert('임시저장되었습니다.');
 				const ctx = document.querySelector('meta[name="ctx"]').content;
-				location.href = ctx + '/approval/list';
+				location.href = ctx + '/approval/list?type=draft';
 				return true;
 		    } catch (e) {
 		        console.error('임시저장 실패:', e);
@@ -495,13 +500,11 @@ export const useApprovalCreateStore = defineStore('approvalCreate', {
 
 		        const formData = new FormData();
 		        formData.append('data', new Blob([JSON.stringify(data)], { type: 'application/json' }));
-		        this.attachedFiles.forEach(file => {
-		            formData.append('files', toRaw(file));
+		        pendingFiles.forEach(file => {
+		            formData.append('files', file);
 		        });
 
-		        await http.post('/approval/doc', formData, {
-		            headers: { 'Content-Type': 'multipart/form-data' }
-		        });
+		        await http.post('/approval/doc', formData);
 
 		        alert('결재가 상신되었습니다.');
 		        const ctx = document.querySelector('meta[name="ctx"]').content;

@@ -98,11 +98,12 @@
       						store.filterType = params.get('type') || 'all';
 
       						// 기간 검색 기본값: 오늘 ~ 1개월 전
+      						const fmt = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
       						const today = new Date();
       						const monthAgo = new Date();
       						monthAgo.setMonth(monthAgo.getMonth() - 1);
-      						store.endDate = today.toISOString().slice(0, 10);
-      						store.startDate = monthAgo.toISOString().slice(0, 10);
+      						store.endDate = fmt(today);
+      						store.startDate = fmt(monthAgo);
 
       						store.fetchList();
       						store.fetchBadgeCounts();
