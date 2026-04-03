@@ -304,38 +304,37 @@
 	</select>
 
 	<select id="myProjectsList" parameterType="map"
-		resultType="com.mvc.app.domain.dto.ProjectsDto">
-		SELECT
-		p.projectId,
-		p.TITLE AS title,
-		TO_CHAR(p.startDate, 'YYYY-MM-DD') AS startDate,
-		TO_CHAR(p.endDate, 'YYYY-MM-DD') AS endDate,
-		p.status,
-		p.progress, (SELECT MIN(e.NAME)
-		FROM EMPPROJECT ep2
-		JOIN EMPLOYEE2 e ON ep2.EMPID = e.EMPID
-		WHERE ep2.PROJECTID = p.PROJECTID AND ep2.ROLE = 'M') AS managerName,
-		CASE
-		WHEN p.STARTDATE &gt; TRUNC(SYSDATE) THEN '시작 전'
-		WHEN p.ENDDATE &lt;= TRUNC(SYSDATE) THEN '종료'
-		ELSE TO_CHAR(GREATEST(p.ENDDATE - TRUNC(SYSDATE) + 1, 0)) || ' / ' ||
-		TO_CHAR(TRUNC(p.ENDDATE - p.STARTDATE + 1))
-		END AS remainDays
-		FROM PROJECT p
-		WHERE EXISTS (
-		SELECT 1 FROM EMPPROJECT ep
-		WHERE ep.PROJECTID = p.PROJECTID AND ep.EMPID = #{empId}
-		)
-		<if test="status != null and status != ''">
-			AND p.status = #{status}
-		</if>
-		<if test="kwd != null and kwd != ''">
-			AND p.TITLE LIKE '%' || #{kwd} || '%'
-		</if>
-		ORDER BY p.projectId DESC
-		<if test="size != null">
-			OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
-		</if>
+	    resultType="com.mvc.app.domain.dto.ProjectsDto">
+	    SELECT
+	        p.projectId,
+	        p.TITLE AS title,
+	        TO_CHAR(p.startDate, 'YYYY-MM-DD') AS startDate,
+	        TO_CHAR(p.endDate, 'YYYY-MM-DD') AS endDate,
+	        p.status,
+	        ep.ROLE AS role,
+	        p.progress,
+	        (SELECT MIN(e.NAME)
+	         FROM EMPPROJECT ep2
+	         JOIN EMPLOYEE2 e ON ep2.EMPID = e.EMPID
+	         WHERE ep2.PROJECTID = p.PROJECTID AND ep2.ROLE = 'M') AS managerName,
+	        CASE
+	            WHEN p.STARTDATE &gt; TRUNC(SYSDATE) THEN '시작 전'
+	            WHEN p.ENDDATE &lt;= TRUNC(SYSDATE) THEN '종료'
+	            ELSE TO_CHAR(GREATEST(p.ENDDATE - TRUNC(SYSDATE) + 1, 0)) || ' / ' ||
+	                 TO_CHAR(TRUNC(p.ENDDATE - p.STARTDATE + 1))
+	        END AS remainDays
+	    FROM PROJECT p
+	    JOIN EMPPROJECT ep ON ep.PROJECTID = p.PROJECTID AND ep.EMPID = #{empId}
+	    <if test="status != null and status != ''">
+	        AND p.status = #{status}
+	    </if>
+	    <if test="kwd != null and kwd != ''">
+	        AND p.TITLE LIKE '%' || #{kwd} || '%'
+	    </if>
+	    ORDER BY p.projectId DESC
+	    <if test="size != null">
+	        OFFSET #{offset} ROWS FETCH FIRST #{size} ROWS ONLY
+	    </if>
 	</select>
 
 	<select id="myProjectsCount" parameterType="map"
