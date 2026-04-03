@@ -10,17 +10,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-/**
- * 알림 이벤트 리스너
- *
- * @TransactionalEventListener(AFTER_COMMIT)
- *   → 비즈니스 트랜잭션 커밋 완료 후 실행
- *   → 롤백 시 알림이 발생하지 않아 데이터 정합성 보장
- *
- * @Async
- *   → 비동기 처리로 비즈니스 로직 응답 속도에 영향 없음
- *   → 알림 실패가 비즈니스 로직에 영향 없음
- */
+//알림 이벤트 리스너
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -28,10 +19,7 @@ public class NotificationEventListener {
 
     private final NotificationService notificationService;
 
-    // ══════════════════════════════════════════════════════
-    // [1] 결재 알림
-    //     이동: VUE  /approval/view?docId={docId}
-    // ══════════════════════════════════════════════════════
+    //결재 알림
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onApproval(NotificationEvent.Approval event) {
@@ -67,10 +55,7 @@ public class NotificationEventListener {
         }
     }
 
-    // ══════════════════════════════════════════════════════
-    // [2] 프로젝트 알림
-    //     이동: PAGE  /projects/ganttarticle
-    // ══════════════════════════════════════════════════════
+    //프로젝트 알림
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onProject(NotificationEvent.Project event) {
@@ -94,11 +79,7 @@ public class NotificationEventListener {
         }
     }
 
-    // ══════════════════════════════════════════════════════
-    // [3] 권한 변동 알림
-    //     이동: NONE (화면 이동 없음)
-    //     title에 기존권한 → 변경된 권한 표시
-    // ══════════════════════════════════════════════════════
+    //권한 변동 알림
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onAuth(NotificationEvent.Auth event) {
@@ -122,10 +103,7 @@ public class NotificationEventListener {
         }
     }
 
-    // ══════════════════════════════════════════════════════
-    // [4] 보고서 피드백 알림
-    //     이동: PAGE  /report/detail?filenum={filenum}
-    // ══════════════════════════════════════════════════════
+    //보고서 피드백 알림
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onFeedback(NotificationEvent.Feedback event) {
@@ -149,10 +127,7 @@ public class NotificationEventListener {
         }
     }
 
-    // ══════════════════════════════════════════════════════
-    // [5] 채팅 알림
-    //     이동: VUE  미구현 (확장성 고려, targetUrl null 처리)
-    // ══════════════════════════════════════════════════════
+    //채팅 알림
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onChat(NotificationEvent.Chat event) {

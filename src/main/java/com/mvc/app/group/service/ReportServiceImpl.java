@@ -179,9 +179,7 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-    // ============================================================
     // 피드백 수정
-    // ============================================================
     @Override
     @Transactional
     public void updateFeedback(ReportDto dto, List<MultipartFile> newFiles, List<Long> deleteFilenums) throws Exception {
@@ -202,9 +200,7 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-    // ============================================================
     // 피드백 삭제
-    // ============================================================
     @Override
     @Transactional
     public void deleteFeedback(Long filenum) throws Exception {
@@ -213,9 +209,7 @@ public class ReportServiceImpl implements ReportService {
         reportMapper.deleteFeedback(filenum);
     }
 
-    // ============================================================
     // 첨부파일 다운로드
-    // ============================================================
     @Override
     public ResponseEntity<?> downloadFile(Long filenum) throws Exception {
         ReportFileDto fileDto = reportMapper.findFileById(filenum);
@@ -238,17 +232,13 @@ public class ReportServiceImpl implements ReportService {
         return dto;
     }
 
-    // ============================================================
     // 같은 프로젝트 사원 empId 목록
-    // ============================================================
     @Override
     public List<String> getSharedProjectEmpIds(String empId) {
         return reportMapper.findEmpIdsBySharedProject(empId);
     }
 
-    // ============================================================
     // 내부 헬퍼 - 파일 저장
-    // ============================================================
     private void saveFiles(List<MultipartFile> files, Long reportFilenum) throws Exception {
         String uploadPath = getUploadPath();
         for (MultipartFile file : files) {

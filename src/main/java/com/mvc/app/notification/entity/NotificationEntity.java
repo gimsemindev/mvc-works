@@ -8,10 +8,6 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-/**
- * 알림 엔티티
- * 테이블: notification
- */
 @Getter
 @Setter
 @NoArgsConstructor

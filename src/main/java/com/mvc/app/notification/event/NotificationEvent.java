@@ -2,24 +2,10 @@ package com.mvc.app.notification.event;
 
 import lombok.Getter;
 
-/**
- * 알림 이벤트 클래스 모음
- *
- * 사용 패턴:
- *   eventPublisher.publishEvent(new NotificationEvent.Approval(...));
- *
- * 종류:
- *   Approval  - 결재 알림    (VUE  이동: /approval/view?docId={id})
- *   Project   - 프로젝트     (PAGE 이동: /projects/ganttarticle)
- *   Auth      - 권한 변동    (NONE 이동 없음, 기존→변경 권한명 표시)
- *   Feedback  - 보고서 피드백 (PAGE 이동: /report/detail?filenum={id})
- *   Chat      - 채팅 알림    (VUE  이동: 미구현, 확장성 고려)
- */
+// 알림 이벤트 클래스 모음
 public class NotificationEvent {
 
-    // ══════════════════════════════════════════
-    // [1] 결재 알림
-    // ══════════════════════════════════════════
+    //결재 알림
     @Getter
     public static class Approval {
         private final String receiverId;   // 수신자 사번 (결재 요청자)
@@ -40,9 +26,7 @@ public class NotificationEvent {
         }
     }
 
-    // ══════════════════════════════════════════
-    // [2] 프로젝트 알림
-    // ══════════════════════════════════════════
+    //프로젝트 알림
     @Getter
     public static class Project {
         private final String receiverId;
@@ -61,9 +45,7 @@ public class NotificationEvent {
         }
     }
 
-    // ══════════════════════════════════════════
-    // [3] 권한 변동 알림 (화면 이동 없음)
-    // ══════════════════════════════════════════
+    //권한 변동 알림 (화면 이동 없음)
     @Getter
     public static class Auth {
         private final String receiverId;      // 수신자 사번 (권한 변경 대상자)
@@ -82,9 +64,7 @@ public class NotificationEvent {
         }
     }
 
-    // ══════════════════════════════════════════
-    // [4] 보고서 피드백 알림
-    // ══════════════════════════════════════════
+    //보고서 피드백 알림
     @Getter
     public static class Feedback {
         private final String receiverId;   // 수신자 사번 (보고서 작성자)
@@ -103,9 +83,7 @@ public class NotificationEvent {
         }
     }
 
-    // ══════════════════════════════════════════
-    // [5] 채팅 알림 (URL 미구현 - 확장성 고려)
-    // ══════════════════════════════════════════
+    //채팅 알림
     @Getter
     public static class Chat {
         private final String receiverId;

@@ -11,12 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * 알림 서비스
- * - 알림 저장 (DB INSERT)
- * - 목록 조회 / 읽음 처리
- * - SSE push 위임
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -25,10 +19,7 @@ public class NotificationService {
     private final NotificationMapper notificationMapper;
     private final SseService         sseService;
 
-    /**
-     * 알림 저장 + SSE push
-     * EventListener에서 호출
-     */
+    //알림 저장 + SSE push
     @Transactional
     public void saveAndPush(NotificationEntity entity) {
         try {
@@ -45,9 +36,7 @@ public class NotificationService {
         }
     }
 
-    /**
-     * 알림 목록 조회 (최신 20건)
-     */
+    //알림 목록 조회 (최신 20건)
     @Transactional(readOnly = true)
     public List<NotificationDto> getList(String receiverId) {
         return notificationMapper.selectByReceiverId(receiverId)
@@ -56,25 +45,19 @@ public class NotificationService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 읽지 않은 알림 수
-     */
+    //읽지 않은 알림 수
     @Transactional(readOnly = true)
     public int getUnreadCount(String receiverId) {
         return notificationMapper.countUnread(receiverId);
     }
 
-    /**
-     * 단건 읽음 처리
-     */
+    //단건 읽음 처리
     @Transactional
     public void markAsRead(Long notiId, String receiverId) {
         notificationMapper.updateRead(notiId, receiverId);
     }
 
-    /**
-     * 전체 읽음 처리
-     */
+    //전체 읽음 처리
     @Transactional
     public void markAllAsRead(String receiverId) {
         notificationMapper.updateReadAll(receiverId);
