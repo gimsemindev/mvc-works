@@ -17,9 +17,7 @@ public class EmpPerformanceServiceImpl implements EmpPerformanceService {
 
     private final EmpPerformanceMapper mapper;
 
-    // ──────────────────────────────────────────────
-    // [1] 전체 건수
-    // ──────────────────────────────────────────────
+    //전체 건수
     @Override
     public int dataCount(Map<String, Object> params) {
         try {
@@ -30,9 +28,7 @@ public class EmpPerformanceServiceImpl implements EmpPerformanceService {
         }
     }
 
-    // ──────────────────────────────────────────────
-    // [2] 직원 목록
-    // ──────────────────────────────────────────────
+    //직원 목록
     @Override
     public List<EmpPerformanceDto> listEmpPerformance(Map<String, Object> params) {
         try {
@@ -43,9 +39,7 @@ public class EmpPerformanceServiceImpl implements EmpPerformanceService {
         }
     }
 
-    // ──────────────────────────────────────────────
-    // [3] 재직상태 공통코드 목록
-    // ──────────────────────────────────────────────
+    //재직상태 공통코드 목록
     @Override
     public List<Map<String, Object>> listEmpStatusCodes() {
         try {
@@ -56,9 +50,7 @@ public class EmpPerformanceServiceImpl implements EmpPerformanceService {
         }
     }
 
-    // ──────────────────────────────────────────────
-    // [4] 세션 기준 소속 프로젝트 목록
-    // ──────────────────────────────────────────────
+    //세션 기준 소속 프로젝트 목록
     @Override
     public List<Map<String, Object>> listMyProjects(String empId) {
         try {
@@ -69,9 +61,7 @@ public class EmpPerformanceServiceImpl implements EmpPerformanceService {
         }
     }
 
-    // ──────────────────────────────────────────────
-    // [4] 보고서 존재 연도 목록
-    // ──────────────────────────────────────────────
+    //보고서 존재 연도 목록
     @Override
     public List<Integer> listEvalYears(String empId) {
         try {
@@ -82,9 +72,7 @@ public class EmpPerformanceServiceImpl implements EmpPerformanceService {
         }
     }
 
-    // ──────────────────────────────────────────────
-    // [5] 연도별 월×주차 평가 그리드
-    // ──────────────────────────────────────────────
+    //연도별 월 주차 평가
     @Override
     public List<EmpPerformanceDto> listEvalGrid(Map<String, Object> params) {
         try {

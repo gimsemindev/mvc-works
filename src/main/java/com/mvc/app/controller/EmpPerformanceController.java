@@ -13,14 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * EmpPerformanceController — 직원 성과 관리 REST API
- *
- *  GET /api/emp-performance                직원 목록 (검색 + 페이징)
- *  GET /api/emp-performance/my-projects    세션 기준 소속 프로젝트 목록
- *  GET /api/emp-performance/eval-years     평가 모달 연도 목록
- *  GET /api/emp-performance/eval-grid      평가 월×주차 그리드
- */
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -29,10 +21,7 @@ public class EmpPerformanceController {
 
     private final EmpPerformanceService empPerformanceService;
 
-    // ──────────────────────────────────────────────────────────────
-    // [1] 직원 목록 조회
-    //     GET /api/emp-performance
-    // ──────────────────────────────────────────────────────────────
+    //직원 목록 조회
     @GetMapping
     public ResponseEntity<?> getEmpPerformanceList(
             @RequestParam(name = "page",       defaultValue = "1")  int    currentPage,
@@ -49,7 +38,7 @@ public class EmpPerformanceController {
             Map<String, Object> params = buildSearchParams(
                 empId, empName, deptName, gradeName, empStatus, projectId
             );
-            // 세션 empId를 항상 주입 — XML의 기본 필터(소속 프로젝트 직원만)에 사용
+            // 세션 empId를 항상 주입
             params.put("sessionEmpId", si.getEmpId());
 
             int totalCount = empPerformanceService.dataCount(params);
@@ -75,11 +64,7 @@ public class EmpPerformanceController {
         }
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // [2] 재직상태 공통코드 목록
-    //     GET /api/emp-performance/status-codes
-    //     → 재직상태 select 옵션 데이터 (codeGroup = 'EMPSTATUS')
-    // ──────────────────────────────────────────────────────────────
+    //재직상태 공통코드 목록
     @GetMapping("/status-codes")
     public ResponseEntity<?> getEmpStatusCodes() {
         try {
@@ -91,11 +76,7 @@ public class EmpPerformanceController {
         }
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // [3] 세션 기준 소속 프로젝트 목록
-    //     GET /api/emp-performance/my-projects
-    //     → 참여 프로젝트 select 옵션 데이터
-    // ──────────────────────────────────────────────────────────────
+    //세션 기준 소속 프로젝트 목록
     @GetMapping("/my-projects")
     public ResponseEntity<?> getMyProjects(
             @SessionAttribute(name = "member") SessionInfo si) {
@@ -108,10 +89,7 @@ public class EmpPerformanceController {
         }
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // [4] 평가 모달 — 보고서 존재 연도 목록
-    //     GET /api/emp-performance/eval-years?empId={empId}
-    // ──────────────────────────────────────────────────────────────
+    //보고서 존재 연도 목록
     @GetMapping("/eval-years")
     public ResponseEntity<?> getEvalYears(
             @RequestParam(name = "empId") String empId) {
@@ -124,10 +102,7 @@ public class EmpPerformanceController {
         }
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // [5] 평가 모달 — 월×주차 그리드 데이터
-    //     GET /api/emp-performance/eval-grid?empId={empId}&year={year}
-    // ──────────────────────────────────────────────────────────────
+    //평가 모달
     @GetMapping("/eval-grid")
     public ResponseEntity<?> getEvalGrid(
             @RequestParam(name = "empId") String empId,
@@ -145,9 +120,7 @@ public class EmpPerformanceController {
         }
     }
 
-    // ──────────────────────────────────────────────────────────────
-    // 내부 헬퍼 — 검색 파라미터 Map 구성 (빈 문자열 → null)
-    // ──────────────────────────────────────────────────────────────
+    //검색 파라미터
     private Map<String, Object> buildSearchParams(
             String empId, String empName, String deptName,
             String gradeName, String empStatus, String projectId) {
